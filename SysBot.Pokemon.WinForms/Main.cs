@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using SysBot.Pokemon.Discord.Commands.Bots;
+using static System.Windows.Forms.Design.AxImporter;
 
 namespace SysBot.Pokemon.WinForms
 {
@@ -24,7 +25,10 @@ namespace SysBot.Pokemon.WinForms
     {
         public readonly List<PokeBotState> Bots = new();
         public IReadOnlyList<PokeBotState> BotStates => Bots.AsReadOnly();
-        public ProgramConfig Config { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        internal ProgramConfig Config { get; set; }
+
         private IPokeBotRunner RunningEnvironment { get; set; }
 
         public readonly ISwitchConnectionAsync? SwitchConnection;
@@ -129,7 +133,17 @@ namespace SysBot.Pokemon.WinForms
             InitUtil.InitializeStubs(Config.Mode);
             _isFormLoading = false;
             UpdateBackgroundImage(Config.Mode);
-            this.InitWebServer();
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    this.InitWebServer();
+                }
+                catch (Exception ex)
+                {
+                    LogUtil.LogError($"No se pudo iniciar el servidor web: {ex.Message}", "Sistema");
+                }
+            });
             LogUtil.LogInfo($"Inicialización de BOT completa", "Sistema");
         }
 

@@ -1791,7 +1791,7 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
     private ProgramConfig? GetConfig()
     {
         var configProp = _mainForm.GetType().GetProperty("Config",
-            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         return configProp?.GetValue(_mainForm) as ProgramConfig;
     }
 
