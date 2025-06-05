@@ -11,7 +11,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PackageId>SysBot.Pokemon.WinForms</PackageId>
-    <Description>Nintendo Switch Pokémon Bot Manager</Description>
+    <Description>Administrador de bots de Pokémon para Nintendo Switch</Description>
     <ApplicationIcon>icon.ico</ApplicationIcon>
     <StartupObject>SysBot.Pokemon.WinForms.Program</StartupObject>
     <Version>01.00.00</Version>
