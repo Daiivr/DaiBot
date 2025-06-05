@@ -18,7 +18,7 @@ jobs:
       - name: Read Current Version
         id: read_version
         run: |
-          CURRENT_VERSION=$(grep 'public const string Version' SysBot.Pokemon/Helpers/PokeBot.cs | sed 's/.*Version = "\(.*\)";/\1/')
+          CURRENT_VERSION=$(grep 'public const string Version' SysBot.Pokemon/Helpers/DaiBot.cs | sed 's/.*Version = "\(.*\)";/\1/')
           echo "Current version is $CURRENT_VERSION"
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
