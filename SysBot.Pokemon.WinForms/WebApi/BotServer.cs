@@ -14,416 +14,1248 @@ using SysBot.Base;
 
 namespace SysBot.Pokemon.WinForms.WebApi;
 
-public class BotServer : IDisposable
+public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDisposable
 {
     private HttpListener? _listener;
     private Thread? _listenerThread;
-    private readonly int _port;
-    private readonly int _tcpPort;
+    private readonly int _port = port;
+    private readonly int _tcpPort = tcpPort;
     private readonly CancellationTokenSource _cts = new();
-    private readonly Main _mainForm;
+    private readonly Main _mainForm = mainForm ?? throw new ArgumentNullException(nameof(mainForm));
     private volatile bool _running;
 
     private const string HtmlTemplate = @"<!DOCTYPE html>
-<html lang=""en"">
-<head>
-    <meta charset=""UTF-8"">
-    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-    <title>Centro de Control de DaiBot</title>
-    <style>
-        :root {
-            --bg-primary: #0a0e27;
-            --bg-secondary: #151932;
-            --bg-card: #1e2139;
-            --bg-hover: #252846;
-            --text-primary: #ffffff;
-            --text-secondary: #a8aec0;
-            --accent: #7c3aed;
-            --accent-hover: #6d28d9;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --border: #2d3054;
-            --online: #10b981;
-            --offline: #6b7280;
-            --idle: #f59e0b;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; overflow-x: hidden; }
-        .app { min-height: 100vh; display: flex; flex-direction: column; }
-        .header { background: rgba(21, 25, 50, 0.95); padding: 1rem 2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
-        .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .logo { display: flex; align-items: center; gap: 1rem; }
-        .logo h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #7c3aed 0%, #10b981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .status-indicator { width: 12px; height: 12px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
-        .main { flex: 1; padding: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; }
-        .global-controls { background: var(--bg-card); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid var(--border); }
-        .global-controls h2 { font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-secondary); }
-        .control-buttons { display: flex; flex-wrap: wrap; gap: 0.25rem; }
-        .btn { padding: 0.5rem 1.5rem; border: none; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; background: var(--bg-hover); color: var(--text-primary); border: 1px solid var(--border); position: relative; overflow: hidden; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
-        .btn-primary { background: var(--accent); border-color: var(--accent); }
-        .btn-success { background: var(--success); border-color: var(--success); }
-        .btn-warning { background: var(--warning); border-color: var(--warning); }
-        .btn-danger { background: var(--danger); border-color: var(--danger); }
-        .instances-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
-        .instance-card { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; transition: all 0.3s; position: relative; }
-        .instance-card.online { border-color: var(--online); }
-        .instance-card.offline { opacity: 0.7; border-color: var(--offline); }
-        .instance-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
-        .instance-header { background: var(--bg-secondary); padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .instance-title { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
-        .instance-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: var(--bg-hover); color: var(--text-secondary); }
-        .instance-body { padding: 1.5rem; }
-        .instance-info { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
-        .info-item { display: flex; flex-direction: column; gap: 0.25rem; }
-        .info-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-        .info-value { font-size: 0.95rem; font-weight: 600; }
-        .bot-status { display: grid; grid-template-columns: 1fr; gap: 0.5rem; margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-hover); border-radius: 8px; }
-        .bot-status-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.875rem; padding: 0.25rem 0; }
-        .bot-status-item .bot-name { display: flex; align-items: center; gap: 0.5rem; }
-        .bot-status-item .bot-state { font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
-        .bot-state.running { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .bot-state.stopped { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-        .bot-state.idle { background: rgba(245, 158, 11, 0.2); color: var(--idle); }
-        .bot-state.error { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-        .loading { display: flex; align-items: center; justify-content: center; min-height: 200px; }
-        .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .error-message { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); border-radius: 8px; padding: 1rem; margin: 1rem 0; color: var(--danger); display: flex; align-items: center; gap: 0.75rem; }
-        .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); transform: translateX(400px); transition: transform 0.3s ease; z-index: 1000; display: flex; align-items: center; gap: 0.75rem; max-width: 400px; }
-        .toast.show { transform: translateX(0); }
-        .toast.success { border-color: var(--success); background: rgba(16, 185, 129, 0.1); }
-        .toast.error { border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
-        .online-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--online); display: inline-block; margin-right: 0.5rem; }
-        .offline-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--offline); display: inline-block; margin-right: 0.5rem; }
-        .instance-status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .instance-status-badge.running { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .instance-status-badge.stopped { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-        .instance-status-badge.idle { background: rgba(245, 158, 11, 0.2); color: var(--idle); border: 1px solid var(--idle); }
-        .instance-status-badge.mixed { background: rgba(168, 174, 192, 0.2); color: var(--text-secondary); border: 1px solid var(--text-secondary); }
-        @media (max-width: 768px) { .header { padding: 1rem; } .main { padding: 1rem; } .instances-grid { grid-template-columns: 1fr; } .control-buttons { justify-content: stretch; } .btn { flex: 1; justify-content: center; } }
-    </style>
-</head>
-<body>
-    <div class=""app"">
-        <header class=""header"">
-            <div class=""header-content"">
-                <div class=""logo"">
-                    <h1>Centro de Control de DaiBot</h1>
-                    <div class=""status-indicator""></div>
-                </div>
-                <button class=""btn"" onclick=""refreshInstances()"">🔄 Refresh</button>
-            </div>
-        </header>
-        <main class=""main"">
-            <div class=""global-controls"">
-                <h2>Controles Globales - Todas las Instancias</h2>
-                <div class=""control-buttons"">
-                    <button class=""btn btn-success"" onclick=""sendGlobalCommand('start')"">▶️ Iniciar Todos</button>
-                    <button class=""btn btn-danger"" onclick=""sendGlobalCommand('stop')"">⏹️ Detener Todos</button>
-                    <button class=""btn btn-warning"" onclick=""sendGlobalCommand('idle')"">⏸️ Poner en Espera</button>
-                    <button class=""btn"" onclick=""sendGlobalCommand('resume')"">⏯️ Reanudar Todos</button>
-                    <button class=""btn"" onclick=""sendGlobalCommand('restart')"">🔄 Reiniciar Todos</button>
-                    <button class=""btn"" onclick=""sendGlobalCommand('reboot')"">🔌 Reinicio Forzado</button>
-                    <button class=""btn"" onclick=""sendGlobalCommand('screenon')"">💡 Encender Pantalla</button>
-                    <button class=""btn"" onclick=""sendGlobalCommand('screenoff')"">🌙 Apagar Pantalla</button>
+        <html lang=""en"">
+        <head>
+            <meta charset=""UTF-8"">
+            <meta name=""viewport"" content=""width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0"">
+            <title>DaiBot</title>
+            <style>
+                :root {
+                    --bg-primary: #0a0e27;
+                    --bg-secondary: #151932;
+                    --bg-card: #1e2139;
+                    --bg-hover: #252846;
+                    --text-primary: #ffffff;
+                    --text-secondary: #a8aec0;
+                    --accent: #7c3aed;
+                    --accent-hover: #6d28d9;
+                    --success: #10b981;
+                    --warning: #f59e0b;
+                    --danger: #ef4444;
+                    --border: #2d3054;
+                    --online: #10b981;
+                    --offline: #6b7280;
+                    --idle: #f59e0b;
+                    --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                    --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
+                    --border-radius: 12px;
+                    --border-radius-sm: 8px;
+                    --spacing-xs: 0.25rem;
+                    --spacing-sm: 0.5rem;
+                    --spacing-md: 1rem;
+                    --spacing-lg: 1.5rem;
+                    --spacing-xl: 2rem;
+                }
+        
+                * { 
+                    margin: 0; 
+                    padding: 0; 
+                    box-sizing: border-box; 
+                }
+        
+                body { 
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+                    background: var(--bg-primary); 
+                    color: var(--text-primary); 
+                    line-height: 1.6; 
+                    overflow-x: hidden;
+                    font-size: clamp(14px, 2.5vw, 16px);
+                }
+        
+                .app { 
+                    min-height: 100vh; 
+                    display: flex; 
+                    flex-direction: column; 
+                }
+        
+                .header { 
+                    background: rgba(21, 25, 50, 0.95); 
+                    padding: var(--spacing-md) var(--spacing-lg); 
+                    border-bottom: 1px solid var(--border); 
+                    position: sticky; 
+                    top: 0; 
+                    z-index: 100; 
+                    backdrop-filter: blur(10px);
+                }
+        
+                .header-content { 
+                    max-width: 1400px; 
+                    margin: 0 auto; 
+                    display: flex; 
+                    justify-content: space-between; 
+                    align-items: center; 
+                    gap: var(--spacing-md);
+                }
+        
+                .logo { 
+                    display: flex; 
+                    align-items: center; 
+                    gap: var(--spacing-md); 
+                    min-width: 0;
+                }
+        
+                .logo h1 { 
+                    font-size: clamp(1.25rem, 4vw, 1.5rem); 
+                    font-weight: 700; 
+                    background: linear-gradient(135deg, #7c3aed 0%, #10b981 100%); 
+                    -webkit-background-clip: text; 
+                    -webkit-text-fill-color: transparent;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+        
+                .status-indicator { 
+                    width: 12px; 
+                    height: 12px; 
+                    border-radius: 50%; 
+                    background: var(--success); 
+                    animation: pulse 2s infinite;
+                    flex-shrink: 0;
+                }
+        
+                @keyframes pulse { 
+                    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 
+                    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 
+                    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } 
+                }
 
-                </div>
-            </div>
-            <div id=""instances-container"" class=""instances-grid"">
-                <div class=""loading""><div class=""spinner""></div></div>
-            </div>
-        </main>
-    </div>
-    <div id=""toast"" class=""toast"">
-        <span class=""toast-icon""></span>
-        <div class=""toast-content"">
-            <div class=""toast-title""></div>
-            <div class=""toast-message""></div>
-        </div>
-    </div>
-    <script>
-        const API_BASE = '/api/bot';
-        let instances = [];
-        let refreshInterval;
+                .refresh-status {
+                    display: flex;
+                    align-items: center;
+                    gap: var(--spacing-sm);
+                }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            refreshInstances();
-            refreshInterval = setInterval(refreshInstances, 5000);
-        });
+                .refresh-indicator {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: var(--success);
+                    transition: all 0.3s ease;
+                    cursor: help;
+                }
 
-        window.addEventListener('beforeunload', () => {
-            if (refreshInterval) clearInterval(refreshInterval);
-        });
+                .refresh-indicator.paused {
+                    background: var(--warning);
+                    animation: pulse-warning 2s infinite;
+                }
 
-        async function refreshInstances() {
-            try {
-                const response = await fetch(`${API_BASE}/instances`);
-                if (!response.ok) throw new Error('No se pudieron obtener las instancias');
-                
-                const data = await response.json();
-                instances = data.Instances;
-                renderInstances();
-            } catch (error) {
-                console.error('Error fetching instances:', error);
-                showError('No se pudieron cargar las instancias del bot. Asegúrate de que el bot esté en ejecución.');
-            }
-        }
+                .refresh-indicator:hover {
+                    transform: scale(1.5);
+                }
 
-        function renderInstances() {
-            const container = document.getElementById('instances-container');
-            
-            if (instances.length === 0) {
-                container.innerHTML = '<div class=""error-message"">⚠️ No se encontraron instancias de bots. Asegúrate de que al menos un PokeBot esté en ejecución.</div>';
-                return;
-            }
+                @keyframes pulse-warning {
+                    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+                    70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+                }
+        
+                .main { 
+                    flex: 1; 
+                    padding: var(--spacing-lg); 
+                    max-width: 1400px; 
+                    margin: 0 auto; 
+                    width: 100%; 
+                }
+        
+                .global-controls { 
+                    background: var(--bg-card); 
+                    border-radius: var(--border-radius); 
+                    padding: var(--spacing-lg); 
+                    margin-bottom: var(--spacing-xl); 
+                    border: 1px solid var(--border); 
+                }
+        
+                .global-controls h2 { 
+                    font-size: clamp(1rem, 3vw, 1.2rem); 
+                    margin-bottom: var(--spacing-md); 
+                    color: var(--text-secondary); 
+                }
+        
+                .control-buttons { 
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                    gap: var(--spacing-sm);
+                }
+        
+                .btn { 
+                    padding: var(--spacing-sm) var(--spacing-md); 
+                    border: none; 
+                    border-radius: var(--border-radius-sm); 
+                    font-size: clamp(0.75rem, 2.5vw, 0.875rem); 
+                    font-weight: 600; 
+                    cursor: pointer; 
+                    transition: all 0.2s ease; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center;
+                    gap: var(--spacing-xs); 
+                    background: var(--bg-hover); 
+                    color: var(--text-primary); 
+                    border: 1px solid var(--border); 
+                    position: relative; 
+                    overflow: hidden;
+                    min-height: 44px;
+                    white-space: nowrap;
+                    text-decoration: none;
+                }
+        
+                .btn:hover:not(:disabled) { 
+                    transform: translateY(-2px); 
+                    box-shadow: var(--shadow); 
+                }
+        
+                .btn:active { 
+                    transform: translateY(0); 
+                }
+        
+                .btn:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    transform: none !important;
+                }
+        
+                .btn-primary { 
+                    background: var(--accent); 
+                    border-color: var(--accent); 
+                }
+        
+                .btn-primary:hover:not(:disabled) { 
+                    background: var(--accent-hover); 
+                }
+        
+                .btn-success { 
+                    background: var(--success); 
+                    border-color: var(--success); 
+                }
+        
+                .btn-warning { 
+                    background: var(--warning); 
+                    border-color: var(--warning); 
+                    color: #000;
+                }
+        
+                .btn-danger { 
+                    background: var(--danger); 
+                    border-color: var(--danger); 
+                }
+        
+                .instances-grid { 
+                    display: grid; 
+                    grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr)); 
+                    gap: var(--spacing-lg); 
+                }
+        
+                .instance-card { 
+                    background: var(--bg-card); 
+                    border-radius: var(--border-radius); 
+                    border: 1px solid var(--border); 
+                    overflow: hidden; 
+                    transition: all 0.3s ease; 
+                    position: relative; 
+                }
+        
+                .instance-card.online { 
+                    border-color: var(--online); 
+                }
+        
+                .instance-card.offline { 
+                    opacity: 0.7; 
+                    border-color: var(--offline); 
+                }
+        
+                .instance-card:hover { 
+                    transform: translateY(-4px); 
+                    box-shadow: var(--shadow-hover); 
+                }
+        
+                .instance-header { 
+                    background: var(--bg-secondary); 
+                    padding: var(--spacing-md) var(--spacing-lg); 
+                    display: flex; 
+                    justify-content: space-between; 
+                    align-items: flex-start;
+                    border-bottom: 1px solid var(--border);
+                    gap: var(--spacing-sm);
+                }
+        
+                .instance-title { 
+                    font-size: clamp(0.95rem, 3vw, 1.1rem); 
+                    font-weight: 600; 
+                    display: flex; 
+                    align-items: center; 
+                    gap: var(--spacing-sm);
+                    min-width: 0;
+                    flex: 1;
+                }
+        
+                .instance-badge { 
+                    padding: var(--spacing-xs) var(--spacing-sm); 
+                    border-radius: 20px; 
+                    font-size: 0.75rem; 
+                    font-weight: 600; 
+                    background: var(--bg-hover); 
+                    color: var(--text-secondary);
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                }
+        
+                .instance-body { 
+                    padding: var(--spacing-lg); 
+                }
+        
+                .instance-info { 
+                    display: grid; 
+                    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+                    gap: var(--spacing-md); 
+                    margin-bottom: var(--spacing-lg); 
+                }
+        
+                .info-item { 
+                    display: flex; 
+                    flex-direction: column; 
+                    gap: var(--spacing-xs); 
+                }
+        
+                .info-label { 
+                    font-size: 0.75rem; 
+                    color: var(--text-secondary); 
+                    text-transform: uppercase; 
+                    letter-spacing: 0.5px; 
+                }
+        
+                .info-value { 
+                    font-size: 0.95rem; 
+                    font-weight: 600;
+                    word-break: break-word;
+                }
+        
+                .bot-status { 
+                    display: grid; 
+                    grid-template-columns: 1fr; 
+                    gap: var(--spacing-sm); 
+                    margin-bottom: var(--spacing-md); 
+                    padding: var(--spacing-sm); 
+                    background: var(--bg-hover); 
+                    border-radius: var(--border-radius-sm); 
+                }
+        
+                .bot-status-item { 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: space-between; 
+                    font-size: 0.875rem; 
+                    padding: var(--spacing-xs) 0;
+                    gap: var(--spacing-sm);
+                }
+        
+                .bot-status-item .bot-name { 
+                    display: flex; 
+                    align-items: center; 
+                    gap: var(--spacing-sm);
+                    min-width: 0;
+                    flex: 1;
+                }
+        
+                .bot-status-item .bot-name span:first-child {
+                    flex-shrink: 0;
+                }
+        
+                .bot-status-item .bot-name span:last-child {
+                    word-break: break-word;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+        
+                .bot-status-item .bot-state { 
+                    font-weight: 600; 
+                    padding: var(--spacing-xs) var(--spacing-sm); 
+                    border-radius: 4px; 
+                    font-size: 0.75rem;
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                }
+        
+                .bot-state.running { 
+                    background: rgba(16, 185, 129, 0.2); 
+                    color: var(--success); 
+                }
+        
+                .bot-state.stopped { 
+                    background: rgba(239, 68, 68, 0.2); 
+                    color: var(--danger); 
+                }
+        
+                .bot-state.idle { 
+                    background: rgba(245, 158, 11, 0.2); 
+                    color: var(--idle); 
+                }
+        
+                .bot-state.error { 
+                    background: rgba(239, 68, 68, 0.2); 
+                    color: var(--danger); 
+                }
+        
+                .loading { 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    min-height: 200px; 
+                }
+        
+                .spinner { 
+                    width: 40px; 
+                    height: 40px; 
+                    border: 3px solid var(--border); 
+                    border-top-color: var(--accent); 
+                    border-radius: 50%; 
+                    animation: spin 1s linear infinite; 
+                }
+        
+                @keyframes spin { 
+                    to { transform: rotate(360deg); } 
+                }
+        
+                .error-message { 
+                    background: rgba(239, 68, 68, 0.1); 
+                    border: 1px solid var(--danger); 
+                    border-radius: var(--border-radius-sm); 
+                    padding: var(--spacing-md); 
+                    margin: var(--spacing-md) 0; 
+                    color: var(--danger); 
+                    display: flex; 
+                    align-items: flex-start; 
+                    gap: var(--spacing-sm);
+                    word-break: break-word;
+                }
+        
+                .toast { 
+                    position: fixed; 
+                    bottom: var(--spacing-xl); 
+                    right: var(--spacing-xl); 
+                    background: var(--bg-card); 
+                    border: 1px solid var(--border); 
+                    border-radius: var(--border-radius-sm); 
+                    padding: var(--spacing-md) var(--spacing-lg); 
+                    box-shadow: var(--shadow-hover); 
+                    transform: translateX(calc(100% + var(--spacing-xl))); 
+                    transition: transform 0.3s ease; 
+                    z-index: 10000; 
+                    display: flex; 
+                    align-items: center; 
+                    gap: var(--spacing-sm); 
+                    max-width: min(400px, calc(100vw - 2rem));
+                    word-break: break-word;
+                    opacity: 1;
+                }
+        
+                .toast.show { 
+                    transform: translateX(0); 
+                }
+        
+                .toast.success { 
+                    border-color: var(--success); 
+                    background: var(--bg-card); 
+                }
+        
+                .toast.error { 
+                    border-color: var(--danger); 
+                    background: var(--bg-card); 
+                }
 
-            container.innerHTML = instances.map(instance => {
-                const isOnline = instance.IsOnline || false;
-                const statusClass = isOnline ? 'online' : 'offline';
-                const statusIndicator = isOnline ? 
-                    '<span class=""online-indicator""></span>Conectado' : 
-                    '<span class=""offline-indicator""></span>Desconectado';
-                
-                let instanceStatus = 'stopped';
-                let instanceStatusText = 'Detenido';
-                if (instance.BotStatuses && instance.BotStatuses.length > 0) {
-                    const runningCount = instance.BotStatuses.filter(b => 
-                        b.Status.toUpperCase().includes('RUNNING') || 
-                        b.Status.toUpperCase().includes('ACTIVE') ||
-                        (!b.Status.toUpperCase().includes('IDLE') && 
-                         !b.Status.toUpperCase().includes('STOPPED') && 
-                         !b.Status.toUpperCase().includes('ERROR'))
-                    ).length;
-                    const idleCount = instance.BotStatuses.filter(b => 
-                        b.Status.toUpperCase().includes('IDLE')
-                    ).length;
-                    
-                    if (runningCount === instance.BotStatuses.length) {
-                        instanceStatus = 'running';
-                        instanceStatusText = 'Todos en Ejecución';
-                    } else if (idleCount === instance.BotStatuses.length) {
-                        instanceStatus = 'idle';
-                        instanceStatusText = 'Todos en Espera';
-                    } else if (runningCount > 0) {
-                        instanceStatus = 'mixed';
-                        instanceStatusText = `${runningCount}/${instance.BotStatuses.length} en Ejecución`;
-                    } else if (idleCount > 0) {
-                        instanceStatus = 'idle';
-                        instanceStatusText = 'En Espera';
+                .toast.warning { 
+                    border-color: var(--warning); 
+                    background: var(--bg-card); 
+                }
+
+                .toast.info { 
+                    border-color: var(--accent); 
+                    background: var(--bg-card); 
+                }
+
+                .toast-icon {
+                    font-size: 1.25rem;
+                    flex-shrink: 0;
+                }
+        
+                .online-indicator { 
+                    width: 8px; 
+                    height: 8px; 
+                    border-radius: 50%; 
+                    background: var(--online); 
+                    display: inline-block; 
+                    margin-right: var(--spacing-sm);
+                    flex-shrink: 0;
+                }
+        
+                .offline-indicator { 
+                    width: 8px; 
+                    height: 8px; 
+                    border-radius: 50%; 
+                    background: var(--offline); 
+                    display: inline-block; 
+                    margin-right: var(--spacing-sm);
+                    flex-shrink: 0;
+                }
+        
+                .instance-status-badge { 
+                    padding: var(--spacing-xs) var(--spacing-sm); 
+                    border-radius: 20px; 
+                    font-size: 0.75rem; 
+                    font-weight: 600; 
+                    text-transform: uppercase; 
+                    letter-spacing: 0.5px;
+                    white-space: nowrap;
+                }
+        
+                .instance-status-badge.running { 
+                    background: rgba(16, 185, 129, 0.2); 
+                    color: var(--success); 
+                    border: 1px solid var(--success); 
+                }
+        
+                .instance-status-badge.stopped { 
+                    background: rgba(239, 68, 68, 0.2); 
+                    color: var(--danger); 
+                    border: 1px solid var(--danger); 
+                }
+        
+                .instance-status-badge.idle { 
+                    background: rgba(245, 158, 11, 0.2); 
+                    color: var(--idle); 
+                    border: 1px solid var(--idle); 
+                }
+        
+                .instance-status-badge.mixed { 
+                    background: rgba(168, 174, 192, 0.2); 
+                    color: var(--text-secondary); 
+                    border: 1px solid var(--text-secondary); 
+                }
+
+                .instance-controls {
+                    position: relative;
+                }
+
+                .action-menu-button {
+                    padding: var(--spacing-sm) var(--spacing-md);
+                    background: var(--bg-hover);
+                    border: 1px solid var(--border);
+                    border-radius: var(--border-radius-sm);
+                    color: var(--text-primary);
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    display: flex;
+                    align-items: center;
+                    gap: var(--spacing-xs);
+                    width: 100%;
+                    justify-content: center;
+                    min-height: 44px;
+                }
+
+                .action-menu-button:hover:not(:disabled) {
+                    background: var(--accent);
+                    border-color: var(--accent);
+                    transform: translateY(-1px);
+                    box-shadow: var(--shadow);
+                }
+
+                .action-menu-button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+
+                .action-menu {
+                    position: absolute;
+                    bottom: calc(100% + var(--spacing-xs));
+                    left: 0;
+                    right: 0;
+                    background: var(--bg-card);
+                    border: 1px solid var(--border);
+                    border-radius: var(--border-radius-sm);
+                    box-shadow: var(--shadow-hover);
+                    overflow: hidden;
+                    display: none;
+                    z-index: 1000;
+                }
+
+                .action-menu.show {
+                    display: block;
+                }
+
+                .action-menu-item {
+                    padding: var(--spacing-sm) var(--spacing-md);
+                    display: flex;
+                    align-items: center;
+                    gap: var(--spacing-sm);
+                    cursor: pointer;
+                    transition: background 0.2s ease;
+                    font-size: 0.875rem;
+                    white-space: nowrap;
+                    border: none;
+                    background: none;
+                    color: var(--text-primary);
+                    width: 100%;
+                    text-align: left;
+                }
+
+                .action-menu-item:hover {
+                    background: var(--bg-hover);
+                }
+
+                .action-menu-item.success {
+                    color: var(--success);
+                }
+
+                .action-menu-item.warning {
+                    color: var(--warning);
+                }
+
+                .action-menu-item.danger {
+                    color: var(--danger);
+                }
+
+                .action-menu-divider {
+                    height: 1px;
+                    background: var(--border);
+                    margin: var(--spacing-xs) 0;
+                }
+
+                @media (max-width: 1024px) {
+                    .instances-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
                     }
                 }
-                
-                return `
-                <div class=""instance-card ${statusClass}"" data-port=""${instance.Port}"">
-                    <div class=""instance-header"">
-                        <h3 class=""instance-title"">
-                            ${instance.Name}
-                            <span class=""instance-status-badge ${instanceStatus}"">${instanceStatusText}</span>
-                        </h3>
-                        <span class=""instance-badge"">Port ${instance.Port}</span>
+        
+                @media (max-width: 768px) {
+                    :root {
+                        --spacing-lg: 1rem;
+                        --spacing-xl: 1.5rem;
+                    }
+            
+                    .header { 
+                        padding: var(--spacing-md); 
+                    }
+            
+                    .header-content {
+                        flex-wrap: wrap;
+                    }
+
+                    .refresh-status {
+                        order: 3;
+                        width: 100%;
+                        justify-content: center;
+                        margin-top: var(--spacing-sm);
+                    }
+            
+                    .main { 
+                        padding: var(--spacing-md); 
+                    }
+            
+                    .instances-grid { 
+                        grid-template-columns: 1fr; 
+                        gap: var(--spacing-md);
+                    }
+            
+                    .control-buttons { 
+                        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                        gap: var(--spacing-xs);
+                    }
+            
+                    .instance-info {
+                        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                        gap: var(--spacing-sm);
+                    }
+            
+                    .instance-header {
+                        padding: var(--spacing-md);
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: var(--spacing-sm);
+                    }
+            
+                    .instance-title {
+                        width: 100%;
+                    }
+            
+                    .bot-status-item {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: var(--spacing-xs);
+                    }
+            
+                    .bot-status-item .bot-name {
+                        width: 100%;
+                    }
+            
+                    .toast {
+                        bottom: 0;
+                        right: 0;
+                        left: 0;
+                        max-width: none;
+                        transform: translateY(100%);
+                        border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+                        margin: 0;
+                    }
+            
+                    .toast.show {
+                        transform: translateY(0);
+                    }
+
+                    .action-menu {
+                        position: fixed;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        top: auto;
+                        border-radius: var(--border-radius) var(--border-radius) 0 0;
+                        max-height: 70vh;
+                        overflow-y: auto;
+                    }
+                }
+        
+                @media (max-width: 480px) {
+                    .control-buttons {
+                        grid-template-columns: 1fr 1fr;
+                    }
+            
+                    .btn {
+                        font-size: 0.75rem;
+                        padding: var(--spacing-sm);
+                    }
+            
+                    .global-controls {
+                        padding: var(--spacing-md);
+                    }
+            
+                    .instance-body {
+                        padding: var(--spacing-md);
+                    }
+            
+                    .logo h1 {
+                        font-size: 1.1rem;
+                    }
+                }
+        
+                @media (hover: none) and (pointer: coarse) {
+                    .btn:hover {
+                        transform: none;
+                        box-shadow: none;
+                    }
+            
+                    .instance-card:hover {
+                        transform: none;
+                        box-shadow: none;
+                    }
+
+                    .action-menu-button:hover {
+                        transform: none;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class=""app"">
+                <header class=""header"">
+                    <div class=""header-content"">
+                        <div class=""logo"">
+                            <h1>Centro de Control de PokeBot</h1>
+                            <div class=""status-indicator""></div>
+                        </div>
+                        <div class=""refresh-status"">
+                            <span class=""refresh-indicator"" id=""refresh-indicator"" title=""Autoactualización activa""></span>
+                            <button class=""btn"" onclick=""manualRefresh()"" title=""Actualizar ahora"">🔄 Actualizar</button>
+                        </div>
                     </div>
-                    <div class=""instance-body"">
-                        <div class=""instance-info"">
-                            <div class=""info-item"">
-                                <span class=""info-label"">Versión</span>
-                                <span class=""info-value"">${instance.Version}</span>
-                            </div>
-                            <div class=""info-item"">
-                                <span class=""info-label"">Modo</span>
-                                <span class=""info-value"">${instance.Mode}</span>
-                            </div>
-                            <div class=""info-item"">
-                                <span class=""info-label"">ID del Proceso</span>
-                                <span class=""info-value"">${instance.ProcessId}</span>
-                            </div>
-                            <div class=""info-item"">
-                                <span class=""info-label"">Conexión</span>
-                                <span class=""info-value"">${statusIndicator}</span>
-                            </div>
-                        </div>
-                        
-                        ${instance.BotStatuses && instance.BotStatuses.length > 0 ? `
-                        <div class=""bot-status"">
-                            <div class=""info-label"" style=""margin-bottom: 0.5rem;"">BOTS (${instance.BotStatuses.length})</div>
-                            ${instance.BotStatuses.map((bot, index) => `
-                                <div class=""bot-status-item"">
-                                    <span class=""bot-name"">
-                                        <span style=""color: ${getStatusColor(bot.Status)};"">●</span>
-                                        ${bot.Name || `Bot ${index + 1}`}
-                                    </span>
-                                    <span class=""bot-state ${getStatusClass(bot.Status)}"">${bot.Status}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                        ` : instance.BotCount > 0 ? `
-                        <div class=""bot-status"">
-                            <div class=""info-label"">BOTS</div>
-                            <div class=""bot-status-item"">
-                                <span class=""bot-name"">Cantidad de Bots: ${instance.BotCount}</span>
-                                <span class=""bot-state"">Estado Desconocido</span>
-                            </div>
-                        </div>
-                        ` : ''}
-                        
+                </header>
+                <main class=""main"">
+                    <div class=""global-controls"">
+                        <h2>Controles Globales - Todas las Instancias</h2>
                         <div class=""control-buttons"">
-                            <button class=""btn btn-sm"" onclick=""sendInstanceCommand(${instance.Port}, 'start')"" ${!isOnline ? 'disabled' : ''}>Iniciar</button>
-                            <button class=""btn btn-sm"" onclick=""sendInstanceCommand(${instance.Port}, 'stop')"" ${!isOnline ? 'disabled' : ''}>Detener</button>
-                            <button class=""btn btn-sm"" onclick=""sendInstanceCommand(${instance.Port}, 'idle')"" ${!isOnline ? 'disabled' : ''}>Idle</button>
-                            <button class=""btn btn-sm"" onclick=""sendInstanceCommand(${instance.Port}, 'resume')"" ${!isOnline ? 'disabled' : ''}>Reanudar</button>
+                            <button class=""btn btn-success"" onclick=""sendGlobalCommand('start')"">▶️ Iniciar Todo</button>
+                            <button class=""btn btn-danger"" onclick=""sendGlobalCommand('stop')"">⏹️ Detener Todo</button>
+                            <button class=""btn btn-warning"" onclick=""sendGlobalCommand('idle')"">⏸️ Poner en Espera</button>
+                            <button class=""btn"" onclick=""sendGlobalCommand('resume')"">⏯️ Reanudar Todo</button>
+                            <button class=""btn"" onclick=""sendGlobalCommand('restart')"">🔄 Reiniciar Todo</button>
+                            <button class=""btn"" onclick=""sendGlobalCommand('reboot')"">🔌 Reinicio Forzado</button>
+                            <button class=""btn"" onclick=""sendGlobalCommand('screenon')"">💡 Encender Pantalla</button>
+                            <button class=""btn"" onclick=""sendGlobalCommand('screenoff')"">🌙 Apagar Pantalla</button>
                         </div>
                     </div>
+                    <div id=""instances-container"" class=""instances-grid"">
+                        <div class=""loading""><div class=""spinner""></div></div>
+                    </div>
+                </main>
+            </div>
+            <div id=""toast"" class=""toast"">
+                <span class=""toast-icon""></span>
+                <div class=""toast-content"">
+                    <div class=""toast-title""></div>
+                    <div class=""toast-message""></div>
                 </div>
-            `;
-            }).join('');
-        }
+            </div>
+            <script>
+                const API_BASE = '/api/bot';
+                let instances = [];
+                let refreshInterval;
+                let activeToasts = [];
 
-        function getStatusColor(status) {
-            const upperStatus = status?.toUpperCase() || '';
-            if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('EN ESPERA ACTIVA') || upperStatus === 'ONLINE' ||
-                (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
-                return '#10b981'; // green
-            } else if (upperStatus.includes('EN ESPERA') || upperStatus.includes('PAUSADO') || upperStatus.includes('EN ESPERA ACTIVA')) {
-                return '#f59e0b'; // yellow
-            } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('DESCONECTADO') || upperStatus.includes('REINICIANDO')) {
-                return '#ef4444'; // red
-            } else if (upperStatus.includes('ERROR')) {
-                return '#ef4444'; // red
-            } else {
-                return '#6b7280'; // gray
-            }
-        }
+                let isInteracting = false;
+                let refreshPaused = false;
+                let lastRefreshTime = Date.now();
 
-        function getStatusClass(status) {
-            const upperStatus = status?.toUpperCase() || '';
-            if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('EN ESPERA ACTIVA') ||
-                (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
-                return 'running';
-            } else if (upperStatus.includes('EN ESPERA') || upperStatus.includes('PAUSADO')) {
-                return 'idle';
-            } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('REINICIANDO') || upperStatus.includes('ERROR')) {
-                return 'stopped';
-            } else {
-                return 'error';
-            }
-        }
+                document.addEventListener('DOMContentLoaded', () => {
+                    refreshInstances();
+                    startAutoRefresh();
+                    
+                    // Close menus when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (!e.target.closest('.instance-controls')) {
+                            document.querySelectorAll('.action-menu.show').forEach(menu => {
+                                menu.classList.remove('show');
+                            });
+                        }
+                    });
 
-        async function sendGlobalCommand(command) {
-            showToast('info', 'Enviando Comando', `Enviando ${command} a todas las instancias...`);
-            
-            try {
-                const response = await fetch(`${API_BASE}/command/all`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Command: command })
+                    // Track mouse interaction
+                    document.addEventListener('mouseenter', (e) => {
+                        if (e.target.closest('.instance-card')) {
+                            isInteracting = true;
+                        }
+                    }, true);
+
+                    document.addEventListener('mouseleave', (e) => {
+                        if (e.target.closest('.instance-card')) {
+                            isInteracting = false;
+                        }
+                    }, true);
+
+                    // Track touch interaction
+                    document.addEventListener('touchstart', (e) => {
+                        if (e.target.closest('.instance-card')) {
+                            isInteracting = true;
+                        }
+                    });
+
+                    document.addEventListener('touchend', () => {
+                        setTimeout(() => {
+                            isInteracting = false;
+                        }, 500);
+                    });
                 });
 
-                if (!response.ok) throw new Error('Fallo el comando');
-                
-                const result = await response.json();
-                const successCount = result.SuccessfulCommands || 0;
-                const totalCount = result.TotalInstances || 0;
-                
-                if (successCount === totalCount && totalCount > 0) {
-                    showToast('success', 'Comando Enviado', `Se envió correctamente ${command} a las ${totalCount} instancias`);
-                } else if (successCount > 0) {
-                    showToast('warning', 'Éxito Parcial', `Comando enviado a ${successCount} de ${totalCount} instancias`);
-                } else {
-                    showToast('error', 'Fallo en Comando', `No se pudo enviar el comando a ninguna instancia`);
-                }
-                
-                setTimeout(refreshInstances, 1000);
-            } catch (error) {
-                console.error('Error al enviar comando global:', error);
-                showToast('error', 'Error', `Fallo al enviar el comando: ${command}`);
-            }
-        }
+                window.addEventListener('beforeunload', () => {
+                    if (refreshInterval) clearInterval(refreshInterval);
+                });
 
-        async function sendInstanceCommand(port, command) {
-            // Mostrar notificación informativa que se está enviando el comando a la instancia indicada
-            showToast('info', 'Enviando Comando', `Enviando ${command} a la instancia en el puerto ${port}...`);
+                function startAutoRefresh() {
+                    refreshInterval = setInterval(() => {
+                        const hasOpenMenu = document.querySelector('.action-menu.show') !== null;
+                        const timeSinceLastRefresh = Date.now() - lastRefreshTime;
+                        const indicator = document.getElementById('refresh-indicator');
+        
+                        // Actualizar indicador
+                        if (hasOpenMenu || isInteracting || refreshPaused) {
+                            indicator.classList.add('paused');
+                            indicator.title = 'Autoactualización en pausa';
+                        } else {
+                            indicator.classList.remove('paused');
+                            indicator.title = 'Autoactualización activa';
+                        }
+        
+                        // Solo refrescar si no hay menús abiertos, no se está interactuando y no está pausado manualmente
+                        if (!hasOpenMenu && !isInteracting && !refreshPaused && timeSinceLastRefresh >= 5000) {
+                            refreshInstances();
+                        }
+                    }, 1000); // Verificar cada segundo pero refrescar solo cuando se cumplan las condiciones
+                }
+
+                async function refreshInstances(isManual = false) {
+                    try {
+                        // No actualizar si hay un menú abierto y no es una actualización manual
+                        if (!isManual && document.querySelector('.action-menu.show')) {
+                            return;
+                        }
+
+                        lastRefreshTime = Date.now();
+                        const response = await fetch(`${API_BASE}/instances`);
+                        if (!response.ok) throw new Error('No se pudo obtener las instancias');
+        
+                        const data = await response.json();
+                        instances = data.Instances;
+        
+                        // Solo renderizar si no hay menús abiertos o es una actualización manual
+                        if (!document.querySelector('.action-menu.show') || isManual) {
+                            renderInstances();
+                        }
+                    } catch (error) {
+                        console.error('Error al obtener las instancias:', error);
+                        showError('No se pudieron cargar las instancias del bot. Asegúrate de que el bot esté en ejecución.');
+                    }
+                }
+
+                function renderInstances() {
+                    const container = document.getElementById('instances-container');
+
+                    if (instances.length === 0) {
+                        container.innerHTML = '<div class=""error-message"">⚠️ No se encontraron instancias del bot. Asegúrate de que al menos un PokeBot esté en ejecución.</div>';
+                        return;
+                    }
+
+                    container.innerHTML = instances.map(instance => {
+                        const isOnline = instance.IsOnline || false;
+                        const statusClass = isOnline ? 'online' : 'offline';
+                        const statusIndicator = isOnline ? 
+                            '<span class=""online-indicator""></span>Conectado' : 
+                            '<span class=""offline-indicator""></span>Desconectado';
+                
+                        let instanceStatus = 'stopped';
+                        let instanceStatusText = 'Detenido';
+
+                        if (instance.BotStatuses && instance.BotStatuses.length > 0) {
+                            const runningCount = instance.BotStatuses.filter(b => 
+                                b.Status.toUpperCase().includes('EN EJECUCIÓN') || 
+                                b.Status.toUpperCase().includes('ACTIVO') ||
+                                (!b.Status.toUpperCase().includes('EN ESPERA') && 
+                                 !b.Status.toUpperCase().includes('DETENIDO') && 
+                                 !b.Status.toUpperCase().includes('ERROR') && 
+                                 !b.Status.toUpperCase().includes('DESCONOCIDO'))
+                            ).length;
+
+                            const idleCount = instance.BotStatuses.filter(b => 
+                                b.Status.toUpperCase().includes('EN ESPERA')
+                            ).length;
+
+                            if (runningCount === instance.BotStatuses.length) {
+                                instanceStatus = 'running';
+                                instanceStatusText = 'Todos en ejecución';
+                            } else if (idleCount === instance.BotStatuses.length) {
+                                instanceStatus = 'idle';
+                                instanceStatusText = 'Todos en espera';
+                            } else if (runningCount > 0) {
+                                instanceStatus = 'mixed';
+                                instanceStatusText = `${runningCount}/${instance.BotStatuses.length} en ejecución`;
+                            } else if (idleCount > 0) {
+                                instanceStatus = 'idle';
+                                instanceStatusText = 'En espera';
+                            }
+                        }
+                
+                        return `
+                        <div class=""instance-card ${statusClass}"" data-port=""${instance.Port}"">
+                            <div class=""instance-header"">
+                                <h3 class=""instance-title"">
+                                    ${instance.Name}
+                                    <span class=""instance-status-badge ${instanceStatus}"">${instanceStatusText}</span>
+                                </h3>
+                                <span class=""instance-badge"">Puerto ${instance.Port}</span>
+                            </div>
+                            <div class=""instance-body"">
+                                <div class=""instance-info"">
+                                    <div class=""info-item"">
+                                        <span class=""info-label"">Versión</span>
+                                        <span class=""info-value"">${instance.Version}</span>
+                                    </div>
+                                    <div class=""info-item"">
+                                        <span class=""info-label"">Modo</span>
+                                        <span class=""info-value"">${instance.Mode}</span>
+                                    </div>
+                                    <div class=""info-item"">
+                                        <span class=""info-label"">ID del Proceso</span>
+                                        <span class=""info-value"">${instance.ProcessId}</span>
+                                    </div>
+                                    <div class=""info-item"">
+                                        <span class=""info-label"">Conexión</span>
+                                        <span class=""info-value"">${statusIndicator}</span>
+                                    </div>
+                                </div>
+                        
+                                ${instance.BotStatuses && instance.BotStatuses.length > 0 ? `
+                                <div class=""bot-status"">
+                                    <div class=""info-label"" style=""margin-bottom: 0.5rem;"">BOTS (${instance.BotStatuses.length})</div>
+                                    ${instance.BotStatuses.map((bot, index) => `
+                                        <div class=""bot-status-item"">
+                                            <span class=""bot-name"">
+                                                <span style=""color: ${getStatusColor(bot.Status)};"">●</span>
+                                                <span>${bot.Name || `Bot ${index + 1}`}</span>
+                                            </span>
+                                            <span class=""bot-state ${getStatusClass(bot.Status)}"">${bot.Status}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                ` : instance.BotCount > 0 ? `
+                                <div class=""bot-status"">
+                                    <div class=""info-label"">BOTS</div>
+                                    <div class=""bot-status-item"">
+                                        <span class=""bot-name"">Cantidad de bots: ${instance.BotCount}</span>
+                                        <span class=""bot-state"">Estado desconocido</span>
+                                    </div>
+                                </div>
+                                ` : '' }
+                        
+                                <div class=""instance-controls"">
+                                    <button class=""action-menu-button"" onclick=""toggleActionMenu(event, ${instance.Port})"" ${!isOnline ? 'disabled' : ''}>
+                                        ⚡ Acciones <span style=""font-size: 0.75rem;"">▼</span>
+                                    </button>
+                                    <div class=""action-menu"" id=""action-menu-${instance.Port}"">
+                                        <button class=""action-menu-item success"" onclick=""sendInstanceCommand(${instance.Port}, 'start')"">
+                                            ▶️ Iniciar
+                                        </button>
+                                        <button class=""action-menu-item danger"" onclick=""sendInstanceCommand(${instance.Port}, 'stop')"">
+                                            ⏹️ Detener
+                                        </button>
+                                        <button class=""action-menu-item warning"" onclick=""sendInstanceCommand(${instance.Port}, 'idle')"">
+                                            ⏸️ En Espera
+                                        </button>
+                                        <button class=""action-menu-item"" onclick=""sendInstanceCommand(${instance.Port}, 'resume')"">
+                                            ⏯️ Reanudar
+                                        </button>
+                                        <div class=""action-menu-divider""></div>
+                                        <button class=""action-menu-item"" onclick=""sendInstanceCommand(${instance.Port}, 'restart')"">
+                                            🔄 Reiniciar
+                                        </button>
+                                        <button class=""action-menu-item danger"" onclick=""sendInstanceCommand(${instance.Port}, 'reboot')"">
+                                            🔌 Reinicio Forzado
+                                        </button>
+                                        <div class=""action-menu-divider""></div>
+                                        <button class=""action-menu-item"" onclick=""sendInstanceCommand(${instance.Port}, 'screenon')"">
+                                            💡 Encender Pantalla
+                                        </button>
+                                        <button class=""action-menu-item"" onclick=""sendInstanceCommand(${instance.Port}, 'screenoff')"">
+                                            🌙 Apagar Pantalla
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    }).join('');
+                }
+
+                function manualRefresh() {
+                    // Cerrar todos los menús
+                    document.querySelectorAll('.action-menu.show').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
     
-            try {
-                // Hacer petición POST para enviar comando a la instancia en el puerto dado
-                const response = await fetch(`${API_BASE}/instances/${port}/command`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Command: command })
-                });
-
-                // Si la respuesta no es exitosa, lanzar error
-                if (!response.ok) throw new Error('Fallo el comando');
-        
-                // Obtener resultado en JSON
-                const result = await response.json();
-                if (result.Success) {
-                    // Mostrar notificación de éxito
-                    showToast('success', 'Comando Enviado', `Comando ${command} enviado correctamente a la instancia en el puerto ${port}`);
-                } else {
-                    // Mostrar notificación de fallo con mensaje si existe
-                    showToast('error', 'Fallo en Comando', result.Message || 'Error desconocido');
+                    // Forzar actualización
+                    refreshInstances(true);
+                    showToast('info', 'Actualizado', 'Instancias del bot actualizadas');
                 }
-        
-                // Refrescar lista de instancias después de 1 segundo
-                setTimeout(refreshInstances, 1000);
-            } catch (error) {
-                console.error(`Error al enviar comando al puerto ${port}:`, error);
-                showToast('error', 'Error', `No se pudo enviar el comando a la instancia en el puerto ${port}`);
-            }
-        }
 
+                function toggleActionMenu(event, port) {
+                    event.stopPropagation();
+                    const menu = document.getElementById(`action-menu-${port}`);
+                    const allMenus = document.querySelectorAll('.action-menu');
+                    
+                    // Close all other menus
+                    allMenus.forEach(m => {
+                        if (m.id !== `action-menu-${port}`) {
+                            m.classList.remove('show');
+                        }
+                    });
+                    
+                    // Toggle current menu
+                    const wasOpen = menu.classList.contains('show');
+                    menu.classList.toggle('show');
+                    
+                    // Update interaction state
+                    isInteracting = !wasOpen;
+                    
+                    // If we just closed the last menu, allow refresh again
+                    if (wasOpen && !document.querySelector('.action-menu.show')) {
+                        isInteracting = false;
+                    }
+                }
 
-        function showError(message) {
-            console.error(message);
-            showToast('error', 'Error', message);
-        }
+                function getStatusColor(status) {
+                    const upperStatus = status?.toUpperCase() || '';
 
-        function showToast(type, title, message) {
-            const toast = document.getElementById('toast');
-            const icon = toast.querySelector('.toast-icon');
-            const titleEl = toast.querySelector('.toast-title');
-            const messageEl = toast.querySelector('.toast-message');
-            
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-            
-            toast.className = 'toast';
-            switch(type) {
-                case 'success':
-                    icon.textContent = '✅';
-                    toast.classList.add('success');
-                    break;
-                case 'error':
-                    icon.textContent = '❌';
-                    toast.classList.add('error');
-                    break;
-                case 'warning':
-                    icon.textContent = '⚠️';
-                    break;
-                case 'info':
-                default:
-                    icon.textContent = 'ℹ️';
-                    break;
-            }
-            
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4000);
-        }
-    </script>
-</body>
-</html>";
+                    if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('ACTIVO') ||
+                        (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
+                        return '#10b981'; // Verde - activo
+                    } else if (upperStatus.includes('EN ESPERA') || upperStatus.includes('PAUSA')) {
+                        return '#f59e0b'; // Amarillo - inactivo o pausado
+                    } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('DESCONECTADO') || upperStatus.includes('REINICIANDO')) {
+                        return '#ef4444'; // Rojo - detenido o error
+                    } else if (upperStatus.includes('ERROR')) {
+                        return '#ef4444'; // Rojo - error
+                    } else {
+                        return '#6b7280'; // Gris - desconocido
+                    }
+                }
 
-    public BotServer(Main mainForm, int port = 8080, int tcpPort = 8081)
-    {
-        _mainForm = mainForm ?? throw new ArgumentNullException(nameof(mainForm));
-        _port = port;
-        _tcpPort = tcpPort;
-    }
+                function getStatusClass(status) {
+                    const upperStatus = status?.toUpperCase() || '';
+
+                    if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('ACTIVO') ||
+                        (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
+                        return 'running';
+                    } else if (upperStatus.includes('EN ESPERA') || upperStatus.includes('PAUSA')) {
+                        return 'idle';
+                    } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('REINICIANDO') || upperStatus.includes('DESCONECTADO') || upperStatus.includes('ERROR')) {
+                        return 'stopped';
+                    } else {
+                        return 'error';
+                    }
+                }
+
+                async function sendGlobalCommand(command) {
+                    showToast('info', 'Enviando Comando', `Enviando ${command} a todas las instancias...`);
+
+                    try {
+                        const response = await fetch(`${API_BASE}/command/all`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ Command: command })
+                        });
+
+                        if (!response.ok) throw new Error('Fallo al enviar el comando');
+
+                        const result = await response.json();
+                        const successCount = result.SuccessfulCommands || 0;
+                        const totalCount = result.TotalInstances || 0;
+
+                        if (successCount === totalCount && totalCount > 0) {
+                            showToast('success', 'Comando Enviado', `Comando ${command} enviado correctamente a las ${totalCount} instancias`);
+                        } else if (successCount > 0) {
+                            showToast('warning', 'Éxito Parcial', `Comando ${command} enviado a ${successCount} de ${totalCount} instancias`);
+                        } else {
+                            showToast('error', 'Fallo', `No se pudo enviar el comando a ninguna instancia`);
+                        }
+
+                        setTimeout(() => refreshInstances(true), 1000);
+                    } catch (error) {
+                        console.error('Error al enviar el comando global:', error);
+                        showToast('error', 'Error', `No se pudo enviar el comando: ${command}`);
+                    }
+                }
+
+                async function sendInstanceCommand(port, command) {
+                    // Cerrar menú de acciones
+                    document.getElementById(`action-menu-${port}`).classList.remove('show');
+    
+                    // Limpiar estado de interacción
+                    isInteracting = false;
+    
+                    showToast('info', 'Enviando Comando', `Enviando ${command} a la instancia en el puerto ${port}...`);
+
+                    try {
+                        const response = await fetch(`${API_BASE}/instances/${port}/command`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ Command: command })
+                        });
+
+                        if (!response.ok) throw new Error('Fallo al enviar el comando');
+
+                        const result = await response.json();
+                        if (result.Success) {
+                            showToast('success', 'Comando Enviado', `Comando ${command} enviado correctamente a la instancia en el puerto ${port}`);
+                        } else {
+                            showToast('error', 'Fallo', result.Message || 'Error desconocido');
+                        }
+
+                        setTimeout(() => refreshInstances(true), 1000);
+                    } catch (error) {
+                        console.error(`Error al enviar el comando al puerto ${port}:`, error);
+                        showToast('error', 'Error', `No se pudo enviar el comando a la instancia en el puerto ${port}`);
+                    }
+                }
+
+                function showError(message) {
+                    console.error(message);
+                    showToast('error', 'Error', message);
+                }
+
+                function showToast(type, title, message) {
+                    const toastId = Date.now();
+                    const toast = document.getElementById('toast').cloneNode(true);
+                    toast.id = `toast-${toastId}`;
+                    
+                    const icon = toast.querySelector('.toast-icon');
+                    const titleEl = toast.querySelector('.toast-title');
+                    const messageEl = toast.querySelector('.toast-message');
+            
+                    titleEl.textContent = title;
+                    messageEl.textContent = message;
+            
+                    toast.className = 'toast';
+                    switch(type) {
+                        case 'success':
+                            icon.textContent = '✅';
+                            toast.classList.add('success');
+                            break;
+                        case 'error':
+                            icon.textContent = '❌';
+                            toast.classList.add('error');
+                            break;
+                        case 'warning':
+                            icon.textContent = '⚠️';
+                            toast.classList.add('warning');
+                            break;
+                        case 'info':
+                        default:
+                            icon.textContent = 'ℹ️';
+                            toast.classList.add('info');
+                            break;
+                    }
+                    
+                    document.body.appendChild(toast);
+                    activeToasts.push(toastId);
+                    
+                    // Adjust position for multiple toasts
+                    const toastHeight = 80; // Approximate height including margin
+                    const bottomOffset = activeToasts.indexOf(toastId) * toastHeight;
+                    
+                    if (window.innerWidth <= 768) {
+                        toast.style.bottom = `${bottomOffset}px`;
+                    } else {
+                        toast.style.bottom = `${32 + bottomOffset}px`;
+                    }
+                    
+                    // Force reflow before adding show class
+                    toast.offsetHeight;
+                    
+                    requestAnimationFrame(() => {
+                        toast.classList.add('show');
+                    });
+            
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                        setTimeout(() => {
+                            toast.remove();
+                            activeToasts = activeToasts.filter(id => id !== toastId);
+                            
+                            // Reposition remaining toasts
+                            activeToasts.forEach((id, index) => {
+                                const remainingToast = document.getElementById(`toast-${id}`);
+                                if (remainingToast) {
+                                    if (window.innerWidth <= 768) {
+                                        remainingToast.style.bottom = `${index * toastHeight}px`;
+                                    } else {
+                                        remainingToast.style.bottom = `${32 + index * toastHeight}px`;
+                                    }
+                                }
+                            });
+                        }, 300);
+                    }, 4000);
+                }
+            </script>
+        </body>
+        </html>";
 
     public void Start()
     {
@@ -433,7 +1265,7 @@ public class BotServer : IDisposable
         {
             _listener = new HttpListener();
 
-            // Try to listen on all interfaces firstAdd commentMore actions
+            // Intentar escuchar en todas las interfaces primero
             try
             {
                 _listener.Prefixes.Add($"http://+:{_port}/");
@@ -442,16 +1274,16 @@ public class BotServer : IDisposable
             }
             catch (HttpListenerException ex) when (ex.ErrorCode == 5)
             {
-                // Access denied - need admin rights
+                // Acceso denegado - se requieren privilegios de administrador
                 _listener = new HttpListener();
                 _listener.Prefixes.Add($"http://localhost:{_port}/");
                 _listener.Prefixes.Add($"http://127.0.0.1:{_port}/");
                 _listener.Start();
 
-                LogUtil.LogError($"El servidor web requiere privilegios de administrador para acceso en red. Actualmente limitado solo a localhost.", "WebServer");
-                LogUtil.LogInfo("Para habilitar el acceso en red, hacer una de las siguientes:", "WebServer");
-                LogUtil.LogInfo("1. Ejecutar esta aplicación como Administrador", "WebServer");
-                LogUtil.LogInfo("2. O ejecutar este comando como administrador: netsh http add urlacl url=http://+:8080/ user=Everyone", "WebServer");
+                LogUtil.LogError($"El servidor web requiere privilegios de administrador para acceder a la red. Actualmente limitado solo a localhost.", "WebServer");
+                LogUtil.LogInfo("Para habilitar el acceso por red, haz una de las siguientes opciones:", "WebServer");
+                LogUtil.LogInfo("1. Ejecuta esta aplicación como Administrador", "WebServer");
+                LogUtil.LogInfo("2. O ejecuta este comando como administrador: netsh http add urlacl url=http://+:8080/ user=Everyone", "WebServer");
             }
 
             _running = true;
@@ -465,7 +1297,7 @@ public class BotServer : IDisposable
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Error al iniciar el servidor web: {ex.Message}", "WebServer");
+            LogUtil.LogError($"No se pudo iniciar el servidor web: {ex.Message}", "WebServer");
             throw;
         }
     }
@@ -554,7 +1386,7 @@ public class BotServer : IDisposable
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Error procesando la solicitud: {ex.Message}", "WebServer");
+            LogUtil.LogError($"Error al procesar la solicitud: {ex.Message}", "WebServer");
 
             try
             {
@@ -589,25 +1421,25 @@ public class BotServer : IDisposable
         var controllers = GetBotControllers();
 
         // Get mode from config, not window title
-        var mode = config?.Mode.ToString() ?? "Desconocido";
+        var mode = config?.Mode.ToString() ?? "Unknown";
         var name = "DaiBot";
 
         // Get version from TradeBot.Version
-        var version = "Desconocida";
+        var version = "Unknown";
         try
         {
-            var tradeBotType = Type.GetType("SysBot.Pokemon.Helpers.TradeBot, SysBot.Pokemon");
+            var tradeBotType = Type.GetType("SysBot.Pokemon.Helpers.DaiBot, SysBot.Pokemon");
             if (tradeBotType != null)
             {
                 var versionField = tradeBotType.GetField("Version",
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 if (versionField != null)
                 {
-                    version = versionField.GetValue(null)?.ToString() ?? "Desconocida";
+                    version = versionField.GetValue(null)?.ToString() ?? "Unknown";
                 }
             }
 
-            if (version == "Desconocida")
+            if (version == "Unknown")
             {
                 version = _mainForm.GetType().Assembly.GetName().Version?.ToString() ?? "1.0.0";
             }
@@ -632,6 +1464,7 @@ public class BotServer : IDisposable
             Mode = mode,
             BotCount = botStatuses.Count,
             IsOnline = true,
+            IsMaster = true, // This instance is hosting the web server
             BotStatuses = botStatuses
         };
     }
@@ -643,7 +1476,7 @@ public class BotServer : IDisposable
 
         try
         {
-            var processes = Process.GetProcessesByName("DaiBot")
+            var processes = Process.GetProcessesByName("PokeBot")
                 .Where(p => p.Id != currentPid);
 
             foreach (var process in processes)
@@ -655,7 +1488,7 @@ public class BotServer : IDisposable
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Error al escanear instancias remotas: {ex.Message}", "WebServer");
+            LogUtil.LogError($"Error scanning remote instances: {ex.Message}", "WebServer");
         }
 
         return instances;
@@ -681,10 +1514,10 @@ public class BotServer : IDisposable
             var instance = new BotInstance
             {
                 ProcessId = process.Id,
-                Name = "DaiBot",
+                Name = "PokeBot",
                 Port = port,
-                Version = "Desconocida",
-                Mode = "Desconocido",
+                Version = "Unknown",
+                Mode = "Unknown",
                 BotCount = 0,
                 IsOnline = isOnline
             };
@@ -713,13 +1546,13 @@ public class BotServer : IDisposable
                 var root = doc.RootElement;
 
                 if (root.TryGetProperty("Version", out var version))
-                    instance.Version = version.GetString() ?? "Desconocida";
+                    instance.Version = version.GetString() ?? "Unknown";
 
                 if (root.TryGetProperty("Mode", out var mode))
-                    instance.Mode = mode.GetString() ?? "Desconocido";
+                    instance.Mode = mode.GetString() ?? "Unknown";
 
                 if (root.TryGetProperty("Name", out var name))
-                    instance.Name = name.GetString() ?? "DaiBot";
+                    instance.Name = name.GetString() ?? "PokeBot";
             }
 
             var botsResponse = QueryRemote(port, "LISTBOTS");
@@ -793,7 +1626,7 @@ public class BotServer : IDisposable
             var commandRequest = JsonSerializer.Deserialize<BotCommandRequest>(body);
 
             if (commandRequest == null)
-                return CreateErrorResponse("Solicitud de comando inválida");
+                return CreateErrorResponse("Invalid command request");
 
             if (port == _tcpPort)
             {
@@ -827,7 +1660,7 @@ public class BotServer : IDisposable
             var commandRequest = JsonSerializer.Deserialize<BotCommandRequest>(body);
 
             if (commandRequest == null)
-                return CreateErrorResponse("Solicitud de comando inválida");
+                return CreateErrorResponse("Invalid command request");
 
             var results = new List<CommandResponse>();
 
@@ -887,7 +1720,7 @@ public class BotServer : IDisposable
             return JsonSerializer.Serialize(new CommandResponse
             {
                 Success = true,
-                Message = $"Comando {command} enviado con éxito",
+                Message = $"Comando {command} enviado correctamente",
                 Port = _tcpPort,
                 Command = command,
                 Timestamp = DateTime.Now
@@ -898,7 +1731,7 @@ public class BotServer : IDisposable
             return JsonSerializer.Serialize(new CommandResponse
             {
                 Success = true,
-                Message = $"Comando {command} enviado con éxito",
+                Message = $"Comando {command} enviado correctamente",
                 Port = _tcpPort,
                 Command = command,
                 Timestamp = DateTime.Now
@@ -938,7 +1771,7 @@ public class BotServer : IDisposable
         }
         catch
         {
-            return "Fallo al conectar";
+            return "No se pudo conectar";
         }
     }
 
@@ -958,7 +1791,7 @@ public class BotServer : IDisposable
     private ProgramConfig? GetConfig()
     {
         var configProp = _mainForm.GetType().GetProperty("Config",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         return configProp?.GetValue(_mainForm) as ProgramConfig;
     }
 
@@ -994,6 +1827,7 @@ public class BotInstance
     public int BotCount { get; set; }
     public string Mode { get; set; } = string.Empty;
     public bool IsOnline { get; set; }
+    public bool IsMaster { get; set; }
     public List<BotStatusInfo>? BotStatuses { get; set; }
 }
 

@@ -47,8 +47,9 @@ namespace SysBot.Pokemon.WinForms
             for (int i = 1; i < opt.Length; i++)
             {
                 var cmd = opt[i];
-                var item = new ToolStripMenuItem(cmd.ToString())
+                var item = new ToolStripMenuItem(GetCommandText(cmd))
                 {
+                    Tag = cmd, // <-- Guarda el comando original
                     ForeColor = Color.FromArgb(224, 224, 224),
                     BackColor = Color.FromArgb(35, 35, 35)
                 };
@@ -86,10 +87,12 @@ namespace SysBot.Pokemon.WinForms
                 RCMenu.Items.Add(item);
             }
 
+
+
             // Add separator
             RCMenu.Items.Add(new ToolStripSeparator());
 
-            var remove = new ToolStripMenuItem("✕ Remove")
+            var remove = new ToolStripMenuItem("✕ Eliminar")
             {
                 ForeColor = Color.FromArgb(237, 66, 69),
                 BackColor = Color.FromArgb(35, 35, 35)
@@ -109,6 +112,22 @@ namespace SysBot.Pokemon.WinForms
             }
         }
 
+        private string GetCommandText(BotControlCommand cmd)
+        {
+            return cmd switch
+            {
+                BotControlCommand.Start => "Iniciar",
+                BotControlCommand.Stop => "Detener",
+                BotControlCommand.Idle => "Pausar",
+                BotControlCommand.Resume => "Reanudar",
+                BotControlCommand.Restart => "Reiniciar",
+                BotControlCommand.RebootAndStop => "Reiniciar y detener",
+                BotControlCommand.ScreenOnAll => "Encender pantalla",
+                BotControlCommand.ScreenOffAll => "Apagar pantalla",
+                _ => cmd.ToString()
+            };
+        }
+
         private void RcMenuOnOpening(object? sender, CancelEventArgs? e)
         {
             if (Runner == null)
@@ -120,12 +139,10 @@ namespace SysBot.Pokemon.WinForms
 
             foreach (var tsi in RCMenu.Items.OfType<ToolStripMenuItem>())
             {
-                var text = tsi.Text.Replace("▶ ", "").Replace("■ ", "").Replace("⏸ ", "")
-                    .Replace("⏵ ", "").Replace("↻ ", "").Replace("⚡ ", "").Replace("✕ ", "")
-                    .Replace("💡 ", "").Replace("🌙 ", "");
-                tsi.Enabled = Enum.TryParse(text, out BotControlCommand cmd)
-                    ? cmd.IsUsable(bot.IsRunning, bot.IsPaused)
-                    : !bot.IsRunning;
+                if (tsi.Tag is BotControlCommand cmd)
+                {
+                    tsi.Enabled = cmd.IsUsable(bot.IsRunning, bot.IsPaused);
+                }
             }
         }
 

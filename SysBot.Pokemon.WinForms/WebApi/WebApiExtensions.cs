@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,6 +18,7 @@ public static class WebApiExtensions
     private static BotServer? _server;
     private static TcpListener? _tcp;
     private static CancellationTokenSource? _cts;
+    private static CancellationTokenSource? _monitorCts;
     private static Main? _main;
 
     private const int WebPort = 8080;
@@ -32,15 +34,125 @@ public static class WebApiExtensions
             {
                 _tcpPort = FindAvailablePort(8081);
                 StartTcpOnly();
+
+                // Start monitoring for master failure
+                StartMasterMonitor();
                 return;
             }
+
+            // Try to add URL reservation for network access
+            TryAddUrlReservation(WebPort);
 
             _tcpPort = FindAvailablePort(8081);
             StartFullServer();
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Error al inicializar el servidor web: {ex.Message}", "WebServer");
+            LogUtil.LogError($"Failed to initialize web server: {ex.Message}", "WebServer");
+        }
+    }
+
+    private static void StartMasterMonitor()
+    {
+        _monitorCts = new CancellationTokenSource();
+
+        Task.Run(async () =>
+        {
+            var random = new Random();
+
+            while (!_monitorCts.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    // Check every 10-15 seconds (randomized to prevent race conditions)
+                    await Task.Delay(10000 + random.Next(5000), _monitorCts.Token);
+
+                    if (!IsPortInUse(WebPort))
+                    {
+                        LogUtil.LogInfo("Master web server is down. Attempting to take over...", "WebServer");
+
+                        // Wait a random amount to reduce race conditions between multiple slaves
+                        await Task.Delay(random.Next(1000, 3000));
+
+                        // Double-check that no one else took over
+                        if (!IsPortInUse(WebPort))
+                        {
+                            TryTakeOverAsMaster();
+                            break; // Stop monitoring once we've taken over
+                        }
+                    }
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    LogUtil.LogError($"Error in master monitor: {ex.Message}", "WebServer");
+                }
+            }
+        }, _monitorCts.Token);
+    }
+
+    private static void TryTakeOverAsMaster()
+    {
+        try
+        {
+            // Try to add URL reservation
+            TryAddUrlReservation(WebPort);
+
+            // Start the web server
+            _server = new BotServer(_main!, WebPort, _tcpPort);
+            _server.Start();
+
+            // Stop the monitor since we're now the master
+            _monitorCts?.Cancel();
+            _monitorCts = null;
+
+            LogUtil.LogInfo($"Successfully took over as master web server on port {WebPort}", "WebServer");
+            LogUtil.LogInfo($"Web interface is now available at http://localhost:{WebPort}", "WebServer");
+
+            // Show notification to user if possible
+            if (_main != null)
+            {
+                _main.BeginInvoke((MethodInvoker)(() =>
+                {
+                    System.Windows.Forms.MessageBox.Show(
+                        $"This instance has taken over as the master web server.\n\nWeb interface available at:\nhttp://localhost:{WebPort}",
+                        "Master Server Takeover",
+                        System.Windows.Forms.MessageBoxButtons.OK,
+                        System.Windows.Forms.MessageBoxIcon.Information);
+                }));
+            }
+        }
+        catch (Exception ex)
+        {
+            LogUtil.LogError($"Failed to take over as master: {ex.Message}", "WebServer");
+
+            // If we failed, go back to monitoring
+            StartMasterMonitor();
+        }
+    }
+
+    private static bool TryAddUrlReservation(int port)
+    {
+        try
+        {
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "netsh",
+                Arguments = $"http add urlacl url=http://+:{port}/ user=Everyone",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                Verb = "runas" // Request admin privileges
+            };
+
+            using var process = System.Diagnostics.Process.Start(startInfo);
+            process?.WaitForExit(5000);
+            return process?.ExitCode == 0;
+        }
+        catch
+        {
+            // If we can't add the reservation, the server will fall back to localhost
+            return false;
         }
     }
 
@@ -86,7 +198,7 @@ public static class WebApiExtensions
             }
             catch (Exception ex) when (!_cts.Token.IsCancellationRequested)
             {
-                LogUtil.LogError($"Error en el listener TCP: {ex.Message}", "TCP");
+                LogUtil.LogError($"TCP listener error: {ex.Message}", "TCP");
             }
         });
     }
@@ -116,14 +228,14 @@ public static class WebApiExtensions
         }
         catch (Exception ex) when (!(ex is IOException { InnerException: SocketException }))
         {
-            LogUtil.LogError($"Error al manejar el cliente TCP: {ex.Message}", "TCP");
+            LogUtil.LogError($"Error handling TCP client: {ex.Message}", "TCP");
         }
     }
 
     private static string ProcessCommand(string command)
     {
         if (_main == null)
-            return "ERROR: Formulario principal no inicializado";
+            return "ERROR: Main form not initialized";
 
         var parts = command.Split(':');
         var cmd = parts[0].ToUpperInvariant();
@@ -143,7 +255,7 @@ public static class WebApiExtensions
             "STATUS" => GetBotStatuses(botId),
             "ISREADY" => CheckReady(),
             "INFO" => GetInstanceInfo(),
-            _ => $"ERROR: Comando desconocido '{cmd}'"
+            _ => $"ERROR: Unknown command '{cmd}'"
         };
     }
 
@@ -158,11 +270,11 @@ public static class WebApiExtensions
                 sendAllMethod?.Invoke(_main, new object[] { command });
             }));
 
-            return $"OK: comando {command} enviado a todos los bots";
+            return $"OK: {command} command sent to all bots";
         }
         catch (Exception ex)
         {
-            return $"ERROR: Falló la ejecución de {command} - {ex.Message}";
+            return $"ERROR: Failed to execute {command} - {ex.Message}";
         }
     }
 
@@ -189,7 +301,7 @@ public static class WebApiExtensions
                             Id = $"{bot.Connection.IP}:{bot.Connection.Port}",
                             Name = bot.Connection.IP,
                             RoutineType = bot.InitialRoutine.ToString(),
-                            Status = "Desconocido",
+                            Status = "Unknown",
                             ConnectionType = bot.Connection.Protocol.ToString(),
                             bot.Connection.IP,
                             bot.Connection.Port
@@ -223,8 +335,8 @@ public static class WebApiExtensions
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Error en GetBotsList: {ex.Message}", "WebAPI");
-            return $"ERROR: Falló obtener la lista de bots - {ex.Message}";
+            LogUtil.LogError($"GetBotsList error: {ex.Message}", "WebAPI");
+            return $"ERROR: Failed to get bots list - {ex.Message}";
         }
     }
 
@@ -250,11 +362,11 @@ public static class WebApiExtensions
             var botController = controllers.FirstOrDefault(c =>
                 $"{c.State.Connection.IP}:{c.State.Connection.Port}" == botId);
 
-            return botController?.ReadBotState() ?? "ERROR: Bot no encontrado";
+            return botController?.ReadBotState() ?? "ERROR: Bot not found";
         }
         catch (Exception ex)
         {
-            return $"ERROR: Falló obtener el estado - {ex.Message}";
+            return $"ERROR: Failed to get status - {ex.Message}";
         }
     }
 
@@ -278,7 +390,7 @@ public static class WebApiExtensions
         {
             var config = GetConfig();
             var version = GetVersion();
-            var mode = config?.Mode.ToString() ?? "Desconocido";
+            var mode = config?.Mode.ToString() ?? "Unknown";
             var name = GetInstanceName(config, mode);
 
             var info = new
@@ -294,7 +406,7 @@ public static class WebApiExtensions
         }
         catch (Exception ex)
         {
-            return $"ERROR: Falló obtener la información de la instancia - {ex.Message}";
+            return $"ERROR: Failed to get instance info - {ex.Message}";
         }
     }
 
@@ -305,10 +417,10 @@ public static class WebApiExtensions
 
         if (flpBotsField?.GetValue(_main) is FlowLayoutPanel flpBots)
         {
-            return [.. flpBots.Controls.OfType<BotController>()];
+            return flpBots.Controls.OfType<BotController>().ToList();
         }
 
-        return [];
+        return new List<BotController>();
     }
 
     private static ProgramConfig? GetConfig()
@@ -328,7 +440,6 @@ public static class WebApiExtensions
     {
         try
         {
-            // Get the TradeBot type from the Helpers namespace
             var tradeBotType = Type.GetType("SysBot.Pokemon.Helpers.PokeBot, SysBot.Pokemon");
             if (tradeBotType != null)
             {
@@ -336,16 +447,16 @@ public static class WebApiExtensions
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 if (versionField != null)
                 {
-                    return versionField.GetValue(null)?.ToString() ?? "Desconocido";
+                    return versionField.GetValue(null)?.ToString() ?? "Unknown";
                 }
             }
 
             // Fallback to assembly version
-            return _main!.GetType().Assembly.GetName().Version?.ToString() ?? "Desconocido";
+            return _main!.GetType().Assembly.GetName().Version?.ToString() ?? "Unknown";
         }
         catch
         {
-            return "Desconocido";
+            return "Unknown";
         }
     }
 
@@ -376,7 +487,7 @@ public static class WebApiExtensions
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Error al crear el archivo de puerto: {ex.Message}", "WebServer");
+            LogUtil.LogError($"Failed to create port file: {ex.Message}", "WebServer");
         }
     }
 
@@ -393,7 +504,7 @@ public static class WebApiExtensions
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Error al limpiar el archivo de puerto: {ex.Message}", "WebServer");
+            LogUtil.LogError($"Failed to cleanup port file: {ex.Message}", "WebServer");
         }
     }
 
@@ -404,7 +515,7 @@ public static class WebApiExtensions
             if (!IsPortInUse(port))
                 return port;
         }
-        throw new InvalidOperationException("No se encontraron puertos disponibles");
+        throw new InvalidOperationException("No available ports found");
     }
 
     private static bool IsPortInUse(int port)
@@ -448,7 +559,7 @@ public static class WebApiExtensions
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Error al detener el servidor web: {ex.Message}", "WebServer");
+            LogUtil.LogError($"Error stopping web server: {ex.Message}", "WebServer");
         }
     }
 }
