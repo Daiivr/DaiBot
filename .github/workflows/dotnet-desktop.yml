@@ -63,7 +63,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: PokeBot
+          name: DaiBot
           path: ./publish
 
   create-release:
@@ -78,7 +78,7 @@ jobs:
       - name: Read Current Version
         id: read_version
         run: |
-          CURRENT_VERSION=$(grep 'public const string Version' SysBot.Pokemon/Helpers/PokeBot.cs | sed 's/.*Version = "\(.*\)";/\1/')
+          CURRENT_VERSION=$(grep 'public const string Version' SysBot.Pokemon/Helpers/DaiBot.cs | sed 's/.*Version = "\(.*\)";/\1/')
           echo "Current version is $CURRENT_VERSION"
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
       - name: Get Recent Changes
@@ -96,7 +96,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: PokeBot
+          name: DaiBot
           path: ./publish
       - name: Create Release
         id: create_release
@@ -118,8 +118,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./publish/PokeBot.exe
-          asset_name: PokeBot.exe
+          asset_path: ./publish/DaiBot.exe
+          asset_name: DaiBot.exe
           asset_content_type: application/octet-stream
       - name: Update Last Known Version
         if: success()
