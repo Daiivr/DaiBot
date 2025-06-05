@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using PKHeX.Core;
+using PKHeX.Core.AutoMod;
 using SysBot.Base;
 using SysBot.Pokemon.Helpers;
 using System;
@@ -12,6 +13,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using static SysBot.Pokemon.TradeSettings.TradeSettingsCategory;
 
@@ -578,16 +580,21 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Final validation
         if (set == null || set.Species == 0)
         {
+            // Intentar extraer un nombre del Showdown Set (si posible)
+            var firstLine = content.Split('\n').FirstOrDefault()?.Trim() ?? "";
+            var potentialName = firstLine.Split('@')[0].Trim(); // Por si es "Pikachu @ Item"
+            var nameError = BattleTemplateLegality.VerifyPokemonName(potentialName, (int)LanguageID.English);
+
             var embed = new EmbedBuilder()
                 .WithTitle("Error al analizar el set de Showdown")
-                .WithDescription("No se pudo identificar la especie del Pokémon.")
+                .WithDescription(nameError ?? "No se pudo identificar la especie del Pokémon.")
                 .WithColor(Color.Red)
                 .WithImageUrl("https://i.imgur.com/Y64hLzW.gif")
                 .WithThumbnailUrl("https://i.imgur.com/DWLEXyu.png")
                 .WithAuthor("Error", "https://img.freepik.com/free-icon/warning_318-478601.jpg")
                 .WithFooter(footer =>
                 {
-                    footer.Text = $"{Context.User.Username} • {DateTime.UtcNow.ToString("hh:mm tt")}";
+                    footer.Text = $"{Context.User.Username} • {DateTime.UtcNow:hh:mm tt}";
                     footer.IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
                 })
                 .Build();
@@ -905,16 +912,21 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Final validation
         if (set == null || set.Species == 0)
         {
+            // Intentar extraer un nombre del Showdown Set (si posible)
+            var firstLine = content.Split('\n').FirstOrDefault()?.Trim() ?? "";
+            var potentialName = firstLine.Split('@')[0].Trim(); // Por si es "Pikachu @ Item"
+            var nameError = BattleTemplateLegality.VerifyPokemonName(potentialName, (int)LanguageID.English);
+
             var embed = new EmbedBuilder()
                 .WithTitle("Error al analizar el set de Showdown")
-                .WithDescription("No se pudo identificar la especie del Pokémon.")
+                .WithDescription(nameError ?? "No se pudo identificar la especie del Pokémon.")
                 .WithColor(Color.Red)
                 .WithImageUrl("https://i.imgur.com/Y64hLzW.gif")
                 .WithThumbnailUrl("https://i.imgur.com/DWLEXyu.png")
                 .WithAuthor("Error", "https://img.freepik.com/free-icon/warning_318-478601.jpg")
                 .WithFooter(footer =>
                 {
-                    footer.Text = $"{Context.User.Username} • {DateTime.UtcNow.ToString("hh:mm tt")}";
+                    footer.Text = $"{Context.User.Username} • {DateTime.UtcNow:hh:mm tt}";
                     footer.IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
                 })
                 .Build();
@@ -1427,16 +1439,21 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Final validation
         if (set == null || set.Species == 0)
         {
+            // Intentar extraer un nombre del Showdown Set (si posible)
+            var firstLine = finalContent.Split('\n').FirstOrDefault()?.Trim() ?? "";
+            var potentialName = firstLine.Split('@')[0].Trim();
+            var nameError = BattleTemplateLegality.VerifyPokemonName(potentialName, (int)LanguageID.English);
+
             var embed = new EmbedBuilder()
                 .WithTitle("Error al analizar el set de Showdown")
-                .WithDescription("No se pudo identificar la especie del Pokémon.")
+                .WithDescription(nameError ?? "No se pudo identificar la especie del Pokémon.")
                 .WithColor(Color.Red)
                 .WithImageUrl("https://i.imgur.com/Y64hLzW.gif")
                 .WithThumbnailUrl("https://i.imgur.com/DWLEXyu.png")
                 .WithAuthor("Error", "https://img.freepik.com/free-icon/warning_318-478601.jpg")
                 .WithFooter(footer =>
                 {
-                    footer.Text = $"{Context.User.Username} • {DateTime.UtcNow.ToString("hh:mm tt")}";
+                    footer.Text = $"{Context.User.Username} • {DateTime.UtcNow:hh:mm tt}";
                     footer.IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
                 })
                 .Build();

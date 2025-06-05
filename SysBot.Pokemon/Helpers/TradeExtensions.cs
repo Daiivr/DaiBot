@@ -353,31 +353,31 @@ namespace SysBot.Pokemon.Helpers
                 if (ribbonSetMark.RibbonMarkMightiest)
                 {
                     result = RibbonIndex.MarkMightiest;
-                    markTitle = " The Unrivaled";
+                    markTitle = "el Imbatible";
                     return true;
                 }
                 else if (ribbonSetMark.RibbonMarkAlpha)
                 {
                     result = RibbonIndex.MarkAlpha;
-                    markTitle = " The Former Alpha";
+                    markTitle = "el Antiguo Alfa";
                     return true;
                 }
                 else if (ribbonSetMark.RibbonMarkTitan)
                 {
                     result = RibbonIndex.MarkTitan;
-                    markTitle = " The Former Titan";
+                    markTitle = "el Antiguo Dominante";
                     return true;
                 }
                 else if (ribbonSetMark.RibbonMarkJumbo)
                 {
                     result = RibbonIndex.MarkJumbo;
-                    markTitle = " The Great";
+                    markTitle = "el Gigante";
                     return true;
                 }
                 else if (ribbonSetMark.RibbonMarkMini)
                 {
                     result = RibbonIndex.MarkMini;
-                    markTitle = " The Teeny";
+                    markTitle = "el Diminuto";
                     return true;
                 }
             }
