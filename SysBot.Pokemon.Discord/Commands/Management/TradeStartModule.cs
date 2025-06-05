@@ -43,7 +43,7 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
                 AddLogChannel(c, ch.ID);
         }
 
-        LogUtil.LogInfo("Added Trade Start Notification to Discord channel(s) on Bot startup.", "Discord");
+        LogUtil.LogInfo("Notificación de inicio de intercambio añadida al/los canal(es) de Discord al iniciar el bot.", "Discord");
     }
 
     public static bool IsStartChannel(ulong cid)
