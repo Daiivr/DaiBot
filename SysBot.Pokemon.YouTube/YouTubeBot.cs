@@ -109,15 +109,15 @@ public class YouTubeBot<T> where T : PKM, new()
             return string.Empty; // sudo only commands
 
         if (args.Length > 0)
-            return "Commands don't use arguments. Try again with just the command code.";
+            return "Los comandos no utilizan argumentos. Inténtalo de nuevo solo con el código de comando.";
 
         return cmd switch
         {
             "pr" => (Info.Hub.Ledy.Pool.Reload(Hub.Config.Folder.DistributeFolder)
-                ? $"Reloaded from folder. Pool count: {Info.Hub.Ledy.Pool.Count}"
-                : "Failed to reload from folder."),
+                ? $"Recargado desde la carpeta. Recuento de grupos: {Info.Hub.Ledy.Pool.Count}"
+                : "No se pudo recargar desde la carpeta."),
 
-            "pc" => $"The pool count is: {Info.Hub.Ledy.Pool.Count}",
+            "pc" => $"El recuento del grupo es: {Info.Hub.Ledy.Pool.Count}",
 
             _ => string.Empty,
         };

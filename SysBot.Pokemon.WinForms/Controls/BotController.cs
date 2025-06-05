@@ -4,7 +4,10 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.Design.AxImporter;
 
 namespace SysBot.Pokemon.WinForms
 {
@@ -72,6 +75,12 @@ namespace SysBot.Pokemon.WinForms
                     case BotControlCommand.RebootAndStop:
                         item.Text = "⚡ " + item.Text;
                         break;
+                    case BotControlCommand.ScreenOnAll:
+                        item.Text = "💡 " + item.Text;
+                        break;
+                    case BotControlCommand.ScreenOffAll:
+                        item.Text = "🌙 " + item.Text;
+                        break;
                 }
 
                 RCMenu.Items.Add(item);
@@ -112,7 +121,8 @@ namespace SysBot.Pokemon.WinForms
             foreach (var tsi in RCMenu.Items.OfType<ToolStripMenuItem>())
             {
                 var text = tsi.Text.Replace("▶ ", "").Replace("■ ", "").Replace("⏸ ", "")
-                    .Replace("⏵ ", "").Replace("↻ ", "").Replace("⚡ ", "").Replace("✕ ", "");
+                    .Replace("⏵ ", "").Replace("↻ ", "").Replace("⚡ ", "").Replace("✕ ", "")
+                    .Replace("💡 ", "").Replace("🌙 ", "");
                 tsi.Enabled = Enum.TryParse(text, out BotControlCommand cmd)
                     ? cmd.IsUsable(bot.IsRunning, bot.IsPaused)
                     : !bot.IsRunning;
@@ -124,7 +134,7 @@ namespace SysBot.Pokemon.WinForms
             Runner = runner;
             State = cfg;
             ReloadStatus();
-            L_Description.Text = "Initializing...";
+            L_Description.Text = "Inicializando...";
         }
 
         public void ReloadStatus()
@@ -253,10 +263,70 @@ namespace SysBot.Pokemon.WinForms
                         bot.Start();
                         break;
                     }
+                case BotControlCommand.ScreenOnAll:
+                    ExecuteScreenCommand(true);
+                    break;
+                case BotControlCommand.ScreenOffAll:
+                    ExecuteScreenCommand(false);
+                    break;
                 default:
                     WinFormsUtil.Alert($"{cmd} is not a command that can be sent to the Bot.");
                     return;
             }
+        }
+
+        private void ExecuteScreenCommand(bool screenOn)
+        {
+            if (Runner == null)
+            {
+                LogUtil.LogError("Runner is null - cannot execute screen command", "BotController");
+                return;
+            }
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var bots = Runner.Bots;
+                    if (bots == null || bots.Count == 0)
+                    {
+                        LogUtil.LogError("No bots available to execute screen command", "BotController");
+                        return;
+                    }
+
+                    int successCount = 0;
+                    int totalCount = bots.Count;
+
+                    foreach (var botSource in bots)
+                    {
+                        try
+                        {
+                            var bot = botSource.Bot;
+                            if (bot?.Connection != null && bot.Connection.Connected)
+                            {
+                                var crlf = bot is SwitchRoutineExecutor<PokeBotState> { UseCRLF: true };
+                                await bot.Connection.SendAsync(SwitchCommand.SetScreen(screenOn ? ScreenState.On : ScreenState.Off, crlf), CancellationToken.None);
+                                successCount++;
+                                LogUtil.LogInfo($"Screen turned {(screenOn ? "ON" : "OFF")} for {bot.Connection.Name}", "BotController");
+                            }
+                            else
+                            {
+                                LogUtil.LogError($"Cannot send screen command - bot {bot?.Connection?.Name ?? "unknown"} is not connected", "BotController");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogUtil.LogError($"Failed to send screen command to bot: {ex.Message}", "BotController");
+                        }
+                    }
+
+                    LogUtil.LogInfo($"Screen command sent to {successCount} of {totalCount} bots", "BotController");
+                }
+                catch (Exception ex)
+                {
+                    LogUtil.LogError($"Failed to execute screen command for all bots: {ex.Message}", "BotController");
+                }
+            });
         }
 
         public string ReadBotState()
@@ -270,6 +340,10 @@ namespace SysBot.Pokemon.WinForms
                 var bot = botSource.Bot;
                 if (bot == null)
                     return "ERROR";
+
+                // Check if bot is stopped first - this is the key fixAdd commentMore actions
+                if (!botSource.IsRunning)
+                    return "STOPPED";
 
                 if (botSource.IsStopping)
                     return "STOPPING";
@@ -292,7 +366,11 @@ namespace SysBot.Pokemon.WinForms
                 if (cfg.CurrentRoutineType == PokeRoutineType.Idle)
                     return "IDLE";
 
-                return cfg.CurrentRoutineType.ToString();
+                // Only return the routine type if the bot is actually runningAdd commentMore actions
+                if (botSource.IsRunning && bot.Connection.Connected)
+                    return cfg.CurrentRoutineType.ToString();
+
+                return "UNKNOWN";
             }
             catch (Exception ex)
             {
@@ -583,6 +661,8 @@ namespace SysBot.Pokemon.WinForms
         Resume,
         Restart,
         RebootAndStop,
+        ScreenOnAll,
+        ScreenOffAll,
     }
 
     public static class BotControlCommandExtensions
@@ -596,6 +676,8 @@ namespace SysBot.Pokemon.WinForms
                 BotControlCommand.Idle => running && !paused,
                 BotControlCommand.Resume => paused,
                 BotControlCommand.Restart => true,
+                BotControlCommand.ScreenOnAll => running, // Only when running
+                BotControlCommand.ScreenOffAll => running, // Only when running
                 _ => false,
             };
         }

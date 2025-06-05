@@ -35,7 +35,7 @@ public sealed class SwitchSocketAsync : SwitchSocket, ISwitchConnectionAsync
             return;
         }
 
-        Log("Connecting to device...");
+        Log("Conectando al dispositivo...");
         IAsyncResult result = Connection.BeginConnect(Info.IP, Info.Port, null, null);
         bool success = result.AsyncWaitHandle.WaitOne(5000, true);
         if (!success || !Connection.Connected)

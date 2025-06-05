@@ -19,7 +19,7 @@ namespace SysBot.Base
             Connection = cfg.CreateAsynchronous();
         }
 
-        public string LastLogged { get; private set; } = "Not Started";
+        public string LastLogged { get; private set; } = "No iniciado";
 
         public DateTime LastTime { get; private set; } = DateTime.Now;
 
