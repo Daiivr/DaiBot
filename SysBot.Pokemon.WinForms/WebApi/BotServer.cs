@@ -282,28 +282,28 @@ public class BotServer : IDisposable
 
         function getStatusColor(status) {
             const upperStatus = status?.toUpperCase() || '';
-            if (upperStatus.includes('RUNNING') || upperStatus.includes('ACTIVE') || upperStatus === 'ONLINE' ||
-                (!upperStatus.includes('IDLE') && !upperStatus.includes('STOPPED') && !upperStatus.includes('ERROR') && !upperStatus.includes('UNKNOWN'))) {
-                return '#10b981';
-            } else if (upperStatus.includes('IDLE') || upperStatus.includes('PAUSED')) {
-                return '#f59e0b';
-            } else if (upperStatus.includes('STOPPED') || upperStatus.includes('OFFLINE') || upperStatus.includes('DISCONNECTED')) {
-                return '#ef4444';
+            if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('EN ESPERA ACTIVA') || upperStatus === 'ONLINE' ||
+                (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
+                return '#10b981'; // green
+            } else if (upperStatus.includes('EN ESPERA') || upperStatus.includes('PAUSADO') || upperStatus.includes('EN ESPERA ACTIVA')) {
+                return '#f59e0b'; // yellow
+            } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('DESCONECTADO') || upperStatus.includes('REINICIANDO')) {
+                return '#ef4444'; // red
             } else if (upperStatus.includes('ERROR')) {
-                return '#ef4444';
+                return '#ef4444'; // red
             } else {
-                return '#6b7280';
+                return '#6b7280'; // gray
             }
         }
 
         function getStatusClass(status) {
             const upperStatus = status?.toUpperCase() || '';
-            if (upperStatus.includes('RUNNING') || upperStatus.includes('ACTIVE') || 
-                (!upperStatus.includes('IDLE') && !upperStatus.includes('STOPPED') && !upperStatus.includes('ERROR') && !upperStatus.includes('UNKNOWN'))) {
+            if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('EN ESPERA ACTIVA') ||
+                (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
                 return 'running';
-            } else if (upperStatus.includes('IDLE')) {
+            } else if (upperStatus.includes('EN ESPERA') || upperStatus.includes('PAUSADO')) {
                 return 'idle';
-            } else if (upperStatus.includes('STOPPED') || upperStatus.includes('ERROR')) {
+            } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('REINICIANDO') || upperStatus.includes('ERROR')) {
                 return 'stopped';
             } else {
                 return 'error';

@@ -224,13 +224,13 @@ namespace SysBot.Pokemon.WinForms
         {
             if (Runner?.Config.SkipConsoleBotCreation != false)
             {
-                LogUtil.LogError("No bots were created because SkipConsoleBotCreation is on!", "Hub");
+                LogUtil.LogError("¡No se creó ningún bot porque SkipConsoleBotCreation está activado!", "Hub");
                 return;
             }
             var bot = GetBot();
             if (bot == null)
             {
-                LogUtil.LogError("Bot is null!", "BotController");
+                LogUtil.LogError("¡El bot es nulo!", "BotController");
                 return;
             }
 
@@ -254,7 +254,7 @@ namespace SysBot.Pokemon.WinForms
                     break;
                 case BotControlCommand.Restart:
                     {
-                        var prompt = WinFormsUtil.Prompt(MessageBoxButtons.YesNo, "Are you sure you want to restart the connection?");
+                        var prompt = WinFormsUtil.Prompt(MessageBoxButtons.YesNo, "¿Estás seguro de que quieres reiniciar la conexión?");
                         if (prompt != DialogResult.Yes)
                             return;
 
@@ -270,7 +270,7 @@ namespace SysBot.Pokemon.WinForms
                     ExecuteScreenCommand(false);
                     break;
                 default:
-                    WinFormsUtil.Alert($"{cmd} is not a command that can be sent to the Bot.");
+                    WinFormsUtil.Alert($"{cmd} no es un comando que se pueda enviar al Bot.");
                     return;
             }
         }
@@ -279,7 +279,7 @@ namespace SysBot.Pokemon.WinForms
         {
             if (Runner == null)
             {
-                LogUtil.LogError("Runner is null - cannot execute screen command", "BotController");
+                LogUtil.LogError("Runner es nulo - no se puede ejecutar el comando de pantalla", "BotController");
                 return;
             }
 
@@ -290,7 +290,7 @@ namespace SysBot.Pokemon.WinForms
                     var bots = Runner.Bots;
                     if (bots == null || bots.Count == 0)
                     {
-                        LogUtil.LogError("No bots available to execute screen command", "BotController");
+                        LogUtil.LogError("No hay bots disponibles para ejecutar el comando de pantalla", "BotController");
                         return;
                     }
 
@@ -307,24 +307,24 @@ namespace SysBot.Pokemon.WinForms
                                 var crlf = bot is SwitchRoutineExecutor<PokeBotState> { UseCRLF: true };
                                 await bot.Connection.SendAsync(SwitchCommand.SetScreen(screenOn ? ScreenState.On : ScreenState.Off, crlf), CancellationToken.None);
                                 successCount++;
-                                LogUtil.LogInfo($"Screen turned {(screenOn ? "ON" : "OFF")} for {bot.Connection.Name}", "BotController");
+                                LogUtil.LogInfo($"Pantalla {(screenOn ? "ENCENDIDA" : "APAGADA")} para {bot.Connection.Name}", "BotController");
                             }
                             else
                             {
-                                LogUtil.LogError($"Cannot send screen command - bot {bot?.Connection?.Name ?? "unknown"} is not connected", "BotController");
+                                LogUtil.LogError($"No se puede enviar el comando de pantalla - el bot {bot?.Connection?.Name ?? "desconocido"} no está conectado", "BotController");
                             }
                         }
                         catch (Exception ex)
                         {
-                            LogUtil.LogError($"Failed to send screen command to bot: {ex.Message}", "BotController");
+                            LogUtil.LogError($"Error al enviar el comando de pantalla al bot: {ex.Message}", "BotController");
                         }
                     }
 
-                    LogUtil.LogInfo($"Screen command sent to {successCount} of {totalCount} bots", "BotController");
+                    LogUtil.LogInfo($"Comando de pantalla enviado a {successCount} de {totalCount} bots", "BotController");
                 }
                 catch (Exception ex)
                 {
-                    LogUtil.LogError($"Failed to execute screen command for all bots: {ex.Message}", "BotController");
+                    LogUtil.LogError($"Error al ejecutar el comando de pantalla para todos los bots: {ex.Message}", "BotController");
                 }
             });
         }
@@ -341,40 +341,40 @@ namespace SysBot.Pokemon.WinForms
                 if (bot == null)
                     return "ERROR";
 
-                // Check if bot is stopped first - this is the key fixAdd commentMore actions
+                // Verificar si el bot está detenido primero - esta es la corrección clave
                 if (!botSource.IsRunning)
-                    return "STOPPED";
+                    return "DETENIDO";
 
                 if (botSource.IsStopping)
-                    return "STOPPING";
+                    return "DETENIÉNDOSE";
 
                 if (botSource.IsPaused)
                 {
                     if (bot.Config?.CurrentRoutineType != PokeRoutineType.Idle)
-                        return "IDLING";
+                        return "EN ESPERA ACTIVA";  // "IDLING"
                     else
-                        return "IDLE";
+                        return "EN ESPERA";          // "IDLE"
                 }
 
                 if (botSource.IsRunning && !bot.Connection.Connected)
-                    return "REBOOTING";
+                    return "REINICIANDO";
 
                 var cfg = bot.Config;
                 if (cfg == null)
-                    return "UNKNOWN";
+                    return "DESCONOCIDO";
 
                 if (cfg.CurrentRoutineType == PokeRoutineType.Idle)
-                    return "IDLE";
+                    return "EN ESPERA";  // "IDLE"
 
-                // Only return the routine type if the bot is actually runningAdd commentMore actions
+                // Solo devolver el tipo de rutina si el bot está realmente en ejecución
                 if (botSource.IsRunning && bot.Connection.Connected)
                     return cfg.CurrentRoutineType.ToString();
 
-                return "UNKNOWN";
+                return "DESCONOCIDO";
             }
             catch (Exception ex)
             {
-                LogUtil.LogError($"Error reading bot state: {ex.Message}", "BotController");
+                LogUtil.LogError($"Error al leer el estado del bot: {ex.Message}", "BotController");
                 return "ERROR";
             }
         }
@@ -394,7 +394,7 @@ namespace SysBot.Pokemon.WinForms
             }
             catch (Exception ex)
             {
-                LogUtil.LogError($"Error getting bot: {ex.Message}", "BotController");
+                LogUtil.LogError($"Error al obtener el bot: {ex.Message}", "BotController");
                 return null;
             }
         }
