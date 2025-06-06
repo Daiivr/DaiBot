@@ -129,7 +129,7 @@ namespace SysBot.Pokemon.WinForms
             LoadControls();
             Text = $"{(string.IsNullOrEmpty(Config.Hub.BotName) ? "DaiBot" : Config.Hub.BotName)} {DaiBot.Version} ({Config.Mode})";
             trayIcon.Text = Text;
-            Task.Run(BotMonitor);
+            _ = Task.Run(BotMonitor);
             InitUtil.InitializeStubs(Config.Mode);
             _isFormLoading = false;
             UpdateBackgroundImage(Config.Mode);
