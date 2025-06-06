@@ -785,6 +785,7 @@
                     <button class="btn" onclick="sendGlobalCommand('reboot')">🔌 Reinicio Forzado</button>
                     <button class="btn" onclick="sendGlobalCommand('screenon')">💡 Encender Pantalla</button>
                     <button class="btn" onclick="sendGlobalCommand('screenoff')">🌙 Apagar Pantalla</button>
+                    <button class="btn btn-primary" onclick="updateAllInstances()">⬆️ Actualizar Todo</button>
                 </div>
             </div>
             <div id="instances-container" class="instances-grid">
@@ -852,6 +853,55 @@
         window.addEventListener('beforeunload', () => {
             if (refreshInterval) clearInterval(refreshInterval);
         });
+
+        async function updateAllInstances() {
+            // Don't pause refresh - we want to see the progress
+            showToast('info', 'Buscando Actualizaciones', 'Comprobando actualizaciones en todas las instancias...');
+
+            try {
+                const response = await fetch(`${API_BASE}/update/all`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error('Falló la verificación de actualización');
+
+                const result = await response.json();
+
+                if (result.UpdatesNeeded === 0) {
+                    showToast('info', 'Sin Actualizaciones', 'Todas las instancias ya están actualizadas');
+                } else if (result.UpdatesStarted > 0) {
+                    showToast('success', 'Actualizaciones Iniciadas',
+                        `Iniciando actualizaciones secuenciales para ${result.UpdatesStarted} instancias. La instancia maestra se actualizará al final.`);
+
+                    // Show detailed results
+                    if (result.Results && result.Results.length > 0) {
+                        let updateCount = 0;
+                        result.Results.forEach(r => {
+                            if (r.NeedsUpdate && r.UpdateStarted) {
+                                updateCount++;
+                                setTimeout(() => {
+                                    showToast('info', `Actualización ${updateCount}/${result.UpdatesStarted}`,
+                                        `Puerto ${r.Port}: Actualizando de la versión ${r.CurrentVersion} a ${r.LatestVersion}`);
+                                }, updateCount * 1000);
+                            } else if (r.Error) {
+                                showToast('error', `Port ${r.Port}`, r.Error);
+                            }
+                        });
+                    }
+
+                    // Keep refreshing to show update progress
+                } else if (result.UpdatesFailed > 0) {
+                    showToast('error', 'Actualización Fallida',
+                        `No se pudo actualizar ${result.UpdatesFailed} instancias`);
+                } else {
+                    showToast('warning', 'Estado de Actualización', 'No se iniciaron actualizaciones');
+                }
+            } catch (error) {
+                console.error('Error al actualizar las instancias:', error);
+                showToast('error', 'Error', 'No se pudo verificar actualizaciones');
+            }
+        }
 
         function startAutoRefresh() {
             refreshInterval = setInterval(() => {
@@ -999,7 +1049,7 @@
 
                         <div class="instance-controls">
                             <button class="action-menu-button" onclick="toggleActionMenu(event, ${instance.Port})" ${!isOnline ? 'disabled' : ''}>
-                                ⚡ Actions <span style="font-size: 0.75rem;">▼</span>
+                                ⚡ Acciones <span style="font-size: 0.75rem;">▼</span>
                             </button>
                             <div class="action-menu" id="action-menu-${instance.Port}">
                                 <button class="action-menu-item success" onclick="sendInstanceCommand(${instance.Port}, 'start')">

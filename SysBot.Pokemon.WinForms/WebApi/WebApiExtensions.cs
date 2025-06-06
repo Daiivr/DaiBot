@@ -8,8 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SysBot.Pokemon.Helpers;
 using SysBot.Base;
+using SysBot.Pokemon.Helpers;
 using SysBot.Pokemon.WinForms.WebApi;
 
 namespace SysBot.Pokemon.WinForms;
@@ -256,8 +256,35 @@ public static class WebApiExtensions
             "STATUS" => GetBotStatuses(botId),
             "ISREADY" => CheckReady(),
             "INFO" => GetInstanceInfo(),
+            "VERSION" => DaiBot.Version,
+            "UPDATE" => TriggerUpdate(),
             _ => $"ERROR: Unknown command '{cmd}'"
         };
+    }
+
+    private static string TriggerUpdate()
+    {
+        try
+        {
+            if (_main == null)
+                return "ERROR: El formulario principal no está inicializado";
+
+            _main.BeginInvoke((MethodInvoker)(async () =>
+            {
+                var(updateAvailable, _, newVersion) = await UpdateChecker.CheckForUpdatesAsync(false);
+                if (updateAvailable)
+                {
+                    var updateForm = new UpdateForm(false, newVersion, true);
+                    updateForm.PerformUpdate();
+                }
+            }));
+
+            return "OK: Actualización iniciada";
+        }
+        catch (Exception ex)
+        {
+            return $"ERROR: {ex.Message}";
+        }
     }
 
     private static string ExecuteGlobalCommand(BotControlCommand command)
@@ -418,7 +445,7 @@ public static class WebApiExtensions
 
         if (flpBotsField?.GetValue(_main) is FlowLayoutPanel flpBots)
         {
-            return flpBots.Controls.OfType<BotController>().ToList();
+            return [.. flpBots.Controls.OfType<BotController>()];
         }
 
         return new List<BotController>();

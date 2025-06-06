@@ -105,7 +105,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         with:
           tag_name: ${{ env.CURRENT_VERSION }}
-          release_name: Release ${{ env.CURRENT_VERSION }}
+          release_name: Versión ${{ env.CURRENT_VERSION }}
           body: |
             ## Recent Changes
             ${{ env.RECENT_CHANGES }}

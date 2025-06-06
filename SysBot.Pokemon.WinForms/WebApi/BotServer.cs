@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SysBot.Base;
+using static System.Windows.Forms.Design.AxImporter;
 
 namespace SysBot.Pokemon.WinForms.WebApi;
 
@@ -210,6 +211,7 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
                 var path when path?.StartsWith("/api/bot/instances/") == true && path.EndsWith("/command") =>
                     await RunCommand(request, ExtractPort(path)),
                 "/api/bot/command/all" => await RunAllCommand(request),
+                "/api/bot/update/all" => await UpdateAllInstances(request),
                 _ => null
             };
 
@@ -238,6 +240,37 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
                 context.Response.Close();
             }
             catch { }
+        }
+    }
+
+    private async Task<string> UpdateAllInstances(HttpListenerRequest request)
+    {
+        try
+        {
+            var result = await UpdateManager.UpdateAllInstancesAsync(_mainForm, _tcpPort);
+
+            return JsonSerializer.Serialize(new
+            {
+                Success = result.UpdatesFailed == 0 && result.UpdatesNeeded > 0,
+                result.TotalInstances,
+                result.UpdatesNeeded,
+                result.UpdatesStarted,
+                result.UpdatesFailed,
+                Results = result.InstanceResults.Select(r => new
+                {
+                    r.Port,
+                    r.ProcessId,
+                    r.CurrentVersion,
+                    r.LatestVersion,
+                    r.NeedsUpdate,
+                    r.UpdateStarted,
+                    r.Error
+                })
+            });
+        }
+        catch (Exception ex)
+        {
+            return CreateErrorResponse(ex.Message);
         }
     }
 
@@ -596,7 +629,7 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
         };
     }
 
-    private static string QueryRemote(int port, string command)
+    public static string QueryRemote(int port, string command)
     {
         try
         {
