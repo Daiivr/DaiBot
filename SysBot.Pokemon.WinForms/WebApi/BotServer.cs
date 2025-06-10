@@ -11,6 +11,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SixLabors.ImageSharp.Memory;
 using SysBot.Base;
 using static System.Windows.Forms.Design.AxImporter;
 
@@ -158,26 +159,55 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
         {
             try
             {
-                var context = _listener.GetContext();
-                _ = Task.Run(() => HandleRequest(context));
+                var asyncResult = _listener.BeginGetContext(null, null);
+
+                while (_running && !asyncResult.AsyncWaitHandle.WaitOne(100))
+                {
+                    // Check if we should continue listening
+                }
+
+                if (!_running)
+                    break;
+
+                var context = _listener.EndGetContext(asyncResult);
+
+                ThreadPool.QueueUserWorkItem(async _ =>
+                {
+                    try
+                    {
+                        await HandleRequest(context);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogUtil.LogError($"Error al manejar la solicitud: {ex.Message}", "WebServer");
+                    }
+                });
             }
-            catch (HttpListenerException) when (!_running)
+            catch (HttpListenerException ex) when (!_running || ex.ErrorCode == 995)
+            {
+                break;
+            }
+            catch (ObjectDisposedException) when (!_running)
             {
                 break;
             }
             catch (Exception ex)
             {
-                LogUtil.LogError($"Error en el listener: {ex.Message}", "WebServer");
+                if (_running)
+                {
+                    LogUtil.LogError($"Error en el oyente: {ex.Message}", "WebServer");
+                }
             }
         }
     }
 
     private async Task HandleRequest(HttpListenerContext context)
     {
+        HttpListenerResponse? response = null;
         try
         {
             var request = context.Request;
-            var response = context.Response;
+            response = context.Response;
 
             response.Headers.Add("Access-Control-Allow-Origin", "*");
             response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -229,17 +259,45 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
             }
 
             var bufferMain = Encoding.UTF8.GetBytes(responseString);
-            await response.OutputStream.WriteAsync(bufferMain, _cts.Token);
-            response.Close();
+            response.ContentLength64 = bufferMain.Length;
+
+            try
+            {
+                await response.OutputStream.WriteAsync(bufferMain, 0, bufferMain.Length);
+                await response.OutputStream.FlushAsync();
+            }
+            catch (HttpListenerException ex) when (ex.ErrorCode == 64 || ex.ErrorCode == 1229)
+            {
+                return;
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
+            catch (InvalidOperationException)
+            {
+                return;
+            }
         }
         catch (Exception ex)
         {
             LogUtil.LogError($"Error al procesar la solicitud: {ex.Message}", "WebServer");
 
+            if (response != null && response.OutputStream.CanWrite)
+            {
+                try
+                {
+                    response.StatusCode = 500;
+                }
+                catch { }
+            }
+        }
+        finally
+        {
+
             try
             {
-                context.Response.StatusCode = 500;
-                context.Response.Close();
+                response?.Close();
             }
             catch { }
         }
@@ -482,7 +540,7 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
 
         // Get mode from config, not window title
         var mode = config?.Mode.ToString() ?? "Unknown";
-        var name = "DaiBot";
+        var name = config?.Hub?.BotName ?? "DaiBot";
 
         var version = "Unknown";
         try
