@@ -21,6 +21,10 @@ Cliente de [sys-botbase](https://github.com/olliz0r/sys-botbase) para la automat
 
 ![imagen](https://github.com/user-attachments/assets/3a30b334-955c-4fb3-b7d8-60cd005a2e18)
 
+- **Actualizaciones automáticas** - Actualiza tus bots con solo un clic para mantenerlos siempre al día con las últimas versiones de PKHeX/ALM.
+
+  ![imagen](https://github.com/user-attachments/assets/c4596ac3-bd08-4242-a817-f35ea7881840)
+
 
 # 📱 Accede a PokeBot Desde Cualquier Dispositivo en Tu Red
 
