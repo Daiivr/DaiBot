@@ -105,7 +105,7 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
     public void TradeCanceled(PokeRoutineExecutor<T> routine, PokeTradeDetail<T> info, PokeTradeResult msg)
     {
         OnFinish?.Invoke(routine);
-        EmbedHelper.SendTradeCanceledEmbedAsync(Trader, msg.ToString()).ConfigureAwait(false);
+        EmbedHelper.SendTradeCanceledEmbedAsync(Trader, msg.GetDescription()).ConfigureAwait(false);
     }
 
     public void TradeFinished(PokeRoutineExecutor<T> routine, PokeTradeDetail<T> info, T result)

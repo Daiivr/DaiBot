@@ -107,7 +107,7 @@ jobs:
           tag_name: ${{ env.CURRENT_VERSION }}
           release_name: Versión ${{ env.CURRENT_VERSION }}
           body: |
-            ## Recent Changes
+            ## Cambios Recientes
             ${{ env.RECENT_CHANGES }}
           draft: false
           prerelease: false

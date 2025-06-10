@@ -99,7 +99,10 @@ public static class UpdateManager
         }
 
         LogUtil.LogInfo("Esperando a que todos los bots terminen sus operaciones actuales y pasen a estado de espera...", "UpdateManager");
-        var allIdle = await WaitForAllInstancesToBeIdle(mainForm, instancesNeedingUpdate, 300);
+
+        // Pass ALL instances to check, not just ones needing update
+        var allInstances = instances.Select(i => (i.ProcessId, i.Port, i.Version)).ToList();
+        var allIdle = await WaitForAllInstancesToBeIdle(mainForm, allInstances, 300);
 
         if (!allIdle)
         {
@@ -148,6 +151,157 @@ public static class UpdateManager
                     instanceResult.UpdateStarted = true;
                     result.UpdatesStarted++;
                     LogUtil.LogInfo("Actualización de la instancia maestra iniciada", "UpdateManager");
+                }
+                else
+                {
+                    LogUtil.LogInfo($"Iniciando actualización para la instancia en el puerto {port}...", "UpdateManager");
+                    var updateResponse = BotServer.QueryRemote(port, "UPDATE");
+                    if (!updateResponse.StartsWith("ERROR"))
+                    {
+                        instanceResult.UpdateStarted = true;
+                        result.UpdatesStarted++;
+                        LogUtil.LogInfo($"Actualización iniciada para la instancia en el puerto {port}", "UpdateManager");
+                        await Task.Delay(5000);
+                    }
+                    else
+                    {
+                        instanceResult.Error = "No se pudo iniciar la actualización";
+                        result.UpdatesFailed++;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                instanceResult.Error = ex.Message;
+                result.UpdatesFailed++;
+                LogUtil.LogError($"Error al actualizar la instancia en el puerto {port}: {ex.Message}", "UpdateManager");
+            }
+
+            result.InstanceResults.Add(instanceResult);
+        }
+
+        return result;
+    }
+
+    public static async Task<UpdateAllResult> StartUpdateProcessAsync(Main mainForm, int currentPort)
+    {
+        var result = new UpdateAllResult();
+
+        var (updateAvailable, _, latestVersion) = await UpdateChecker.CheckForUpdatesAsync(false);
+        if (string.IsNullOrEmpty(latestVersion))
+        {
+            result.UpdatesFailed = 1;
+            result.InstanceResults.Add(new InstanceUpdateResult
+            {
+                Error = "No se pudo obtener la última versión"
+            });
+            return result;
+        }
+
+        var instances = GetAllInstances(currentPort);
+        result.TotalInstances = instances.Count;
+
+        var instancesNeedingUpdate = new List<(int ProcessId, int Port, string Version)>();
+
+        foreach (var instance in instances)
+        {
+            if (instance.Version != latestVersion)
+            {
+                instancesNeedingUpdate.Add(instance);
+                result.UpdatesNeeded++;
+                result.InstanceResults.Add(new InstanceUpdateResult
+                {
+                    Port = instance.Port,
+                    ProcessId = instance.ProcessId,
+                    CurrentVersion = instance.Version,
+                    LatestVersion = latestVersion,
+                    NeedsUpdate = true
+                });
+            }
+        }
+
+        if (instancesNeedingUpdate.Count == 0)
+        {
+            return result;
+        }
+
+        // Start idling all bots
+        LogUtil.LogInfo($"Poniendo en espera a todos los bots en {instancesNeedingUpdate.Count} instancias antes de las actualizaciones...", "UpdateManager");
+
+        foreach (var (processId, port, version) in instancesNeedingUpdate)
+        {
+            if (processId == Environment.ProcessId)
+            {
+                var flpBotsField = mainForm.GetType().GetField("FLP_Bots",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+                if (flpBotsField?.GetValue(mainForm) is FlowLayoutPanel flpBots)
+                {
+                    var controllers = flpBots.Controls.OfType<BotController>().ToList();
+                    foreach (var controller in controllers)
+                    {
+                        var currentState = controller.ReadBotState();
+                        if (currentState != "IDLE" && currentState != "STOPPED")
+                        {
+                            controller.SendCommand(BotControlCommand.Idle, false);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var idleResponse = BotServer.QueryRemote(port, "IDLEALL");
+                if (idleResponse.StartsWith("ERROR"))
+                {
+                    LogUtil.LogError($"No se pudo enviar el comando de espera al puerto {port}", "UpdateManager");
+                }
+            }
+        }
+
+        // Return immediately after starting the idle process
+        return result;
+    }
+
+    public static async Task<UpdateAllResult> ProceedWithUpdatesAsync(Main mainForm, int currentPort)
+    {
+        var result = new UpdateAllResult();
+
+        var (updateAvailable, _, latestVersion) = await UpdateChecker.CheckForUpdatesAsync(false);
+        var instances = GetAllInstances(currentPort);
+        var instancesNeedingUpdate = instances.Where(i => i.Version != latestVersion).ToList();
+
+        result.TotalInstances = instances.Count;
+        result.UpdatesNeeded = instancesNeedingUpdate.Count;
+
+        var sortedInstances = instancesNeedingUpdate
+            .Where(i => i.ProcessId != Environment.ProcessId)
+            .Concat(instancesNeedingUpdate.Where(i => i.ProcessId == Environment.ProcessId))
+            .ToList();
+
+        foreach (var (processId, port, currentVersion) in sortedInstances)
+        {
+            var instanceResult = new InstanceUpdateResult
+            {
+                Port = port,
+                ProcessId = processId,
+                CurrentVersion = currentVersion,
+                LatestVersion = latestVersion,
+                NeedsUpdate = true
+            };
+
+            try
+            {
+                if (processId == Environment.ProcessId)
+                {
+                    var updateForm = new UpdateForm(false, latestVersion, true);
+                    mainForm.BeginInvoke((MethodInvoker)(() =>
+                    {
+                        updateForm.PerformUpdate();
+                    }));
+
+                    instanceResult.UpdateStarted = true;
+                    result.UpdatesStarted++;
+                    LogUtil.LogInfo("Se inició la actualización de la instancia maestra", "UpdateManager");
                 }
                 else
                 {
@@ -271,7 +425,7 @@ public static class UpdateManager
 
         try
         {
-            var processes = Process.GetProcessesByName("PokeBot")
+            var processes = Process.GetProcessesByName("DaiBot")
                 .Where(p => p.Id != Environment.ProcessId);
 
             foreach (var process in processes)
@@ -282,7 +436,7 @@ public static class UpdateManager
                     if (string.IsNullOrEmpty(exePath))
                         continue;
 
-                    var portFile = Path.Combine(Path.GetDirectoryName(exePath)!, $"PokeBot_{process.Id}.port");
+                    var portFile = Path.Combine(Path.GetDirectoryName(exePath)!, $"DaiBot_{process.Id}.port");
                     if (!File.Exists(portFile))
                         continue;
 

@@ -576,21 +576,28 @@ public sealed class SysCord<T> where T : PKM, new()
         await Log(new LogMessage(LogSeverity.Info, "LoadLoggingAndEcho()", "Canales de registro y eco cargados!")).ConfigureAwait(false);
         MessageChannelsLoaded = true;
 
-        var game = Hub.Config.Discord.BotGameStatus;
-        if (!string.IsNullOrWhiteSpace(game))
-            await _client.SetGameAsync(game).ConfigureAwait(false);
+        if (!SysCordSettings.Settings.EnableDynamicGameStatus)
+        {
+            var game = Hub.Config.Discord.BotGameStatus;
+            if (!string.IsNullOrWhiteSpace(game))
+            {
+                await _client.SetGameAsync(game).ConfigureAwait(false);
+            }
+        }
     }
 
     private async Task MonitorStatusAsync(CancellationToken token)
     {
         const int Interval = 20; // seconds
 
-        // Check datetime for update
         UserStatus state = UserStatus.Idle;
+        string currentGameStatus = "";
+
         while (!token.IsCancellationRequested)
         {
             var time = DateTime.Now;
             var lastLogged = LogUtil.LastLogged;
+
             if (Hub.Config.Discord.BotColorStatusTradeOnly)
             {
                 var recent = Hub.Bots.ToArray()
@@ -598,10 +605,11 @@ public sealed class SysCord<T> where T : PKM, new()
                     .MaxBy(z => z.LastTime);
                 lastLogged = recent?.LastTime ?? time;
             }
+
             var delta = time - lastLogged;
             var gap = TimeSpan.FromSeconds(Interval) - delta;
-
             bool noQueue = !Hub.Queues.Info.GetCanQueue();
+
             if (gap <= TimeSpan.Zero)
             {
                 var idle = noQueue ? UserStatus.DoNotDisturb : UserStatus.Idle;
@@ -609,8 +617,25 @@ public sealed class SysCord<T> where T : PKM, new()
                 {
                     state = idle;
                     await _client.SetStatusAsync(state).ConfigureAwait(false);
+
+                    if (SysCordSettings.Settings.EnableDynamicGameStatus)
+                    {
+                        string newGameStatus = state switch
+                        {
+                            UserStatus.DoNotDisturb => "⛔️ Pokémon",
+                            UserStatus.Idle => "💤 Pokémon",
+                            _ => "🔄 Pokémon"
+                        };
+
+                        if (newGameStatus != currentGameStatus)
+                        {
+                            currentGameStatus = newGameStatus;
+                            await _client.SetGameAsync(currentGameStatus).ConfigureAwait(false);
+                        }
+                    }
                 }
-                await Task.Delay(2_000, token).ConfigureAwait(false);
+
+                await Task.Delay(2000, token).ConfigureAwait(false);
                 continue;
             }
 
@@ -619,11 +644,36 @@ public sealed class SysCord<T> where T : PKM, new()
             {
                 state = active;
                 await _client.SetStatusAsync(state).ConfigureAwait(false);
+
+                if (SysCordSettings.Settings.EnableDynamicGameStatus)
+                {
+                    string newGameStatus = state switch
+                    {
+                        UserStatus.DoNotDisturb => "⛔️ Pokémon",
+                        UserStatus.Idle => "💤 Pokémon",
+                        _ => "🔄 Pokémon"
+                    };
+
+                    if (newGameStatus != currentGameStatus)
+                    {
+                        currentGameStatus = newGameStatus;
+                        await _client.SetGameAsync(currentGameStatus).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    var staticStatus = Hub.Config.Discord.BotGameStatus;
+                    if (staticStatus != currentGameStatus)
+                    {
+                        currentGameStatus = staticStatus;
+                        await _client.SetGameAsync(staticStatus).ConfigureAwait(false);
+                    }
+                }
             }
+
             await Task.Delay(gap, token).ConfigureAwait(false);
         }
     }
-
 
     private async Task TryHandleAttachmentAsync(SocketMessage msg)
     {

@@ -67,8 +67,11 @@ public class DiscordSettings
     [Category(Startup), Description("Prefijo de comando del bot.")]
     public string CommandPrefix { get; set; } = "$";
 
+    [Category(Startup), Description("Si se activa, el estado del bot cambiará dinámicamente entre 🔄, 💤 y ⛔️ dependiendo de su actividad. Esto desactiva el estado personalizado."), DisplayName("Estado del bot dinámico")]
+    public bool EnableDynamicGameStatus { get; set; } = false;
+
     [Category(Startup), Description("Estado personalizado del bot."), DisplayName("Estado de Juego del Bot")]
-    public string BotGameStatus { get; set; } = "SysBot.NET: Pokémon";
+    public string BotGameStatus { get; set; } = "Pokémon";
 
     [Category(Operation), Description("Habilita o deshabilita el sistema de XP para usuarios cuando usan comandos."), DisplayName("Sistema de XP")]
     public bool EnableXPSystem { get; set; } = false;
@@ -136,7 +139,7 @@ public class DiscordSettings
     public RemoteControlAccessList ChannelWhitelist { get; set; } = new();
 
     [Category(Operation), Description("El bot puede responder con un conjunto de showdown en cualquier canal que el bot pueda ver, en lugar de solo los canales en los que el bot ha sido incluido en la lista blanca para ejecutarse. Haga esto solo si desea que el bot tenga más utilidad en canales que no son de bot.")]
-    public bool ConvertPKMReplyAnyChannel { get; set; }
+    public bool ConvertPKMReplyAnyChannel { get; set; } = false;
 
     [Category(Operation), Description("Bot escucha los mensajes del canal para responder con un Showdown Set cada vez que se adjunta un archivo PKM (no con un comando).")]
     public bool ConvertPKMToShowdownSet { get; set; } = true;
@@ -213,22 +216,22 @@ public class DiscordSettings
     public bool ReturnPKMs { get; set; } = true;
 
     [Category(Roles), Description("Los usuarios con este rol pueden ingresar a la cola de clonación.")]
-    public RemoteControlAccessList RoleCanClone { get; set; } = new() { AllowIfEmpty = false };
+    public RemoteControlAccessList RoleCanClone { get; set; } = new() { AllowIfEmpty = true };
 
     [Category(Roles), Description("Los usuarios con esta función pueden ingresar a la cola de Dump.")]
-    public RemoteControlAccessList RoleCanDump { get; set; } = new() { AllowIfEmpty = false };
+    public RemoteControlAccessList RoleCanDump { get; set; } = new() { AllowIfEmpty = true };
 
     [Category(Roles), Description("Los usuarios con este rol pueden ingresar a la cola Fix OT.")]
-    public RemoteControlAccessList RoleCanFixOT { get; set; } = new() { AllowIfEmpty = false };
+    public RemoteControlAccessList RoleCanFixOT { get; set; } = new() { AllowIfEmpty = true };
 
     [Category(Roles), Description("Los usuarios con este rol pueden ingresar a la cola de verificación de semillas/solicitudes especiales.")]
-    public RemoteControlAccessList RoleCanSeedCheckorSpecialRequest { get; set; } = new() { AllowIfEmpty = false };
+    public RemoteControlAccessList RoleCanSeedCheckorSpecialRequest { get; set; } = new() { AllowIfEmpty = true };
 
     [Category(Roles), Description("Los usuarios con este rol pueden ingresar a la cola de Trade.")]
-    public RemoteControlAccessList RoleCanTrade { get; set; } = new() { AllowIfEmpty = false };
+    public RemoteControlAccessList RoleCanTrade { get; set; } = new() { AllowIfEmpty = true };
 
     [Category(Roles), Description("Los usuarios con esta función pueden utilizar las funciones Trade Adicionales.")]
-    public RemoteControlAccessList RoleCanTradePlus { get; set; } = new() { AllowIfEmpty = false };
+    public RemoteControlAccessList RoleCanTradePlus { get; set; } = new() { AllowIfEmpty = true };
 
     [Category(Roles), Description("Los usuarios con este rol pueden unirse a la cola con una mejor posición.")]
     public RemoteControlAccessList RoleFavored { get; set; } = new() { AllowIfEmpty = false };
