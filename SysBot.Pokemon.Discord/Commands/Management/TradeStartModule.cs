@@ -137,7 +137,7 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
             string footerText = detail.Type == PokeTradeType.Clone || detail.Type == PokeTradeType.Dump || detail.Type == PokeTradeType.Seed || detail.Type == PokeTradeType.FixOT
                 ? "Iniciando el comercio ahora."
                 : detail.Type == PokeTradeType.Item
-                    ? $"Iniciando el comercio ahora.\nDisfrute de su item: {embedData.HeldItem}!"
+                    ? $"Iniciando el comercio ahora.\nDisfruta de tu: {embedData.HeldItem}!"
                     : $"Iniciando el comercio ahora.\nDisfrute de su {(detail.IsMysteryTrade ? "🎭 Pokemon Misterioso 🎭" : detail.IsMysteryEgg ? "✨ Huevo Misterioso ✨" : speciesName)}!";
 
             var embed = new EmbedBuilder()

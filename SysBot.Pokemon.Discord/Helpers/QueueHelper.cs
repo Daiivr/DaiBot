@@ -249,15 +249,26 @@ public static class QueueHelper<T> where T : PKM, new()
                 }
             }
 
-            DetailsExtractor<T>.AddAdditionalText(embedBuilder);
-
-            if (!isMysteryTrade && !isMysteryEgg && type != PokeRoutineType.Clone && type != PokeRoutineType.Dump && type != PokeRoutineType.FixOT && type != PokeRoutineType.SeedCheck)
+            if (t == PokeTradeType.Item)
             {
-                DetailsExtractor<T>.AddNormalTradeFields(embedBuilder, embedData, trader.Mention, pk);
+                string itemInfo = $"**Entrenador:** {trader.Mention}";
+                string mentionInfo = $"{embedData.HeldItem}";
+                string fullInfo = $"{itemInfo}\n{mentionInfo}";
+
+                embedBuilder.AddField("\u200B", fullInfo, inline: false);
             }
             else
             {
-                DetailsExtractor<T>.AddSpecialTradeFields(embedBuilder, isMysteryTrade, isMysteryEgg, type == PokeRoutineType.SeedCheck, type == PokeRoutineType.Clone, type == PokeRoutineType.FixOT, trader.Mention);
+                DetailsExtractor<T>.AddAdditionalText(embedBuilder);
+
+                if (!isMysteryTrade && !isMysteryEgg && type != PokeRoutineType.Clone && type != PokeRoutineType.Dump && type != PokeRoutineType.FixOT && type != PokeRoutineType.SeedCheck)
+                {
+                    DetailsExtractor<T>.AddNormalTradeFields(embedBuilder, embedData, trader.Mention, pk);
+                }
+                else
+                {
+                    DetailsExtractor<T>.AddSpecialTradeFields(embedBuilder, isMysteryTrade, isMysteryEgg, type == PokeRoutineType.SeedCheck, type == PokeRoutineType.Clone, type == PokeRoutineType.FixOT, trader.Mention);
+                }
             }
 
             if (setEdited && Info.Hub.Config.Trade.AutoCorrectConfig.AutoCorrectEmbedIndicator)
@@ -301,7 +312,17 @@ public static class QueueHelper<T> where T : PKM, new()
                 embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/exclamation.gif";
                 embedBuilder.AddField("__**Aviso**__: **Este Pokémon no es nativo.**", $"{NonNative}");
             }
-            DetailsExtractor<T>.AddThumbnails(embedBuilder, type == PokeRoutineType.Clone, type == PokeRoutineType.SeedCheck, type == PokeRoutineType.Dump, type == PokeRoutineType.FixOT, embedData.HeldItemUrl, pk, t);
+            if (!isMysteryTrade && t != PokeTradeType.Item)
+            {
+                DetailsExtractor<T>.AddThumbnails(embedBuilder,
+                    type == PokeRoutineType.Clone,
+                    type == PokeRoutineType.SeedCheck,
+                    type == PokeRoutineType.Dump,
+                    type == PokeRoutineType.FixOT,
+                    embedData.HeldItemUrl,
+                    pk,
+                    t);
+            }
 
             if (!isHiddenTrade && SysCord<T>.Runner.Config.Trade.TradeEmbedSettings.UseEmbeds)
             {

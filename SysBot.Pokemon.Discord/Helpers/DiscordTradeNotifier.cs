@@ -52,9 +52,21 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
     public void TradeInitialize(PokeRoutineExecutor<T> routine, PokeTradeDetail<T> info)
     {
         int language = 2;
-        var speciesName = SpeciesName.GetSpeciesName(Data.Species, language);
         var batchInfo = TotalBatchTrades > 1 ? $" (Trade {BatchTradeNumber} of {TotalBatchTrades})" : "";
-        var receive = IsMysteryTrade ? " (Pokemon Misterioso)" : (Data.Species == 0 ? string.Empty : $" ({Data.Nickname})");
+        string receive;
+        string speciesName;
+
+        if (info.Type == PokeTradeType.Item)
+        {
+            speciesName = GameInfo.GetStrings("en").itemlist[Data.HeldItem];
+            receive = $" ({speciesName})";
+        }
+        else
+        {
+            speciesName = SpeciesName.GetSpeciesName(Data.Species, language);
+            receive = IsMysteryTrade ? " (Pokemon Misterioso)" :
+                      (Data.Species == 0 ? string.Empty : $" ({Data.Nickname})");
+        }
 
         if (Data is PK9)
         {
@@ -131,12 +143,19 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
         }
         else
         {
-            // Standard single trade message
-            message = tradedToUser != 0
-                ? (info.IsMysteryTrade ? "<a:yes:1206485105674166292> Trade finalizado. ¡Has recibido un **Pokemon Misterioso**!" :
-                   info.IsMysteryEgg ? "<a:yes:1206485105674166292> Trade finalizado. ¡Disfruta de tu **Huevo Misterioso**!" :
-                   $"<a:yes:1206485105674166292> Trade finalizado. Disfruta de tu **{(Species)tradedToUser}**!")
-                : "<a:yes:1206485105674166292> Trade finalizado!";
+            if (info.Type == PokeTradeType.Item)
+            {
+                string itemName = GameInfo.GetStrings("en").itemlist[Data.HeldItem];
+                message = $"<a:yes:1206485105674166292> Trade finalizado. ¡Disfruta de tu **{itemName}**!";
+            }
+            else
+            {
+                message = tradedToUser != 0
+                    ? (info.IsMysteryTrade ? "<a:yes:1206485105674166292> Trade finalizado. ¡Has recibido un **Pokemon Misterioso**!" :
+                       info.IsMysteryEgg ? "<a:yes:1206485105674166292> Trade finalizado. ¡Disfruta de tu **Huevo Misterioso**!" :
+                       $"<a:yes:1206485105674166292> Trade finalizado. Disfruta de tu **{(Species)tradedToUser}**!")
+                    : "<a:yes:1206485105674166292> Trade finalizado!";
+            }
 
             EmbedHelper.SendTradeFinishedEmbedAsync(Trader, message, Data, info.IsMysteryTrade, info.IsMysteryEgg).ConfigureAwait(false);
         }
@@ -146,8 +165,8 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
         {
             // Add more context for batch trades
             string fileMessage = info.TotalBatchTrades > 1
-                ? $"▼ Aqui esta el {tradedSpeciesName} que me enviaste (Trade {info.BatchTradeNumber}/{info.TotalBatchTrades})! ▼"
-                : $"▼ Aqui esta el {tradedSpeciesName} que me enviaste! ▼";
+                ? $"▼ Aqui esta el **{tradedSpeciesName}** que me enviaste (Trade {info.BatchTradeNumber}/{info.TotalBatchTrades})! ▼"
+                : $"▼ Aqui esta el **{tradedSpeciesName}** que me enviaste! ▼";
 
             Trader.SendPKMAsync(result, fileMessage).ConfigureAwait(false);
         }

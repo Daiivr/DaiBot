@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SysBot.Base;
+using System.Diagnostics;
 using SysBot.Pokemon.Helpers;
 using SysBot.Pokemon.WinForms.WebApi;
 
@@ -31,17 +32,17 @@ public static class WebApiExtensions
 
         try
         {
+            CleanupStalePortFiles();
+
             if (IsPortInUse(WebPort))
             {
                 _tcpPort = FindAvailablePort(8081);
                 StartTcpOnly();
 
-                // Start monitoring for master failure
                 StartMasterMonitor();
                 return;
             }
 
-            // Try to add URL reservation for network access
             TryAddUrlReservation(WebPort);
 
             _tcpPort = FindAvailablePort(8081);
@@ -50,6 +51,56 @@ public static class WebApiExtensions
         catch (Exception ex)
         {
             LogUtil.LogError($"Failed to initialize web server: {ex.Message}", "WebServer");
+        }
+    }
+
+    private static void CleanupStalePortFiles()
+    {
+        try
+        {
+            var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "";
+            var exeDir = Path.GetDirectoryName(exePath) ?? Program.WorkingDirectory;
+
+            var portFiles = Directory.GetFiles(exeDir, "DaiBot_*.port");
+
+            foreach (var portFile in portFiles)
+            {
+                try
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(portFile);
+                    var pidStr = fileName.Substring("DaiBot_".Length);
+
+                    if (int.TryParse(pidStr, out int pid))
+                    {
+                        if (pid == Environment.ProcessId)
+                            continue;
+
+                        try
+                        {
+                            var process = Process.GetProcessById(pid);
+                            if (process.ProcessName.Contains("SysBot", StringComparison.OrdinalIgnoreCase) ||
+                                process.ProcessName.Contains("DaiBot", StringComparison.OrdinalIgnoreCase))
+                            {
+                                continue;
+                            }
+                        }
+                        catch (ArgumentException)
+                        {
+                        }
+
+                        File.Delete(portFile);
+                        LogUtil.LogInfo($"Se eliminó archivo de puerto obsoleto: {Path.GetFileName(portFile)}", "WebServer");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogUtil.LogError($"Error al procesar el archivo de puerto {portFile}: {ex.Message}", "WebServer");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            LogUtil.LogError($"Error al limpiar archivos de puerto obsoletos: {ex.Message}", "WebServer");
         }
     }
 
@@ -65,21 +116,18 @@ public static class WebApiExtensions
             {
                 try
                 {
-                    // Check every 10-15 seconds (randomized to prevent race conditions)
                     await Task.Delay(10000 + random.Next(5000), _monitorCts.Token);
 
                     if (!IsPortInUse(WebPort))
                     {
                         LogUtil.LogInfo("Master web server is down. Attempting to take over...", "WebServer");
 
-                        // Wait a random amount to reduce race conditions between multiple slaves
                         await Task.Delay(random.Next(1000, 3000));
 
-                        // Double-check that no one else took over
                         if (!IsPortInUse(WebPort))
                         {
                             TryTakeOverAsMaster();
-                            break; // Stop monitoring once we've taken over
+                            break;
                         }
                     }
                 }
@@ -95,28 +143,24 @@ public static class WebApiExtensions
     {
         try
         {
-            // Try to add URL reservation
             TryAddUrlReservation(WebPort);
 
-            // Start the web server
             _server = new BotServer(_main!, WebPort, _tcpPort);
             _server.Start();
 
-            // Stop the monitor since we're now the master
             _monitorCts?.Cancel();
             _monitorCts = null;
 
-            LogUtil.LogInfo($"Successfully took over as master web server on port {WebPort}", "WebServer");
-            LogUtil.LogInfo($"Web interface is now available at http://localhost:{WebPort}", "WebServer");
+            LogUtil.LogInfo($"Se asumió correctamente como servidor web principal en el puerto {WebPort}", "WebServer");
+            LogUtil.LogInfo($"La interfaz web ahora está disponible en http://localhost:{WebPort}", "WebServer");
 
-            // Show notification to user if possible
             if (_main != null)
             {
                 _main.BeginInvoke((MethodInvoker)(() =>
                 {
                     System.Windows.Forms.MessageBox.Show(
-                        $"This instance has taken over as the master web server.\n\nWeb interface available at:\nhttp://localhost:{WebPort}",
-                        "Master Server Takeover",
+                        $"Esta instancia ha asumido como el servidor web principal.\n\nInterfaz web disponible en:\nhttp://localhost:{WebPort}",
+                        "Control del Servidor Principal",
                         System.Windows.Forms.MessageBoxButtons.OK,
                         System.Windows.Forms.MessageBoxIcon.Information);
                 }));
@@ -124,9 +168,7 @@ public static class WebApiExtensions
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Failed to take over as master: {ex.Message}", "WebServer");
-
-            // If we failed, go back to monitoring
+            LogUtil.LogError($"No se pudo asumir como servidor principal: {ex.Message}", "WebServer");
             StartMasterMonitor();
         }
     }
@@ -143,7 +185,7 @@ public static class WebApiExtensions
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                Verb = "runas" // Request admin privileges
+                Verb = "runas"
             };
 
             using var process = System.Diagnostics.Process.Start(startInfo);
@@ -152,7 +194,6 @@ public static class WebApiExtensions
         }
         catch
         {
-            // If we can't add the reservation, the server will fall back to localhost
             return false;
         }
     }
@@ -229,14 +270,14 @@ public static class WebApiExtensions
         }
         catch (Exception ex) when (!(ex is IOException { InnerException: SocketException }))
         {
-            LogUtil.LogError($"Error handling TCP client: {ex.Message}", "TCP");
+            LogUtil.LogError($"Error al manejar el cliente TCP: {ex.Message}", "TCP");
         }
     }
 
     private static string ProcessCommand(string command)
     {
         if (_main == null)
-            return "ERROR: Main form not initialized";
+            return "ERROR: Formulario principal no inicializado";
 
         var parts = command.Split(':');
         var cmd = parts[0].ToUpperInvariant();
@@ -314,7 +355,6 @@ public static class WebApiExtensions
             var config = GetConfig();
             var controllers = GetBotControllers();
 
-            // If no controllers found in UI, try to get from Bots property
             if (controllers.Count == 0)
             {
                 var botsProperty = _main!.GetType().GetProperty("Bots",
@@ -340,7 +380,6 @@ public static class WebApiExtensions
                 }
             }
 
-            // Use controllers if available
             foreach (var controller in controllers)
             {
                 var state = controller.State;
@@ -460,7 +499,6 @@ public static class WebApiExtensions
 
     private static string GetBotName(PokeBotState state, ProgramConfig? config)
     {
-        // Always return IP address as the bot name
         return state.Connection.IP;
     }
 
@@ -537,7 +575,6 @@ public static class WebApiExtensions
         }
         catch
         {
-            // Also check TCP
             try
             {
                 using var tcpClient = new TcpClient();
@@ -561,6 +598,7 @@ public static class WebApiExtensions
     {
         try
         {
+            _monitorCts?.Cancel();
             _cts?.Cancel();
             _tcp?.Stop();
             _server?.Dispose();
