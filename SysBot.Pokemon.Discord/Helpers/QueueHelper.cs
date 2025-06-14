@@ -251,9 +251,9 @@ public static class QueueHelper<T> where T : PKM, new()
 
             if (t == PokeTradeType.Item)
             {
-                string itemInfo = $"**Entrenador:** {trader.Mention}";
-                string mentionInfo = $"{embedData.HeldItem}";
-                string fullInfo = $"{itemInfo}\n{mentionInfo}";
+                string mentionInfo = $"**Entrenador:** {trader.Mention}";
+                string itemInfo = $"{embedData.HeldItem}";
+                string fullInfo = $"{mentionInfo}\n{itemInfo}";
 
                 embedBuilder.AddField("\u200B", fullInfo, inline: false);
             }

@@ -50,7 +50,7 @@ public static class WebApiExtensions
         }
         catch (Exception ex)
         {
-            LogUtil.LogError($"Failed to initialize web server: {ex.Message}", "WebServer");
+            LogUtil.LogError($"Error al inicializar el servidor web: {ex.Message}", "WebServer");
         }
     }
 
