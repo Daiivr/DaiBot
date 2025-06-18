@@ -198,7 +198,7 @@ namespace SysBot.Pokemon.WinForms
             btnExit.ForeColor = Color.FromArgb(237, 66, 69);
             btnExit.Click += (s, e) => {
                 var result = MessageBox.Show(
-                    "¿Estás seguro de que deseas salir de PokéBot?",
+                    "¿Estás seguro de que deseas cerrar DaiBot?",
                     "Confirmación de salida",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);

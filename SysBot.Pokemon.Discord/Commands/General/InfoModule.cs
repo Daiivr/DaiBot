@@ -16,11 +16,11 @@ namespace SysBot.Pokemon.Discord;
 // Copyright 2017, Christopher F. <foxbot@protonmail.com>
 public class InfoModule : ModuleBase<SocketCommandContext>
 {
-    private const string detail = "Soy un bot de Discord impulsado por PKHeX.Core y otro software de código abierto.";
+    private const string detail = "Soy un bot de Discord impulsado por PKHeX.Core y otros software de código abierto.";
 
-    private const string gengar = "https://github.com/bdawg1989/MergeBot";
+    private const string gengar = "https://github.com/bdawg1989/PokeBot";
 
-    private const string daifork = "https://github.com/Daiivr/SysBot.NET";
+    private const string daifork = "https://github.com/Daiivr/DaiBot";
 
     private const ulong DisallowedUserId = 195756980873199618;
 
