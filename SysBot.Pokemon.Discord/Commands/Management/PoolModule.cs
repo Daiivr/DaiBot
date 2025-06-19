@@ -47,8 +47,8 @@ public class PoolModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new
 
         var pool = hub.Ledy.Pool.Reload(hub.Config.Folder.DistributeFolder);
         if (!pool)
-            await ReplyAsync("<a:warning:1206483664939126795> Fallo al recargar desde carpeta.").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Fallo al recargar desde carpeta.").ConfigureAwait(false);
         else
-            await ReplyAsync($"<a:yes:1206485105674166292> Recargado desde carpeta. Recuento de grupos: {hub.Ledy.Pool.Count}").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Recargado desde carpeta. Recuento de grupos: {hub.Ledy.Pool.Count}").ConfigureAwait(false);
     }
 }

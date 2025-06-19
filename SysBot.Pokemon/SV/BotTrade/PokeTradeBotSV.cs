@@ -507,11 +507,11 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
         {
             detail.IsRetry = true;
             Hub.Queues.Enqueue(type, detail, Math.Min(priority, PokeTradePriorities.Tier2));
-            detail.SendNotification(this, "<a:warning:1206483664939126795> Oops! Algo ocurrió. Intentemoslo una vez mas.");
+            detail.SendNotification(this, $"{Settings.CustomEmojis.Warning} Oops! Algo ocurrió. Intentemoslo una vez mas.");
         }
         else
         {
-            detail.SendNotification(this, $"<a:warning:1206483664939126795> Oops! Algo ocurrió. Cancelando el trade: **{result.GetDescription()}**.");
+            detail.SendNotification(this, $"{Settings.CustomEmojis.Warning} Oops! Algo ocurrió. Cancelando el trade: **{result.GetDescription()}**.");
             detail.TradeCanceled(this, result);
         }
     }
@@ -530,7 +530,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
 
             var report = la.Report();
             Log(report);
-            poke.SendNotification(this, "<a:no:1206485104424128593> Este Pokémon no es __**legal**__ según los controles de legalidad de __PKHeX__. Tengo prohibido clonar esto. Cancelando trade...");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Error} Este Pokémon no es __**legal**__ según los controles de legalidad de __PKHeX__. Tengo prohibido clonar esto. Cancelando trade...");
             poke.SendNotification(this, report);
 
             return (offered, PokeTradeResult.IllegalTrade);
@@ -540,7 +540,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
         if (Hub.Config.Legality.ResetHOMETracker)
             clone.Tracker = 0;
 
-        poke.SendNotification(this, $"**<a:yes:1206485105674166292> He __clonado__ tu **{GameInfo.GetStrings("en").Species[clone.Species]}!**\nAhora __preciosa__ **B** para cancelar y luego seleccione un Pokémon que no quieras para reliazar el tradeo.");
+        poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} He __clonado__ tu **{GameInfo.GetStrings("en").Species[clone.Species]}!**\nAhora __preciosa__ **B** para cancelar y luego seleccione un Pokémon que no quieras para reliazar el tradeo.");
         Log($"Cloné un {GameInfo.GetStrings("en").Species[clone.Species]}. Esperando que el usuario cambie su Pokémon...");
 
         // Separate this out from WaitForPokemonChanged since we compare to old EC from original read.
@@ -582,7 +582,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
         var laInit = new LegalityAnalysis(offered);
         if (!adOT && laInit.Valid)
         {
-            poke.SendNotification(this, "<a:warning:1206483664939126795> No se detectó ningún anuncio en Apodo ni OT, y el Pokémon es legal. Saliendo del comercio.");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} No se detectó ningún anuncio en Apodo ni OT, y el Pokémon es legal. Saliendo del comercio.");
             return (offered, PokeTradeResult.TrainerRequestBad);
         }
 
@@ -607,7 +607,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             Log($"La solicitud de FixOT ha detectado un Pokémon ilegal de {name}: {(Species)offered.Species}");
             var report = laInit.Report();
             Log(laInit.Report());
-            poke.SendNotification(this, $"<a:no:1206485104424128593> **Los Pokémon mostrados no son legales. Intentando regenerar...**\n\n```{report}```");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Error} **Los Pokémon mostrados no son legales. Intentando regenerar...**\n\n```{report}```");
             if (DumpSetting.Dump)
                 DumpPokemon(DumpSetting.DumpFolder, "hacked", offered);
         }
@@ -632,7 +632,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
         var la = new LegalityAnalysis(clone);
         if (!la.Valid)
         {
-            poke.SendNotification(this, "<a:no:1206485104424128593> Este Pokémon no es __**legal**__ según los controles de legalidad de __PKHeX__. No pude arreglar esto. Cancelando trade...");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Error} Este Pokémon no es __**legal**__ según los controles de legalidad de __PKHeX__. No pude arreglar esto. Cancelando trade...");
             return (clone, PokeTradeResult.IllegalTrade);
         }
 
@@ -664,7 +664,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
 
         if (changed)
         {
-            poke.SendNotification(this, "Pokémon intercambiado y no cambiado de nuevo. Saliendo del intercambio.");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} Pokémon intercambiado y no cambiado de nuevo. Saliendo del intercambio.");
             Log("El socio comercial no quiso despedir su ad-mon.");
             return (offered, PokeTradeResult.TrainerTooSlow);
         }
@@ -684,7 +684,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
         {
             if (trade.Type == LedyResponseType.AbuseDetected)
             {
-                var msg = $"Se ha detectado a {partner.TrainerName} por abusar de las operaciones de Ledy.";
+                var msg = $"{Settings.CustomEmojis.Warning} Se ha detectado a {partner.TrainerName} por abusar de las operaciones de Ledy.";
                 if (AbuseSettings.EchoNintendoOnlineIDLedy)
                     msg += $"\nID: {partner.TrainerOnlineID}";
                 if (!string.IsNullOrWhiteSpace(AbuseSettings.LedyAbuseEchoMention))
@@ -697,13 +697,13 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             toSend = trade.Receive;
             poke.TradeData = toSend;
 
-            poke.SendNotification(this, "<a:loading:1210133423050719283> Inyectando el Pokémon solicitado.");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Loading} Inyectando el Pokémon solicitado.");
             await SetBoxPokemonAbsolute(BoxStartOffset, toSend, token, sav).ConfigureAwait(false);
         }
         else if (config.LedyQuitIfNoMatch)
         {
             var nickname = offered.IsNicknamed ? $" (Apodo: \"{offered.Nickname}\")" : string.Empty;
-            poke.SendNotification(this, $"No se encontró coincidencia para el {GameInfo.GetStrings("en").Species[offered.Species]} ofrecido{nickname}.");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} No se encontró coincidencia para el {GameInfo.GetStrings("en").Species[offered.Species]} ofrecido{nickname}.");
             return (toSend, PokeTradeResult.TrainerRequestBad);
         }
 
@@ -890,7 +890,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
                 LastTradeDistributionFixed = false;
                 await ExitTradeToPortal(false, token).ConfigureAwait(false);
                 if (startingDetail.TotalBatchTrades > 1)
-                    poke.SendNotification(this, "⚠️ Cancelando las operaciones de lotes restantes. La rutina ha sido interrumpida.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} Cancelando las operaciones de lotes restantes. La rutina ha sido interrumpida.");
 
                 SendCollectedPokemonAndCleanup();
                 return PokeTradeResult.RoutineCancel;
@@ -900,9 +900,9 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             {
                 poke.IsProcessing = false;
                 if (startingDetail.TotalBatchTrades > 1)
-                    poke.SendNotification(this, $"⚠️ No se encontró ningún socio comercial después del comercio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando las operaciones restantes.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} No se encontró ningún socio comercial después del comercio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando las operaciones restantes.");
                 else
-                    poke.SendNotification(this, "⚠️ No se encontró ningún socio comercial. Cancelando el intercambio.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} No se encontró ningún socio comercial. Cancelando el intercambio.");
 
                 poke.TradeCanceled(this, PokeTradeResult.NoTrainerFound);
 
@@ -937,7 +937,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
                         await RecoverToOverworld(token).ConfigureAwait(false);
                     }
                     if (startingDetail.TotalBatchTrades > 1)
-                        poke.SendNotification(this, $"⚠️ No pude ingresar a la casilla de intercambio después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
+                        poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} No pude ingresar a la casilla de intercambio después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
                     return PokeTradeResult.RecoverOpenBox;
                 }
             }
@@ -975,7 +975,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             if (partnerCheck != PokeTradeResult.Success)
             {
                 if (startingDetail.TotalBatchTrades > 1)
-                    poke.SendNotification(this, $"⚠️ Verificación de socio comercial fallida después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando las operaciones restantes.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} Verificación de socio comercial fallida después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando las operaciones restantes.");
 
                 SendCollectedPokemonAndCleanup();
 
@@ -988,7 +988,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             if (!tradeOffered)
             {
                 if (startingDetail.TotalBatchTrades > 1)
-                    poke.SendNotification(this, $"⚠️ El socio comercial se tardó demasiado después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando las operaciones restantes.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} El socio comercial se tardó demasiado después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando las operaciones restantes.");
                 SendCollectedPokemonAndCleanup();
 
                 await ExitTradeToPortal(false, token).ConfigureAwait(false);
@@ -1015,7 +1015,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             {
                 Log("El intercambio finalizó porque no se ofreció un Pokémon válido.");
                 if (startingDetail.TotalBatchTrades > 1)
-                    poke.SendNotification(this, $"⚠️ Pokémon inválido ofrecido después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} Pokémon inválido ofrecido después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
 
                 SendCollectedPokemonAndCleanup();
 
@@ -1029,7 +1029,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             if (update != PokeTradeResult.Success)
             {
                 if (startingDetail.TotalBatchTrades > 1)
-                    poke.SendNotification(this, $"⚠️ Fallo en la verificación de actualización después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} Fallo en la verificación de actualización después del intercambio: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
 
                 SendCollectedPokemonAndCleanup();
 
@@ -1042,7 +1042,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             if (tradeResult != PokeTradeResult.Success)
             {
                 if (startingDetail.TotalBatchTrades > 1)
-                    poke.SendNotification(this, $"⚠️ La confirmación del trade falló después de la operación: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} La confirmación del trade falló después de la operación: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
 
                 SendCollectedPokemonAndCleanup();
 
@@ -1055,7 +1055,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
                 StartFromOverworld = true;
                 LastTradeDistributionFixed = false;
                 if (startingDetail.TotalBatchTrades > 1)
-                    poke.SendNotification(this, "⚠️ Cancelando los intercambios restantes. La rutina ha sido interrumpida.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} Cancelando los intercambios restantes. La rutina ha sido interrumpida.");
 
                 SendCollectedPokemonAndCleanup();
 
@@ -1067,7 +1067,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             if (SearchUtil.HashByDetails(received) == SearchUtil.HashByDetails(toSend) && received.Checksum == toSend.Checksum)
             {
                 if (startingDetail.TotalBatchTrades > 1)
-                    poke.SendNotification(this, $"⚠️ El socio no completó la transacción: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} El socio no completó la transacción: {completedTrades + 1}/{startingDetail.TotalBatchTrades}. Cancelando los intercambios restantes.");
 
                 SendCollectedPokemonAndCleanup();
 
@@ -1090,7 +1090,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
                 Log($"Trades por lotes completados. Se encontraron {allReceived.Count} Pokémon almacenados para el entrenador {originalTrainerID}");
 
                 // First send notification that trades are complete
-                poke.SendNotification(this, "✅ ¡Todos los intercambios por lotes completados! ¡Gracias por tradear!");
+                poke.SendNotification(this, $"{Settings.CustomEmojis.Success} ¡Todos los intercambios por lotes completados! ¡Gracias por tradear!");
 
                 // Then finish each trade with the corresponding received Pokemon
                 foreach (var pokemon in allReceived)
@@ -1114,7 +1114,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
             {
                 if (nextDetail == null)
                 {
-                    poke.SendNotification(this, "⚠️ Error en la secuencia de lotes. Finalizando operaciones.");
+                    poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} Error en la secuencia de lotes. Finalizando operaciones.");
 
                     SendCollectedPokemonAndCleanup();
 
@@ -1122,7 +1122,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
                     return PokeTradeResult.Success;
                 }
 
-                poke.SendNotification(this, $"Intercambio {completedTrades} completado! ¡Preparando tu próximo Pokémon: ({nextDetail.BatchTradeNumber}/{nextDetail.TotalBatchTrades}). Por favor, espera en la pantalla de intercambio!");
+                poke.SendNotification(this, $"{Settings.CustomEmojis.Success} Intercambio {completedTrades} completado! ¡Preparando tu próximo Pokémon: ({nextDetail.BatchTradeNumber}/{nextDetail.TotalBatchTrades}). Por favor, espera en la pantalla de intercambio!");
                 poke = nextDetail;
 
                 lastOffered = await SwitchConnection.ReadBytesAbsoluteAsync(TradePartnerOfferedOffset, 8, token).ConfigureAwait(false);
@@ -1144,7 +1144,7 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
                 continue;
             }
 
-            poke.SendNotification(this, "<a:warning:1206483664939126795> No se pudo encontrar el siguiente comercio en la secuencia. El comercio por lotes se terminará.");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} No se pudo encontrar el siguiente comercio en la secuencia. El comercio por lotes se terminará.");
 
             SendCollectedPokemonAndCleanup();
 
@@ -1374,18 +1374,18 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
         {
             if (itemReq != SpecialTradeType.None)
             {
-                poke.SendNotification(this, "<a:warning:1206483664939126795> Su solicitud no es legal. Prueba con un Pokémon diferente o solicitud.");
+                poke.SendNotification(this, $"{Settings.CustomEmojis.Warning} Su solicitud no es legal. Prueba con un Pokémon diferente o solicitud.");
             }
 
             return update;
         }
 
         if (itemReq == SpecialTradeType.WonderCard)
-            poke.SendNotification(this, "<a:yes:1206485105674166292> Éxito en la distribución!");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Success} Éxito en la distribución!");
         else if (itemReq != SpecialTradeType.None && itemReq != SpecialTradeType.Shinify)
-            poke.SendNotification(this, "<a:yes:1206485105674166292> Solicitud especial exitosa!");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Success} Solicitud especial exitosa!");
         else if (itemReq == SpecialTradeType.Shinify)
-            poke.SendNotification(this, "<a:yes:1206485105674166292> Shinify con éxito!  Gracias por ser parte de la comunidad!");
+            poke.SendNotification(this, $"{Settings.CustomEmojis.Success} Shinify con éxito!  Gracias por ser parte de la comunidad!");
 
         Log("Confirmando el trade.");
         var tradeResult = await ConfirmAndStartTrading(poke, token).ConfigureAwait(false);
@@ -1499,11 +1499,11 @@ public class PokeTradeBotSV(PokeTradeHub<PK9> Hub, PokeBotState Config) : PokeRo
                 {
                     detail.IsRetry = true;
                     Hub.Queues.Enqueue(type, detail, Math.Min(priority, PokeTradePriorities.Tier2));
-                    detail.SendNotification(this, $"<a:warning:1206483664939126795> Oops! Algo sucedió durante el comercio por lotes {detail.BatchTradeNumber}/{detail.TotalBatchTrades}. Te volveré a poner en cola para otro intento.");
+                    detail.SendNotification(this, $"{Settings.CustomEmojis.Warning} Oops! Algo sucedió durante el comercio por lotes {detail.BatchTradeNumber}/{detail.TotalBatchTrades}. Te volveré a poner en cola para otro intento.");
                 }
                 else
                 {
-                    detail.SendNotification(this, $"<a:warning:1206483664939126795> El trade {detail.BatchTradeNumber}/{detail.TotalBatchTrades} falló. Cancelando las operaciones por lotes restantes: {result}");
+                    detail.SendNotification(this, $"{Settings.CustomEmojis.Warning} El trade {detail.BatchTradeNumber}/{detail.TotalBatchTrades} falló. Cancelando las operaciones por lotes restantes: {result}");
                     CleanupAllBatchTradesFromQueue(detail);
                     detail.TradeCanceled(this, result);
                     await ExitTradeToPortal(false, token).ConfigureAwait(false);

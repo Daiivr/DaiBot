@@ -223,11 +223,11 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         {
             detail.IsRetry = true;
             Hub.Queues.Enqueue(type, detail, Math.Min(priority, PokeTradePriorities.Tier2));
-            detail.SendNotification(this, "<a:warning:1206483664939126795> Oops! Algo ocurrió. Intentemoslo una ves mas.");
+            detail.SendNotification(this, $"{Settings.CustomEmojis.Warning} Oops! Algo ocurrió. Intentemoslo una ves mas.");
         }
         else
         {
-            detail.SendNotification(this, $"<a:warning:1206483664939126795> Oops! Algo ocurrió. Cancelando el trade: **{result.GetDescription()}**.");
+            detail.SendNotification(this, $"{Settings.CustomEmojis.Warning} Oops! Algo ocurrió. Cancelando el trade: **{result.GetDescription()}**.");
             detail.TradeCanceled(this, result);
         }
     }
@@ -490,7 +490,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
         var offeredpbmc = new PB7(offereddatac);
         List<PB7> clonelist = new();
         clonelist.Add(offeredpbmc);
-        detail.SendNotification(this, $"<a:yes:1206485105674166292> Agregaste {(Species)offeredpbmc.Species} a la lista de clonacion");
+        detail.SendNotification(this, $"{Settings.CustomEmojis.Success} Agregaste {(Species)offeredpbmc.Species} a la lista de clonacion");
 
         for (int i = 0; i < 6; i++)
         {
@@ -505,7 +505,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             {
                 clonelist.Add(newofferedpbm);
                 offeredpbmc = newofferedpbm;
-                detail.SendNotification(this, $"<a:yes:1206485105674166292> Agregaste {(Species)offeredpbmc.Species} a la lista de clonacion");
+                detail.SendNotification(this, $"{Settings.CustomEmojis.Success} Agregaste {(Species)offeredpbmc.Species} a la lista de clonacion");
             }
         }
 
@@ -610,7 +610,7 @@ public class PokeTradeBotLGPE(PokeTradeHub<PB7> Hub, PokeBotState Config) : Poke
             Log("Esperando en la pantalla comercial...");
 
             await Task.Delay(10_000, token).ConfigureAwait(false);
-            detail.SendNotification(this, "<a:warning:1206483664939126795> Te quedan 5 segundos para llegar a la pantalla de operaciones y no interrumpir la operación.");
+            detail.SendNotification(this, $"{Settings.CustomEmojis.Warning} Te quedan 5 segundos para llegar a la pantalla de operaciones y no interrumpir la operación.");
             await Task.Delay(5_000, token);
             var tradeResult = await ConfirmAndStartTrading(detail, clonelist.IndexOf(t), token);
             if (tradeResult != PokeTradeResult.Success)

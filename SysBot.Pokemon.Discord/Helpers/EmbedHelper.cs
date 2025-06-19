@@ -38,7 +38,7 @@ public static class EmbedHelper
     {
         var embed = new EmbedBuilder()
             .WithTitle("¡Agregado a la Cola!")
-            .WithDescription($"<a:yes:1206485105674166292> Te he añadido a la __lista__! Te enviaré un __mensaje__ aquí cuando comience tu operación...\n\n¡Aquí está tu código comercial!\n# {code:0000 0000}")
+            .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Success} Te he añadido a la __lista__! Te enviaré un __mensaje__ aquí cuando comience tu operación...\n\n¡Aquí está tu código comercial!\n# {code:0000 0000}")
             .WithTimestamp(DateTimeOffset.Now)
             .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/tradecode.gif")
             .WithColor(Color.Blue)

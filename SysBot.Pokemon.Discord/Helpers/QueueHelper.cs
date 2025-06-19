@@ -94,7 +94,7 @@ public static class QueueHelper<T> where T : PKM, new()
         }
         if ((uint)code > MaxTradeCode)
         {
-            await context.Channel.SendMessageAsync($"<a:warning:1206483664939126795> {context.User.Mention} El código de tradeo debe ser un numero entre: **00000000-99999999**!").ConfigureAwait(false);
+            await context.Channel.SendMessageAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {context.User.Mention} El código de tradeo debe ser un numero entre: **00000000-99999999**!").ConfigureAwait(false);
             return;
         }
 
@@ -813,7 +813,7 @@ public static class QueueHelper<T> where T : PKM, new()
             case DiscordErrorCode.CannotSendMessageToUser:
                 {
                     // The user either has DMs turned off, or Discord thinks they do.
-                    message = context.User == trader ? "Debes habilitar los mensajes privados para estar en la cola.!" : "El usuario mencionado debe habilitar los mensajes privados para que estén en cola.!";
+                    message = context.User == trader ? $"{SysCordSettings.Settings.CustomEmojis.Warning} {context.User.Mention} Debes habilitar los mensajes privados para estar en la cola.!" : $"{SysCordSettings.Settings.CustomEmojis.Warning} {context.User.Mention} El usuario mencionado debe habilitar los mensajes privados para que estén en cola.!";
                 }
                 break;
 

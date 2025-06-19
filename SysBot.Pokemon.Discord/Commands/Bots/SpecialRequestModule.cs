@@ -85,14 +85,14 @@ namespace SysBot.Pokemon.Discord
             var eventData = GetEventData(generationOrGame);
             if (eventData == null)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> Generación o juego no válido: {generationOrGame}").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Generación o juego no válido: {generationOrGame}").ConfigureAwait(false);
                 return;
             }
 
             var allEvents = GetFilteredEvents(eventData, speciesName);
             if (!allEvents.Any())
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention} No se han encontrado eventos para {generationOrGame} con el filtro especificado.").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention} No se han encontrado eventos para {generationOrGame} con el filtro especificado.").ConfigureAwait(false);
             }
 
             var pageCount = (int)Math.Ceiling((double)allEvents.Count() / itemsPerPage);
@@ -110,7 +110,7 @@ namespace SysBot.Pokemon.Discord
         {
             if (!int.TryParse(args, out int index))
             {
-                await ReplyAsync("<a:warning:1206483664939126795> Índice de eventos no válido. Utilice un número de evento válido del comando").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Índice de eventos no válido. Utilice un número de evento válido del comando").ConfigureAwait(false);
                 return;
             }
 
@@ -130,7 +130,7 @@ namespace SysBot.Pokemon.Discord
                 queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
                 // Añadir un field al Embed para indicar el error
-                queueEmbed.AddField("__**Error**__:", $"<a:no:1206485104424128593> {Context.User.Mention} No pude agregarte a la cola", true);
+                queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
                 queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
                 queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -149,14 +149,14 @@ namespace SysBot.Pokemon.Discord
                 var eventData = GetEventData(generationOrGame);
                 if (eventData == null)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> Generación o juego no válido: {generationOrGame}").ConfigureAwait(false);
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Generación o juego no válido: {generationOrGame}").ConfigureAwait(false);
                     return;
                 }
 
                 var entityEvents = eventData.Where(gift => gift.IsEntity && !gift.IsItem).ToArray();
                 if (index < 1 || index > entityEvents.Length)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> Índice de eventos no válido. Utilice un número de evento válido del comando `{SysCord<T>.Runner.Config.Discord.CommandPrefix}srp {generationOrGame}`.").ConfigureAwait(false);
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Índice de eventos no válido. Utilice un número de evento válido del comando `{SysCord<T>.Runner.Config.Discord.CommandPrefix}srp {generationOrGame}`.").ConfigureAwait(false);
                     return;
                 }
 
@@ -164,7 +164,7 @@ namespace SysBot.Pokemon.Discord
                 var pk = ConvertEventToPKM(selectedEvent);
                 if (pk == null)
                 {
-                    await ReplyAsync("<a:warning:1206483664939126795> Los datos de Wondercard proporcionados no son compatibles con este módulo!").ConfigureAwait(false);
+                    await ReplyAsync("{SysCordSettings.Settings.CustomEmojis.Warning} Los datos de Wondercard proporcionados no son compatibles con este módulo!").ConfigureAwait(false);
                     return;
                 }
 
@@ -176,7 +176,7 @@ namespace SysBot.Pokemon.Discord
             }
             catch (Exception ex)
             {
-                await ReplyAsync($"<a:Error:1223766391958671454> Ocurrió un error: {ex.Message}").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Ocurrió un error: {ex.Message}").ConfigureAwait(false);
             }
             finally
             {
@@ -244,7 +244,7 @@ namespace SysBot.Pokemon.Discord
         {
             if (Context.User is not IUser user)
             {
-                await ReplyAsync("<a:Error:1223766391958671454> **Error**: No se puede enviar un DM. Por favor verifique su **Configuración de Privacidad del Servidor**.");
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} **Error**: No se puede enviar un DM. Por favor verifique su **Configuración de Privacidad del Servidor**.");
                 return;
             }
 
@@ -252,11 +252,11 @@ namespace SysBot.Pokemon.Discord
             {
                 var dmChannel = await user.CreateDMChannelAsync();
                 await dmChannel.SendMessageAsync(embed: embed.Build());
-                await ReplyAsync($"<a:yes:1206485105674166292> {Context.User.Mention}, Te envié un DM con la lista de eventos.");
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention}, Te envié un DM con la lista de eventos.");
             }
             catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Forbidden)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention}, No puedo enviarte un DM. Por favor verifique su **Configuración de privacidad del servidor**.");
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, No puedo enviarte un DM. Por favor verifique su **Configuración de privacidad del servidor**.");
             }
         }
 
@@ -304,13 +304,13 @@ namespace SysBot.Pokemon.Discord
                 var eventData = GetEventData(generationOrGame);
                 if (eventData == null)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> Generación o juego no válido: {generationOrGame}").ConfigureAwait(false);
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Generación o juego no válido: {generationOrGame}").ConfigureAwait(false);
                     return;
                 }
                 var entityEvents = eventData.Where(gift => gift.IsEntity && !gift.IsItem).ToArray();
                 if (eventIndex < 1 || eventIndex > entityEvents.Length)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> Índice de evento no válido. Utilice un número de evento válido del comando `{SysCord<T>.Runner.Config.Discord.CommandPrefix}gep {generationOrGame}`.").ConfigureAwait(false);
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Índice de evento no válido. Utilice un número de evento válido del comando `{SysCord<T>.Runner.Config.Discord.CommandPrefix}gep {generationOrGame}`.").ConfigureAwait(false);
                     return;
                 }
 
@@ -318,7 +318,7 @@ namespace SysBot.Pokemon.Discord
                 var pk = ConvertEventToPKM(selectedEvent);
                 if (pk == null)
                 {
-                    await ReplyAsync("<a:warning:1206483664939126795> Los datos de Wondercard proporcionados no son compatibles con este módulo!").ConfigureAwait(false);
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Los datos de Wondercard proporcionados no son compatibles con este módulo!").ConfigureAwait(false);
                     return;
                 }
 
@@ -331,16 +331,16 @@ namespace SysBot.Pokemon.Discord
                 try
                 {
                     await Context.User.SendPKMAsync(pk);
-                    await ReplyAsync($"<a:yes:1206485105674166292> {Context.User.Mention}, Te he enviado el archivo PK por DM.");
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention}, Te he enviado el archivo PK por DM.");
                 }
                 catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Forbidden)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention}, No puedo enviarte un mensaje directo. Revisa la **Configuración de privacidad del servidor**.");
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, No puedo enviarte un mensaje directo. Revisa la **Configuración de privacidad del servidor**.");
                 }
             }
             catch (Exception ex)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> Se produjo un error: {ex.Message}").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Se produjo un error: {ex.Message}").ConfigureAwait(false);
             }
             finally
             {
@@ -361,8 +361,8 @@ namespace SysBot.Pokemon.Discord
                 var customthumbnail = "https://i.imgur.com/DWLEXyu.png";
                 string legalityReport = la.Report(verbose: false);
 
-                string responseMessage = pk.IsEgg ? $"<a:no:1206485104424128593> {usr.Mention} El conjunto de showdown __no es válido__ para este **huevo**. Por favor revisa tu __información__ y vuelve a intentarlo." :
-                    $"<a:no:1206485104424128593> {usr.Mention} el archivo **{typeof(T).Name}** no es __legal__ y no puede ser tradeado.\n### He aquí la razón:\n```{legalityReport}```\n```🔊Consejo:\n• Por favor verifica detenidamente la informacion en PKHeX e intentalo de nuevo!\n• Puedes utilizar el plugin de ALM para legalizar tus pokemons y ahorrarte estos problemas.```";
+                string responseMessage = pk.IsEgg ? $"{SysCordSettings.Settings.CustomEmojis.Error} {usr.Mention} El conjunto de showdown __no es válido__ para este **huevo**. Por favor revisa tu __información__ y vuelve a intentarlo." :
+                    $"{SysCordSettings.Settings.CustomEmojis.Error} {usr.Mention} el archivo **{typeof(T).Name}** no es __legal__ y no puede ser tradeado.\n### He aquí la razón:\n```{legalityReport}```\n```🔊Consejo:\n• Por favor verifica detenidamente la informacion en PKHeX e intentalo de nuevo!\n• Puedes utilizar el plugin de ALM para legalizar tus pokemons y ahorrarte estos problemas.```";
                 var embedResponse = new EmbedBuilder()
                     .WithAuthor("Error al intentar agregarte a la cola.", customIconUrl)
                     .WithDescription(responseMessage)

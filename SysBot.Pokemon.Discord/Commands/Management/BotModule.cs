@@ -70,12 +70,12 @@ namespace SysBot.Pokemon.Discord
             var bot = SysCord<T>.Runner.GetBot(ip);
             if (bot == null)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
                 return;
             }
 
             bot.Start();
-            await ReplyAsync("<a:yes:1206485105674166292> Se ha iniciado el bot.").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Se ha iniciado el bot.").ConfigureAwait(false);
         }
 
         [Command("botStop")]
@@ -89,12 +89,12 @@ namespace SysBot.Pokemon.Discord
             var bot = SysCord<T>.Runner.GetBot(ip);
             if (bot == null)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
                 return;
             }
 
             bot.Stop();
-            await ReplyAsync("<a:yes:1206485105674166292> El bot ha sido detenido.").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} El bot ha sido detenido.").ConfigureAwait(false);
         }
 
         [Command("botIdle")]
@@ -109,12 +109,12 @@ namespace SysBot.Pokemon.Discord
             var bot = SysCord<T>.Runner.GetBot(ip);
             if (bot == null)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
                 return;
             }
 
             bot.Pause();
-            await ReplyAsync("<a:yes:1206485105674166292> El bot se ha configurado en inactivo.").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} El bot se ha configurado en inactivo.").ConfigureAwait(false);
         }
 
         [Command("botChange")]
@@ -128,12 +128,12 @@ namespace SysBot.Pokemon.Discord
             var bot = SysCord<T>.Runner.GetBot(ip);
             if (bot == null)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
                 return;
             }
 
             bot.Bot.Config.Initialize(task);
-            await ReplyAsync($"<a:yes:1206485105674166292> El bot ha recibido la orden de realizar **{task}** como su próxima tarea.").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} El bot ha recibido la orden de realizar **{task}** como su próxima tarea.").ConfigureAwait(false);
         }
 
         [Command("botRestart")]
@@ -147,14 +147,14 @@ namespace SysBot.Pokemon.Discord
             var bot = SysCord<T>.Runner.GetBot(ip);
             if (bot == null)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
                 return;
             }
 
             var c = bot.Bot.Connection;
             c.Reset();
             bot.Start();
-            await ReplyAsync("<a:yes:1206485105674166292> El bot ha recibido la orden de Reiniciarse.").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} El bot ha recibido la orden de Reiniciarse.").ConfigureAwait(false);
         }
     }
 }

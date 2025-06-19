@@ -79,7 +79,7 @@ public class SeedCheckModule<T> : ModuleBase<SocketCommandContext> where T : PKM
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"<a:no:1206485104424128593> {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -119,7 +119,7 @@ public class SeedCheckModule<T> : ModuleBase<SocketCommandContext> where T : PKM
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"<a:no:1206485104424128593> {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -160,7 +160,7 @@ public class SeedCheckModule<T> : ModuleBase<SocketCommandContext> where T : PKM
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"<a:no:1206485104424128593> {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 

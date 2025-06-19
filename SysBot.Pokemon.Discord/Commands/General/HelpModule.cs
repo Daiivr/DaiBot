@@ -94,7 +94,7 @@ public class HelpModule(CommandService commandService) : ModuleBase<SocketComman
         {
             await Context.Message.DeleteAsync();
             await Context.User.SendMessageAsync(embed: builder.Build()).ConfigureAwait(false);
-            var reply = await ReplyAsync($"<a:yes:1206485105674166292> {Context.User.Mention}, la información de ayuda ha sido enviada a tu MD. Por favor, revisa tus mensajes directos.");
+            var reply = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention}, la información de ayuda ha sido enviada a tu MD. Por favor, revisa tus mensajes directos.");
             await Task.Delay(10000); // Delay de 10 segundos
             await reply.DeleteAsync(); // Elimina el mensaje de respuesta del bot
         }
@@ -108,7 +108,7 @@ public class HelpModule(CommandService commandService) : ModuleBase<SocketComman
         // Verificar si el comando se está ejecutando en un MD
         if (!(Context.Channel is IDMChannel))
         {
-            var reply = await ReplyAsync($"<a:warning:1206483664939126795> Lo siento {Context.User.Mention}, este comando solo puede ser usado en el MD del bot.");
+            var reply = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Lo siento {Context.User.Mention}, este comando solo puede ser usado en el MD del bot.");
 
             // Verificar si el contexto NO es un MD, y luego eliminar el mensaje del usuario
             if (Context.Channel is IGuildChannel) // Verifica si es un canal dentro de un servidor
@@ -127,7 +127,7 @@ public class HelpModule(CommandService commandService) : ModuleBase<SocketComman
 
         if (!searchResult.IsSuccess)
         {
-            await ReplyAsync($"<a:warning:1206483664939126795> Lo siento, no pude encontrar un comando como **{command}**.");
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Lo siento, no pude encontrar un comando como **{command}**.");
             return;
         }
 
@@ -152,11 +152,11 @@ public class HelpModule(CommandService commandService) : ModuleBase<SocketComman
         }
         catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Forbidden)
         {
-            await ReplyAsync($"{Context.User.Mention}, no pude enviarte un mensaje privado porque tienes los MD desactivados. Por favor, habilítalos e inténtalo de nuevo.");
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, no pude enviarte un mensaje privado porque tienes los MD desactivados. Por favor, habilítalos e inténtalo de nuevo.");
         }
         catch (Exception ex)
         {
-            await ReplyAsync($"<a:Error:1223766391958671454> Ocurrió un error: {ex.Message}");
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Ocurrió un error: {ex.Message}");
         }
     }
 }

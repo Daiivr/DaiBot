@@ -46,7 +46,7 @@ namespace SysBot.Pokemon.Discord
                 queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
                 // Añadir un field al Embed para indicar el error
-                queueEmbed.AddField("__**Error**__:", $"<a:no:1206485104424128593> {Context.User.Mention} No pude agregarte a la cola", true);
+                queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
                 queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
                 queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -70,7 +70,7 @@ namespace SysBot.Pokemon.Discord
                 catch (Exception ex)
                 {
                     LogUtil.LogSafe(ex, nameof(MysteryEggModule<T>));
-                    await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention}, se produjo un error al procesar la solicitud.").ConfigureAwait(false);
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, se produjo un error al procesar la solicitud.").ConfigureAwait(false);
                 }
             });
         }
@@ -223,7 +223,7 @@ namespace SysBot.Pokemon.Discord
             var mysteryEgg = GenerateLegalMysteryEgg(10);
             if (mysteryEgg == null)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention}, no se pudo generar un huevo misterioso legal. Por favor, inténtelo de nuevo más tarde.").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, no se pudo generar un huevo misterioso legal. Por favor, inténtelo de nuevo más tarde.").ConfigureAwait(false);
                 return;
             }
 

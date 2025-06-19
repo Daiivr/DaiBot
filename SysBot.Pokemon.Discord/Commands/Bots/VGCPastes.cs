@@ -111,10 +111,10 @@ namespace SysBot.Pokemon.Discord
         {
             if (!SysCord<T>.Runner.Config.Trade.VGCPastesConfiguration.AllowRequests)
             {
-                await ReplyAsync($"<a:no:1206485104424128593> {Context.User.Mention} Este módulo está actualmente deshabilitado.").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} Este módulo está actualmente deshabilitado.").ConfigureAwait(false);
                 return;
             }
-            var generatingMessage = await ReplyAsync($"<a:loading:1210133423050719283> {Context.User.Mention} Generando y enviando tu equipo VGC desde VGCPastes. Espere por favor...");
+            var generatingMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Loading} {Context.User.Mention} Generando y enviando tu equipo VGC desde VGCPastes. Espere por favor...");
 
             try
             {
@@ -124,7 +124,7 @@ namespace SysBot.Pokemon.Discord
                 var (PokePasteUrl, selectedRow) = VGCPastes<T>.SelectRandomPokePasteUrl(spreadsheetData, pokemonName);
                 if (PokePasteUrl == null)
                 {
-                    await ReplyAsync("<a:warning:1206483664939126795> No se pudo encontrar una URL de Poke Paste válida con el Pokémon especificado.");
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se pudo encontrar una URL de Poke Paste válida con el Pokémon especificado.");
                     return;
                 }
 
@@ -142,7 +142,7 @@ namespace SysBot.Pokemon.Discord
 
                 if (showdownSets.Count == 0)
                 {
-                    await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention} No se encontraron conjuntos de enfrentamiento válidos en la URL de pokepaste: {PokePasteUrl}");
+                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention} No se encontraron conjuntos de enfrentamiento válidos en la URL de pokepaste: {PokePasteUrl}");
                     return;
                 }
 
@@ -167,11 +167,11 @@ namespace SysBot.Pokemon.Discord
 
                             if (pkm is not PK9 pk || !new LegalityAnalysis(pkm).Valid)
                             {
-                                var reason = result == "Timeout" ? $"<a:warning:1206483664939126795> Ese conjunto {GameInfo.Strings.Species[template.Species]} tardó demasiado en generarse." :
-                                             result == "Failed" ? $"<a:warning:1206483664939126795> No he podido crear un {GameInfo.Strings.Species[template.Species]} a partir de ese conjunto." :
-                                             "<a:Error:1223766391958671454> Un error desconocido ocurrió.";
+                                var reason = result == "Timeout" ? $"Ese conjunto **{GameInfo.Strings.Species[template.Species]}** tardó demasiado en generarse." :
+                                             result == "Failed" ? $"No he podido crear un **{GameInfo.Strings.Species[template.Species]}** a partir de ese conjunto." :
+                                             $"Un error desconocido ocurrió.";
 
-                                await ReplyAsync($"<a:warning:1206483664939126795> Fallo al crear {GameInfo.Strings.Species[template.Species]}: {reason}");
+                                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Fallo al crear **{GameInfo.Strings.Species[template.Species]}**: {reason}");
                                 continue;
                             }
 
@@ -192,7 +192,7 @@ namespace SysBot.Pokemon.Discord
                         catch (Exception ex)
                         {
                             var speciesName = GameInfo.GetStrings("en").Species[set.Species];
-                            await ReplyAsync($"<a:warning:1206483664939126795> Se produjo un error durante el procesamiento de {speciesName}: {ex.Message}");
+                            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Se produjo un error durante el procesamiento de {speciesName}: {ex.Message}");
                         }
                     }
                 }
@@ -251,7 +251,7 @@ namespace SysBot.Pokemon.Discord
             }
             catch (Exception ex)
             {
-                await ReplyAsync($"<a:warning:1206483664939126795> {Context.User.Mention} Error al generar el equipo VGC desde la hoja de cálculo: {ex.Message}");
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention} Error al generar el equipo VGC desde la hoja de cálculo: {ex.Message}");
             }
         }
 

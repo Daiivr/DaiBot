@@ -91,12 +91,12 @@ namespace SysBot.Pokemon.Discord
             var cid = c.Id;
             if (AbuseChannels.TryGetValue(cid, out _))
             {
-                await ReplyAsync("⚠️ Ya se están registrando abusos en este canal.").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Ya se están registrando abusos en este canal.").ConfigureAwait(false);
                 return;
             }
             AddAbuseEchoChannel(c, cid);
             SysCordSettings.Settings.AbuseLogChannels.AddIfNew([GetReference(Context.Channel)]);
-            await ReplyAsync("✅ ¡Se agregó la salida del registro de abuso a este canal!").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} ¡Se agregó la salida del registro de abuso a este canal!").ConfigureAwait(false);
         }
         private static void AddAbuseEchoChannel(ISocketMessageChannel c, ulong cid)
         {
@@ -121,12 +121,12 @@ namespace SysBot.Pokemon.Discord
             var id = Context.Channel.Id;
             if (!AbuseChannels.TryGetValue(id, out var echo))
             {
-                await ReplyAsync("⚠️ No se estan registrando abusos en este canal.").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se estan registrando abusos en este canal.").ConfigureAwait(false);
                 return;
             }
             AbuseChannels.Remove(id);
             SysCordSettings.Settings.AbuseLogChannels.RemoveAll(z => z.ID == id);
-            await ReplyAsync($"✅ Se eliminó el registro de abuso del canal: {Context.Channel.Name}").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Se eliminó el registro de abuso del canal: {Context.Channel.Name}").ConfigureAwait(false);
         }
         [Command("ListAbuseEchoChannels")]
         [Alias("laec")]
@@ -136,7 +136,7 @@ namespace SysBot.Pokemon.Discord
         {
             if (AbuseChannels.Count == 0)
             {
-                await ReplyAsync("⚠️ Actualmente no hay canales configurados para el registro de abuso.").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Actualmente no hay canales configurados para el registro de abuso.").ConfigureAwait(false);
                 return;
             }
             var response = "📑 El registro de abuso está habilitado en los siguientes canales:\n";
@@ -187,7 +187,7 @@ namespace SysBot.Pokemon.Discord
                 Description = embedDescription,
                 ThumbnailUrl = thumbnailUrl
             }
-            .WithTitle("<a:Megaphone:1218248132954030141>  Anuncio importante!");
+            .WithTitle("📣  Anuncio importante!");
 
             // If an image URL is available, use it instead of the thumbnail
             if (!string.IsNullOrEmpty(imageUrl))
@@ -213,7 +213,7 @@ namespace SysBot.Pokemon.Discord
                 var channelId = channelEntry.Key;
                 if (client.GetChannel(channelId) is not ISocketMessageChannel channel)
                 {
-                    LogUtil.LogError($"<a:warning:1206483664939126795> No se pudo encontrar o acceder al canal {channelId}", nameof(AnnounceAsync));
+                    LogUtil.LogError($"{SysCordSettings.Settings.CustomEmojis.Warning} No se pudo encontrar o acceder al canal {channelId}", nameof(AnnounceAsync));
                     continue;
                 }
 
@@ -223,7 +223,7 @@ namespace SysBot.Pokemon.Discord
                 }
                 catch (Exception ex)
                 {
-                    LogUtil.LogError($"<a:warning:1206483664939126795> No se pudo enviar el anuncio al canal {channel.Name}: {ex.Message}", nameof(AnnounceAsync));
+                    LogUtil.LogError($"{SysCordSettings.Settings.CustomEmojis.Warning} No se pudo enviar el anuncio al canal {channel.Name}: {ex.Message}", nameof(AnnounceAsync));
                 }
             }
             var confirmationMessage = await ReplyAsync("<a:yes:1206485105674166292> Anuncio enviado a todos los canales Echo.").ConfigureAwait(false);
@@ -302,7 +302,7 @@ namespace SysBot.Pokemon.Discord
             AddEchoChannel(c, cid);
 
             SysCordSettings.Settings.AnnouncementChannels.AddIfNew([GetReference(Context.Channel)]);
-            await ReplyAsync("<a:yes:1206485105674166292> ¡Se agregaron los Embed de anuncios a este canal!").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} ¡Se agregaron los Embed de anuncios a este canal!").ConfigureAwait(false);
         }
 
         private static async Task<bool> SendMessageWithRetry(ISocketMessageChannel c, string message, int maxRetries = 3)
@@ -317,7 +317,7 @@ namespace SysBot.Pokemon.Discord
                 }
                 catch (Exception ex)
                 {
-                    LogUtil.LogError($"<a:warning:1206483664939126795> No se pudo enviar el mensaje al canal '{c.Name}' (Attempt {retryCount + 1}): {ex.Message}", nameof(AddEchoChannel));
+                    LogUtil.LogError($"{SysCordSettings.Settings.CustomEmojis.Warning} No se pudo enviar el mensaje al canal '{c.Name}' (Attempt {retryCount + 1}): {ex.Message}", nameof(AddEchoChannel));
                     retryCount++;
                     await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false); // Wait for 5 seconds before retrying.
                 }
@@ -344,7 +344,7 @@ namespace SysBot.Pokemon.Discord
                 }
                 catch (Exception ex)
                 {
-                    LogUtil.LogError($"<a:warning:1206483664939126795> No se pudo enviar el embed al canal '{c.Name}' (Attempt {retryCount + 1}): {ex.Message}", nameof(AddEchoChannel));
+                    LogUtil.LogError($"{SysCordSettings.Settings.CustomEmojis.Warning} No se pudo enviar el embed al canal '{c.Name}' (Attempt {retryCount + 1}): {ex.Message}", nameof(AddEchoChannel));
                     retryCount++;
                     if (retryCount < maxRetries)
                         await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false); // Wait for a second before retrying.
@@ -393,13 +393,13 @@ namespace SysBot.Pokemon.Discord
             var id = Context.Channel.Id;
             if (!Channels.TryGetValue(id, out var echo))
             {
-                await ReplyAsync("<a:warning:1206483664939126795> No hay eco en este canal.").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No hay eco en este canal.").ConfigureAwait(false);
                 return;
             }
             EchoUtil.Forwarders.Remove(echo.Action);
             Channels.Remove(Context.Channel.Id);
             SysCordSettings.Settings.AnnouncementChannels.RemoveAll(z => z.ID == id);
-            await ReplyAsync($"<a:yes:1206485105674166292> Ecos eliminados del canal: {Context.Channel.Name}").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Ecos eliminados del canal: {Context.Channel.Name}").ConfigureAwait(false);
         }
 
         [Command("echoClearAll")]
@@ -411,13 +411,13 @@ namespace SysBot.Pokemon.Discord
             foreach (var l in Channels)
             {
                 var entry = l.Value;
-                await ReplyAsync($"<a:yes:1206485105674166292> Eco borrado de {entry.ChannelName} ({entry.ChannelID}!").ConfigureAwait(false);
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Eco borrado de {entry.ChannelName} ({entry.ChannelID}!").ConfigureAwait(false);
                 EchoUtil.Forwarders.Remove(entry.Action);
             }
             EchoUtil.Forwarders.RemoveAll(y => Channels.Select(x => x.Value.Action).Contains(y));
             Channels.Clear();
             SysCordSettings.Settings.AnnouncementChannels.Clear();
-            await ReplyAsync("<a:yes:1206485105674166292> ¡Ecos eliminados de todos los canales!").ConfigureAwait(false);
+            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} ¡Ecos eliminados de todos los canales!").ConfigureAwait(false);
         }
 
         private RemoteControlAccess GetReference(IChannel channel) => new()

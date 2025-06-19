@@ -19,7 +19,7 @@ namespace SysBot.Pokemon.Discord
 
             if (userMessage.Attachments.Count == 0)
             {
-                var reply = await ReplyAsync("<a:warning:1206483664939126795> Adjunte una imagen GIF para establecerla como avatar.."); // standard (boring) images can be set via dashboard
+                var reply = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Adjunte una imagen GIF para establecerla como avatar.."); // standard (boring) images can be set via dashboard
                 await Task.Delay(60000);
                 await userMessage.DeleteAsync();
                 await reply.DeleteAsync();
@@ -28,7 +28,7 @@ namespace SysBot.Pokemon.Discord
             var attachment = userMessage.Attachments.First();
             if (!attachment.Filename.EndsWith(".gif"))
             {
-                var reply = await ReplyAsync("<a:warning:1206483664939126795> Proporcione una imagen GIF.");
+                var reply = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Proporcione una imagen GIF.");
                 await Task.Delay(60000);
                 await userMessage.DeleteAsync();
                 await reply.DeleteAsync();
@@ -42,7 +42,7 @@ namespace SysBot.Pokemon.Discord
             var image = new Image(ms);
             await Context.Client.CurrentUser.ModifyAsync(user => user.Avatar = image);
 
-            var successReply = await ReplyAsync($"<a:yes:1206485105674166292> {Context.User.Mention} Avatar actualizado exitosamente!");
+            var successReply = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention} Avatar actualizado exitosamente!");
             await Task.Delay(60000);
             await userMessage.DeleteAsync();
             await successReply.DeleteAsync();

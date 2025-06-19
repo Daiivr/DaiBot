@@ -55,7 +55,7 @@ namespace SysBot.Pokemon.Discord
         [Summary("Genera un equipo a partir de una URL de pokepaste especificada y lo envía como archivos a través de DM.")]
         public async Task GenerateTeamFromUrlAsync(string pokePasteUrl)
         {
-            var generatingMessage = await ReplyAsync($"<a:loading:1210133423050719283> {Context.User.Mention} Generando y enviando tu equipo de Pokepaste. Espere por favor...");
+            var generatingMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Loading} {Context.User.Mention} Generando y enviando tu equipo de Pokepaste. Espere por favor...");
             try
             {
                 await Task.Run(async () =>
@@ -74,7 +74,7 @@ namespace SysBot.Pokemon.Discord
 
                     if (showdownSets.Count == 0)
                     {
-                        await ReplyAndDeleteAsync($"<a:warning:1206483664939126795> {Context.User.Mention} No se encontraron conjuntos de enfrentamiento válidos en la URL de pokepaste: {pokePasteUrl}", 10, generatingMessage).ConfigureAwait(false);
+                        await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention} No se encontraron conjuntos de enfrentamiento válidos en la URL de pokepaste: {pokePasteUrl}", 10, generatingMessage).ConfigureAwait(false);
                         return;
                     }
 
@@ -103,14 +103,14 @@ namespace SysBot.Pokemon.Discord
                                     }
                                     catch (OperationCanceledException)
                                     {
-                                        await ReplyAndDeleteAsync($"<a:warning:1206483664939126795> Se produjo un tiempo de espera durante la generación {GameInfo.Strings.Species[template.Species]}. Salteando...", 10, generatingMessage).ConfigureAwait(false);
+                                        await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Se produjo un tiempo de espera durante la generación {GameInfo.Strings.Species[template.Species]}. Salteando...", 10, generatingMessage).ConfigureAwait(false);
                                         continue;
                                     }
                                 }
 
                                 if (pk == null || !new LegalityAnalysis(pk).Valid)
                                 {
-                                    await ReplyAndDeleteAsync($"<a:warning:1206483664939126795> Fallo al crear {GameInfo.Strings.Species[template.Species]}. Salteando...", 10, generatingMessage).ConfigureAwait(false);
+                                    await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Fallo al crear {GameInfo.Strings.Species[template.Species]}. Salteando...", 10, generatingMessage).ConfigureAwait(false);
                                     continue;
                                 }
 
@@ -131,7 +131,7 @@ namespace SysBot.Pokemon.Discord
                             catch (Exception ex)
                             {
                                 var speciesName = GameInfo.GetStrings("en").Species[set.Species];
-                                await ReplyAndDeleteAsync($"<a:warning:1206483664939126795> Se produjo un error durante el procesamiento. {speciesName}: {ex.Message}", 10, generatingMessage).ConfigureAwait(false);
+                                await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Se produjo un error durante el procesamiento. {speciesName}: {ex.Message}", 10, generatingMessage).ConfigureAwait(false);
                             }
                         }
                     }
@@ -182,7 +182,7 @@ namespace SysBot.Pokemon.Discord
             }
             catch (Exception ex)
             {
-                await ReplyAndDeleteAsync($"<a:Error:1223766391958671454> Error al generar el equipo de Pokepaste: {ex.Message}", 10, generatingMessage).ConfigureAwait(false);
+                await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Error al generar el equipo de Pokepaste: {ex.Message}", 10, generatingMessage).ConfigureAwait(false);
             }
         }
 

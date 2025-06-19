@@ -146,7 +146,7 @@ public class HelloModule : ModuleBase<SocketCommandContext>
         var assembly = typeof(HelloModule).Assembly;
         using var stream = assembly.GetManifestResourceStream("SysBot.Pokemon.Discord.Assets.hi_background.png");
         if (stream == null)
-            throw new Exception("Failed to load embedded image.");
+            throw new Exception("No se pudo cargar imagen incrustada.");
         using var background = ImageSharpImage.Load<Rgba32>(stream);
 
         using var client = new HttpClient();

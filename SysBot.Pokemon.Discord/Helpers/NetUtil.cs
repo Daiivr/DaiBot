@@ -23,7 +23,7 @@ public static class NetUtil
 
         if (!EntityDetection.IsSizePlausible(att.Size) && !isMyg)
         {
-            result.ErrorMessage = $"{result.SanitizedFileName}: Invalid size.";
+            result.ErrorMessage = $"{result.SanitizedFileName}: Tamaño no válido.";
             return result;
         }
 
@@ -51,7 +51,7 @@ public static class NetUtil
 
         if (pkm is null)
         {
-            result.ErrorMessage = $"{result.SanitizedFileName}: Invalid pkm attachment.";
+            result.ErrorMessage = $"{result.SanitizedFileName}: Adjunto PKM no válido.";
             return result;
         }
 

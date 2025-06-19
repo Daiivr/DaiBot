@@ -37,7 +37,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
             await Context.Message.DeleteAsync().ConfigureAwait(false);
 
             // Send a message indicating they must wait
-            var waitMessage = await ReplyAsync($"<a:no:1206485104424128593> {Context.User.Mention}, ya tienes un desafío pendiente. Espera a que el oponente responda antes de iniciar otro.");
+            var waitMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention}, ya tienes un desafío pendiente. Espera a que el oponente responda antes de iniciar otro.");
 
             // Delete the bot's response message after 30 seconds
             _ = DeleteMessageAfterDelayAsync(waitMessage, TimeSpan.FromSeconds(30));
@@ -57,7 +57,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
                 await Context.Message.DeleteAsync().ConfigureAwait(false);
 
                 // Send a message indicating they are on cooldown
-                var cooldownMessage = await ReplyAsync($"<a:no:1206485104424128593> Lo siento {Context.User.Mention}, debes esperar un poco antes de volver a usar el comando, podrás volver a usarlo <t:{unixTime}:R>.");
+                var cooldownMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, debes esperar un poco antes de volver a usar el comando, podrás volver a usarlo <t:{unixTime}:R>.");
 
                 // Delete the bot's response message after 30 seconds
                 _ = DeleteMessageAfterDelayAsync(cooldownMessage, TimeSpan.FromSeconds(30));
@@ -89,7 +89,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
         {
             var embed = new EmbedBuilder()
                 .WithTitle("¿Jugar contra ti mismo? 🤔")
-                .WithDescription($"<a:no:1206485104424128593> {Context.User.Mention}, eso es un nivel de soledad que ni yo puedo manejar. Encuentra a alguien más para jugar. 🏓")
+                .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention}, eso es un nivel de soledad que ni yo puedo manejar. Encuentra a alguien más para jugar. 🏓")
                 .WithImageUrl("https://github.com/Daiivr/SysBot-Images/blob/main/Ping%20Pong/IFMCv6Y.gif?raw=true")
                 .WithThumbnailUrl(avatarUrl)
                 .WithColor(color)
@@ -142,13 +142,13 @@ public class PingModule : ModuleBase<SocketCommandContext>
         {
             if (userStats.Points < betPoints)
             {
-                await ReplyAsync($"<a:no:1206485104424128593> Lo siento {Context.User.Mention}, no tienes suficientes puntos para apostar {betPoints} puntos. Tus puntos actuales: {userStats.Points}");
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, no tienes suficientes puntos para apostar {betPoints} puntos. Tus puntos actuales: {userStats.Points}");
                 return;
             }
 
             if (opponentStats.Points < betPoints)
             {
-                await ReplyAsync($"<a:no:1206485104424128593> Lo siento {Context.User.Mention}, {opponent.Username} no tiene suficientes puntos para igualar tu apuesta de {betPoints} puntos. Sus puntos actuales: {opponentStats.Points}");
+                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, {opponent.Username} no tiene suficientes puntos para igualar tu apuesta de {betPoints} puntos. Sus puntos actuales: {opponentStats.Points}");
                 return;
             }
         }
@@ -322,7 +322,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
                 var embedBuilder = new EmbedBuilder()
                     .WithTitle("¡Desafío de Ping-Pong!")
                     .WithDescription($"{Context.User.Mention} ha desafiado a <@{userId}> a un partido de ping-pong.\n\n" +
-                                    $"<a:no:1206485104424128593> **<@{userId}> no respondió a tiempo.**")
+                                    $"{SysCordSettings.Settings.CustomEmojis.Error} **<@{userId}> no respondió a tiempo.**")
                     .WithColor(Color.Red)
                     .WithCurrentTimestamp();
 
@@ -366,7 +366,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
                 if (componentInteraction.Data.CustomId == "accept_challenge")
                 {
                     embedBuilder.WithDescription($"{Context.User.Mention} ha desafiado a {componentInteraction.User.Mention} a un partido de ping-pong.\n\n" +
-                                                $"<a:yes:1206485105674166292> **{componentInteraction.User.Username} ha aceptado el desafío.**\n" +
+                                                $"{SysCordSettings.Settings.CustomEmojis.Success} **{componentInteraction.User.Username} ha aceptado el desafío.**\n" +
                                                 "El partido comenzará en **5 segundos**...");
 
                     // Update the embed with the acceptance message
@@ -385,7 +385,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
                 else if (componentInteraction.Data.CustomId == "decline_challenge")
                 {
                     embedBuilder.WithDescription($"{Context.User.Mention} ha desafiado a {componentInteraction.User.Mention} a un partido de ping-pong.\n\n" +
-                                                $"<a:no:1206485104424128593> **{componentInteraction.User.Username} ha rechazado el desafío.**");
+                                                $"{SysCordSettings.Settings.CustomEmojis.Error} **{componentInteraction.User.Username} ha rechazado el desafío.**");
 
                     // Update the embed with the decline message
                     await message.ModifyAsync(msg =>
