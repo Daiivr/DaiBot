@@ -531,7 +531,7 @@ public sealed class SysCord<T> where T : PKM, new()
                 var command = content.Split(' ')[0][1..];
                 if (_validCommands.Contains(command))
                 {
-                    await SafeSendMessageAsync(msg.Channel, $"<a:no:1206485104424128593> Lo siento {msg.Author.Mention}, usaste el prefijo incorrecto! El comando correcto es: **{correctPrefix}{command}**").ConfigureAwait(false);
+                    await SafeSendMessageAsync(msg.Channel, $"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {msg.Author.Mention}, usaste el prefijo incorrecto! El comando correcto es: **{correctPrefix}{command}**").ConfigureAwait(false);
                     return;
                 }
             }
@@ -699,21 +699,21 @@ public sealed class SysCord<T> where T : PKM, new()
             // Check if the user is in the bannedIDs list
             if (msg.Author is SocketGuildUser user && AbuseSettings.BannedIDs.List.Any(z => z.ID == user.Id))
             {
-                await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"<a:no:1206485104424128593> Lo siento {msg.Author.Mention}, tienes prohibido usar este bot.").ConfigureAwait(false);
+                await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"{SysCordSettings.Settings.CustomEmojis.Error}  Lo siento {msg.Author.Mention}, tienes prohibido usar este bot.").ConfigureAwait(false);
                 return true;
             }
 
             var mgr = Manager;
             if (!mgr.CanUseCommandUser(msg.Author.Id))
             {
-                await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"<a:no:1206485104424128593> Lo siento {msg.Author.Mention}, no tiene permitido usar este comando").ConfigureAwait(false);
+                await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"{SysCordSettings.Settings.CustomEmojis.Error}  Lo siento {msg.Author.Mention}, no tiene permitido usar este comando").ConfigureAwait(false);
                 return true;
             }
 
             if (!mgr.CanUseCommandChannel(msg.Channel.Id) && msg.Author.Id != mgr.Owner)
             {
                 if (Hub.Config.Discord.ReplyCannotUseCommandInChannel)
-                    await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"<a:no:1206485104424128593> Lo siento {msg.Author.Mention}, no puedes usar ese comando aquí, usalo en el canal o servidor correspondiente.").ConfigureAwait(false);
+                    await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"{SysCordSettings.Settings.CustomEmojis.Error}  Lo siento {msg.Author.Mention}, no puedes usar ese comando aquí, usalo en el canal o servidor correspondiente.").ConfigureAwait(false);
                 return true;
             }
 

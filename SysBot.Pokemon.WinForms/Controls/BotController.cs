@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.Design.AxImporter;
 
 namespace SysBot.Pokemon.WinForms
 {
@@ -31,10 +30,18 @@ namespace SysBot.Pokemon.WinForms
         {
             InitializeComponent();
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
-                    ControlStyles.DoubleBuffer | ControlStyles.ResizeRedraw, true);
+                    ControlStyles.DoubleBuffer | ControlStyles.ResizeRedraw |
+                    ControlStyles.OptimizedDoubleBuffer, true);
 
             ConfigureContextMenu();
             ConfigureChildControls();
+            this.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            this.AutoSize = false;
+            this.MinimumSize = new Size(400, 80);
+            this.Resize += (_, _) =>
+            {
+                this.Width = this.Parent?.ClientSize.Width - this.Margin.Horizontal - SystemInformation.VerticalScrollBarWidth ?? this.Width;
+            };
         }
 
         private void ConfigureContextMenu()
@@ -47,11 +54,11 @@ namespace SysBot.Pokemon.WinForms
             for (int i = 1; i < opt.Length; i++)
             {
                 var cmd = opt[i];
-                var item = new ToolStripMenuItem(GetCommandText(cmd))
+                var item = new ToolStripMenuItem(cmd.ToString())
                 {
-                    Tag = cmd, // <-- Guarda el comando original
                     ForeColor = Color.FromArgb(224, 224, 224),
-                    BackColor = Color.FromArgb(35, 35, 35)
+                    BackColor = Color.FromArgb(35, 35, 35),
+                    Tag = cmd
                 };
                 item.Click += (_, __) => SendCommand(cmd);
 
@@ -86,8 +93,6 @@ namespace SysBot.Pokemon.WinForms
 
                 RCMenu.Items.Add(item);
             }
-
-
 
             // Add separator
             RCMenu.Items.Add(new ToolStripSeparator());
@@ -693,8 +698,8 @@ namespace SysBot.Pokemon.WinForms
                 BotControlCommand.Idle => running && !paused,
                 BotControlCommand.Resume => paused,
                 BotControlCommand.Restart => true,
-                BotControlCommand.ScreenOnAll => running, // Only when running
-                BotControlCommand.ScreenOffAll => running, // Only when running
+                BotControlCommand.ScreenOnAll => running,
+                BotControlCommand.ScreenOffAll => running,
                 _ => false,
             };
         }
