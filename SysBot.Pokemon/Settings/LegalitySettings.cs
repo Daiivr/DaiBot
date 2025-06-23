@@ -1,6 +1,8 @@
 using PKHeX.Core;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 
 namespace SysBot.Pokemon;
 
@@ -42,7 +44,7 @@ public class LegalitySettings
     public bool AllowBatchCommands { get; set; } = true;
 
     [Category(Generate), Description("Permita a los usuarios enviar OT, TID, SID y OT Gender personalizados en conjuntos de Showdown."), DisplayName("Permitir sobrescribir los datos del entrenador?")]
-    public bool AllowTrainerDataOverride { get; set; }
+    public bool AllowTrainerDataOverride { get; set; } = false;
 
     [Category(Misc), Description("Aplicar Pokémon válidos con los datos de entrenadores OT/SID/TID (Auto OT)"), DisplayName("Utilizar la información del Entrenador?")]
     public bool UseTradePartnerInfo { get; set; } = true;
@@ -54,13 +56,13 @@ public class LegalitySettings
     public bool DisallowTracked { get; set; } = false;
 
     [Category(Generate), Description("Bot creará un Pokémon Huevo de Pascua si se le proporciona un conjunto ilegal."), DisplayName("Habilitar los Huevos de Pascua?")]
-    public bool EnableEasterEggs { get; set; }
+    public bool EnableEasterEggs { get; set; } = false;
 
     [Category(Generate), Description("Requiere el rastreador HOME al intercambiar Pokémon que debieron haber viajado entre los juegos de Switch."), DisplayName("Habilitar la comprobación del rastreador HOME")]
     public bool EnableHOMETrackerCheck { get; set; } = false;
 
     [Category(Generate), Description("Supone que los sets de nivel 50 son sets competitivos de nivel 100")]
-    public bool ForceLevel100for50 { get; set; }
+    public bool ForceLevel100for50 { get; set; } = true;
 
     [Category(Generate), Description("Fuerza la bola especificada si es legal.")]
     public bool ForceSpecifiedBall { get; set; } = true;
@@ -73,12 +75,12 @@ public class LegalitySettings
         EncounterTypeGroup.Trade,
     ];
 
-    [Category(Generate), Description("Si Priorizar juego está configurado en \"True\", utiliza Priorizar versión de juego para comenzar a buscar encuentros. Si es \"False\", se utiliza el juego más reciente como versión. Se recomienda dejar esto como \"True\"."), DisplayName("Priorizar Juego")]
-    public bool PrioritizeGame { get; set; } = true;
+    [Category(Generate), Description("Si PrioritizeGame está establecido en \"True\", se usa PriorityOrder para comenzar a buscar encuentros. Si está en \"False\", se usa el juego más reciente como la versión. Se recomienda dejar esto como \"True\"."), DisplayName("Priorizar Juego")]
+    public bool PrioritizeGame { get; set; } = false;
 
-    [Browsable(false)]
-    [Category(Generate), Description("Especifica el primer juego que se utilizará para generar encuentros, o el juego actual si este campo está configurado en \"Any\". Establezca Priorizar juego en \"True\" para habilitarlo. Se recomienda dejarlo como \"Any\".")]
-    public GameVersion PrioritizeGameVersion { get; set; } = GameVersion.Any;
+    [Category(Generate), Description("El orden de las versiones de juego desde las cuales ALM intentará legalizar.")]
+    public List<GameVersion> PriorityOrder { get; set; } =
+        [.. Enum.GetValues<GameVersion>().Where(ver => ver > GameVersion.Any && ver <= (GameVersion)51)];
 
     // Misc
     [Browsable(false)]
@@ -86,11 +88,11 @@ public class LegalitySettings
     public bool ResetHOMETracker { get; set; } = false;
 
     [Category(Generate), Description("Establece todas las cintas legales posibles para cualquier Pokémon generado."), DisplayName("Establecer todas las cintas legales")]
-    public bool SetAllLegalRibbons { get; set; }
+    public bool SetAllLegalRibbons { get; set; } = false;
 
     [Browsable(false)]
     [Category(Generate), Description("Agrega la versión de batalla para juegos que la admiten (solo SWSH) para usar Pokémon de generaciones pasadas en juegos competitivos en línea.")]
-    public bool SetBattleVersion { get; set; }
+    public bool SetBattleVersion { get; set; } = false;
 
     [Category(Generate), Description("Establece una pokeball del mismo color (según el color) para cualquier Pokémon generado.")]
     public bool SetMatchingBalls { get; set; } = true;

@@ -14,7 +14,7 @@ public static class LanguageHelper
         {
             if (line.StartsWith("Language:", StringComparison.OrdinalIgnoreCase))
             {
-                var languageValue = line.Substring("Language:".Length).Trim();
+                var languageValue = line["Language:".Length..].Trim();
 
                 // Try to parse as LanguageID enum
                 if (Enum.TryParse<LanguageID>(languageValue, true, out var langId))
