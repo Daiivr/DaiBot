@@ -15,8 +15,6 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
     private const string TradeConfig = nameof(TradeConfig);
 
-    private const string AutoCorrectShowdownConfig = nameof(AutoCorrectShowdownConfig);
-
     private const string VGCPastesConfig = nameof(VGCPastesConfig);
 
     private const string Miscellaneous = nameof(Miscellaneous);
@@ -44,9 +42,6 @@ public class TradeSettings : IBotStateSettings, ICountSettings
 
     [Category(VGCPastesConfig), Description("Ajustes relacionados con la Configuración de VGCPastes."), DisplayName("Configuración de VGCPastes"), Browsable(true)]
     public VGCPastesCategory VGCPastesConfiguration { get; set; } = new();
-
-    [Category(AutoCorrectShowdownConfig), Description("Configuraciones relacionadas con la corrección automática de conjuntos de showdown."), DisplayName("Configuración de la autocorrección de Showdown"), Browsable(true)]
-    public AutoCorrectShowdownCategory AutoCorrectConfig { get; set; } = new();
 
     [Category(EmbedSettings), Description("Ajustes relacionados con el Trade Embed en Discord."), DisplayName("Configuración del Embed Trade"), Browsable(true)]
     public TradeEmbedSettingsCategory TradeEmbedSettings { get; set; } = new();
@@ -136,132 +131,6 @@ public class TradeSettings : IBotStateSettings, ICountSettings
             AbilityPatch = 1606,
 
             FreshStartMochi = 2479,
-        }
-    }
-
-    [Category(nameof(AutoCorrectShowdownConfig)), TypeConverter(typeof(CategoryConverter<AutoCorrectShowdownCategory>))]
-    public class AutoCorrectShowdownCategory
-    {
-        public override string ToString() => "Configuración de corrección automática de los conjuntos showdown";
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, cada conjunto de showdown fallido pasará por una corrección automática."), DisplayName("Habilitar corrección automática")]
-        public bool EnableAutoCorrect { get; set; } = true;
-
-        private bool _autoCorrectEmbedIndicator = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, colocaremos un indicador en Trade Embeds que muestre que una operación se corrigió automáticamente."), DisplayName("Mostrar indicador Trade Embed?")]
-        public bool AutoCorrectEmbedIndicator
-        {
-            get => EnableAutoCorrect && _autoCorrectEmbedIndicator;
-            set => _autoCorrectEmbedIndicator = value;
-        }
-
-        private bool _autoCorrectNickname = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá los apodos ilegales."), DisplayName("Autocorrección de Apodos")]
-        public bool AutoCorrectNickname
-        {
-            get => EnableAutoCorrect && _autoCorrectNickname;
-            set => _autoCorrectNickname = value;
-        }
-
-        private string _fixedNickname = string.Empty;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Establezca un apodo predeterminado. Si no se proporciona ninguno, simplemente estará en blanco."), DisplayName("Cambiar el nombre de los apodos no válidos a...")]
-        public string FixedNickname
-        {
-            get => EnableAutoCorrect ? _fixedNickname : string.Empty;
-            set => _fixedNickname = value;
-        }
-
-        private bool _autoCorrectSpeciesAndForm = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá las especies y formas incorrectas."), DisplayName("Autocorrección de Especies y Formas")]
-        public bool AutoCorrectSpeciesAndForm
-        {
-            get => EnableAutoCorrect && _autoCorrectSpeciesAndForm;
-            set => _autoCorrectSpeciesAndForm = value;
-        }
-
-        private bool _autoCorrectHeldItem = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá el item incorrecto."), DisplayName("Autocorrección del Item")]
-        public bool AutoCorrectHeldItem
-        {
-            get => EnableAutoCorrect && _autoCorrectHeldItem;
-            set => _autoCorrectHeldItem = value;
-        }
-
-        private bool _autoCorrectNature = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá la naturaleza incorrecta."), DisplayName("Autocorrección de Naturaleza")]
-        public bool AutoCorrectNature
-        {
-            get => EnableAutoCorrect && _autoCorrectNature;
-            set => _autoCorrectNature = value;
-        }
-
-        private bool _autoCorrectAbility = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en Verdadero, la corrección automática corregirá la habilidad incorrecta."), DisplayName("Autocorrección de Habilidad")]
-        public bool AutoCorrectAbility
-        {
-            get => EnableAutoCorrect && _autoCorrectAbility;
-            set => _autoCorrectAbility = value;
-        }
-
-        private bool _autoCorrectBall = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá el nombre de pokeball incorrecto."), DisplayName("Autocorrección de PokeBall")]
-        public bool AutoCorrectBall
-        {
-            get => EnableAutoCorrect && _autoCorrectBall;
-            set => _autoCorrectBall = value;
-        }
-
-        private bool _autoCorrectGender = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá el género incorrecto."), DisplayName("Autocorrección del Genero")]
-        public bool AutoCorrectGender
-        {
-            get => EnableAutoCorrect && _autoCorrectGender;
-            set => _autoCorrectGender = value;
-        }
-
-        private bool _autoCorrectMovesLearnset = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la autocorrección corregirá los movimientos erróneos y los learnset."), DisplayName("Autocorrección de los Movimientos/Learnset")]
-        public bool AutoCorrectMovesLearnset
-        {
-            get => EnableAutoCorrect && _autoCorrectMovesLearnset;
-            set => _autoCorrectMovesLearnset = value;
-        }
-
-        private bool _autoCorrectEVs = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la autocorrección corregirá los EVs erróneos."), DisplayName("Autocorrección de EVs")]
-        public bool AutoCorrectEVs
-        {
-            get => EnableAutoCorrect && _autoCorrectEVs;
-            set => _autoCorrectEVs = value;
-        }
-
-        private bool _autoCorrectIVs = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá los IV erróneos."), DisplayName("Autocorrección de IVs")]
-        public bool AutoCorrectIVs
-        {
-            get => EnableAutoCorrect && _autoCorrectIVs;
-            set => _autoCorrectIVs = value;
-        }
-
-        private bool _autoCorrectMarks = true;
-
-        [Category(nameof(AutoCorrectShowdownCategory)), Description("Si se establece en True, la corrección automática corregirá las marcas/cintas incorrectas."), DisplayName("Autocorrección de Marcas/Cintas")]
-        public bool AutoCorrectMarks
-        {
-            get => EnableAutoCorrect && _autoCorrectMarks;
-            set => _autoCorrectMarks = value;
         }
     }
 

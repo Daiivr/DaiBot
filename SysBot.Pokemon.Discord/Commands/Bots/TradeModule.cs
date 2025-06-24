@@ -547,34 +547,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         content = ReusableActions.StripCodeBlock(content);
         bool isEgg = TradeExtensions<T>.IsEggCheck(content);
 
-        string finalContent = content;
-        List<string> initialCorrectionMessages = [];
-        bool preCorrected = false;
-
-        // Parse the showdown set
-        _ = ShowdownParsing.TryParseAnyLanguage(finalContent, out ShowdownSet? set);
-
-        // If parsing failed or species is 0, try AutoCorrect if enabled
-        if ((set == null || set.Species == 0) && Info.Hub.Config.Trade.AutoCorrectConfig.EnableAutoCorrect)
-        {
-            try
-            {
-                var (CorrectedContent, CorrectionMessages) = await AutoCorrectShowdown<T>.PerformAutoCorrect(finalContent, Info.Hub.Config.Trade.AutoCorrectConfig);
-
-                // Try parsing the corrected content
-                if (ShowdownParsing.TryParseAnyLanguage(CorrectedContent, out var correctedSet) && correctedSet != null && correctedSet.Species != 0)
-                {
-                    finalContent = CorrectedContent;
-                    initialCorrectionMessages = CorrectionMessages;
-                    preCorrected = true;
-                    set = correctedSet;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogUtil.LogSafe(ex, "Preprocesamiento de AutoCorrect");
-            }
-        }
+        _ = ShowdownParsing.TryParseAnyLanguage(content, out ShowdownSet? set);
 
         if (set == null || set.Species == 0)
         {
@@ -602,7 +575,6 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         }
 
         byte finalLanguage = LanguageHelper.GetFinalLanguage(content, set, (byte)Info.Hub.Config.Legality.GenerateLanguage, TradeExtensions<T>.DetectShowdownLanguage);
-
         var template = AutoLegalityWrapper.GetTemplate(set);
 
         if (set.InvalidLines.Count != 0)
@@ -670,91 +642,47 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                     }
                 }
 
-                T pk;
-                bool setEdited = preCorrected;
-                List<string> allCorrectionMessages = new List<string>(initialCorrectionMessages);
-
-                if (pkm is not T initialPk || !la.Valid || !string.IsNullOrEmpty(set.Form.ToString()))
+                if (pkm is not T pk || !la.Valid)
                 {
-                    if (Info.Hub.Config.Trade.AutoCorrectConfig.EnableAutoCorrect && !la.Valid)
+                    var reason = result switch
                     {
-                        var (CorrectedContent, CorrectionMessages) = await AutoCorrectShowdown<T>.PerformAutoCorrect(finalContent, Info.Hub.Config.Trade.AutoCorrectConfig, pkm, la);
-                        string secondaryCorrection = CorrectedContent;
-                        List<string> secondaryCorrectionMessages = CorrectionMessages;
+                        "Timeout" => $"El **{spec}** tardó demasiado en generarse y se canceló.",
+                        "VersionMismatch" => "❌ **Solicitud denegada:** La versión de **PKHeX** y **Auto-Legality Mod** no coinciden.",
+                        _ => $"{Context.User.Mention}, no se pudo crear un **{spec}** con los datos proporcionados."
+                    };
 
-                        if (secondaryCorrectionMessages.Count > 0)
-                        {
-                            set = new ShowdownSet(secondaryCorrection);
-                            template = AutoLegalityWrapper.GetTemplate(set);
-                            finalLanguage = LanguageHelper.GetFinalLanguage(secondaryCorrection, set, (byte)Info.Hub.Config.Legality.GenerateLanguage, TradeExtensions<T>.DetectShowdownLanguage);
-                            sav = LanguageHelper.GetTrainerInfoWithLanguage<T>((LanguageID)finalLanguage);
-                            pkm = sav.GetLegal(template, out result);
-                            la = new LegalityAnalysis(pkm);
-                            setEdited = true;
-                            allCorrectionMessages.AddRange(secondaryCorrectionMessages);
-                            finalContent = secondaryCorrection;
-                        }
+                    var embed = new EmbedBuilder
+                    {
+                        Title = "⚠️ Error en la Legalidad del Conjunto",
+                        Description = $"{SysCordSettings.Settings.CustomEmojis.Error} **Oops!** {reason}",
+                        Color = new Color(255, 0, 0), // Bright red for visibility
+                        ImageUrl = "https://i.imgur.com/Y64hLzW.gif",
+                        ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
+                    };
+
+                    if (result == "Failed")
+                    {
+                        embed.Description = AutoLegalityWrapper.GetLegalizationHint(template, sav, pkm);
                     }
 
-                    if (pkm is not T correctedPk || !la.Valid)
-                    {
-                        var reason = result switch
-                        {
-                            "Timeout" => $"El **{spec}** tardó demasiado en generarse y se canceló.",
-                            "VersionMismatch" => "❌ **Solicitud denegada:** La versión de **PKHeX** y **Auto-Legality Mod** no coinciden.",
-                            _ => $"{Context.User.Mention}, no se pudo crear un **{spec}** con los datos proporcionados."
-                        };
+                    embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl())
+                         .WithFooter(footer =>
+                         {
+                             footer.Text = $"Solicitado por {Context.User.Username} • {DateTime.UtcNow:hh:mm tt} UTC";
+                             footer.IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
+                         });
 
-                        var embed = new EmbedBuilder
-                        {
-                            Title = "⚠️ Error en la Legalidad del Conjunto",
-                            Description = $"{SysCordSettings.Settings.CustomEmojis.Error} **Oops!** {reason}",
-                            Color = new Color(255, 0, 0), // Bright red for better visibility
-                            ImageUrl = "https://i.imgur.com/Y64hLzW.gif",
-                            ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
-                        };
+                    var message = await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
 
-                        if (result == "Failed")
-                            embed.Description = AutoLegalityWrapper.GetLegalizationHint(template, sav, pkm);
+                    // Elimina el mensaje original del usuario tras 2 segundos
+                    await Task.Delay(2000);
+                    await Context.Message.DeleteAsync();
 
-                        embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl())
-                             .WithFooter(footer =>
-                             {
-                                 footer.Text = $"Solicitado por {Context.User.Username} • {DateTime.UtcNow:hh:mm tt} UTC";
-                                 footer.IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
-                             });
+                    // Elimina el mensaje embed tras 20 segundos
+                    await Task.Delay(20000);
+                    await message.DeleteAsync();
 
-                        // Enviar el mensaje y almacenar la referencia
-                        var message = await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
-                        // Esperar 2 segundos antes de eliminar el mensaje original
-                        await Task.Delay(2000);
-                        await Context.Message.DeleteAsync();
-
-                        // Esperar 20 segundos antes de eliminar el mensaje de error
-                        await Task.Delay(20000);  // Se ajusta el tiempo a 20 segundos 
-                        await message.DeleteAsync();
-
-                        return;
-                    }
-                    pk = correctedPk;
-                }
-                else
-                {
-                    pk = (T)pkm;
-                }
-
-                if (allCorrectionMessages.Count > 0 && la.Valid)
-                {
-                    var userName = Context.User.Mention;
-                    var changesEmbed = new EmbedBuilder()
-                        .WithTitle("Correcciones del set de Showdown")
-                        .WithColor(Color.Orange)
-                        .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/profoak.png")
-                        .WithDescription(string.Join("\n", allCorrectionMessages))
-                        .AddField("Set de Showdown corregido:", $"```{finalContent}```")
-                        .Build();
-                    var correctionMessage = await ReplyAsync($"{userName}, tu conjunto de showdown era incorrecto o inválido y lo hemos corregido.\nAquí están las correcciones hechas:", embed: changesEmbed).ConfigureAwait(false);
-                    _ = DeleteMessagesAfterDelayAsync(correctionMessage, Context.Message, 30);
+                    return;
                 }
 
                 TradeExtensions<T>.CheckAndSetUnrivaledDate(pk);
@@ -781,7 +709,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 }
 
                 var sig = Context.User.GetFavor();
-                await AddTradeToQueueAsync(code, Context.User.Username, pk, sig, Context.User, isBatchTrade: false, batchTradeNumber: 1, totalBatchTrades: 1, true, false, lgcode: lgcode, ignoreAutoOT: ignoreAutoOT, setEdited: setEdited).ConfigureAwait(false);
+                await AddTradeToQueueAsync(code, Context.User.Username, pk, sig, Context.User, isBatchTrade: false, batchTradeNumber: 1, totalBatchTrades: 1, true, false, lgcode: lgcode, ignoreAutoOT: ignoreAutoOT, setEdited: false).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -880,36 +808,8 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         content = ReusableActions.StripCodeBlock(content);
         bool isEgg = TradeExtensions<T>.IsEggCheck(content);
 
-        string finalContent = content;
-        List<string> initialCorrectionMessages = [];
-        bool preCorrected = false;
+        _ = ShowdownParsing.TryParseAnyLanguage(content, out ShowdownSet? set);
 
-        // Parse the showdown set
-        _ = ShowdownParsing.TryParseAnyLanguage(finalContent, out ShowdownSet? set);
-
-        // If parsing failed or species is 0, try AutoCorrect if enabled
-        if ((set == null || set.Species == 0) && Info.Hub.Config.Trade.AutoCorrectConfig.EnableAutoCorrect)
-        {
-            try
-            {
-                var (CorrectedContent, CorrectionMessages) = await AutoCorrectShowdown<T>.PerformAutoCorrect(finalContent, Info.Hub.Config.Trade.AutoCorrectConfig);
-
-                // Try parsing the corrected content
-                if (ShowdownParsing.TryParseAnyLanguage(CorrectedContent, out var correctedSet) && correctedSet != null && correctedSet.Species != 0)
-                {
-                    finalContent = CorrectedContent;
-                    initialCorrectionMessages = CorrectionMessages;
-                    preCorrected = true;
-                    set = correctedSet;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogUtil.LogSafe(ex, "Preprocesamiento de AutoCorrect");
-            }
-        }
-
-        // Final validation
         if (set == null || set.Species == 0)
         {
             // Intentar extraer un nombre del Showdown Set (si posible)
@@ -935,9 +835,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             return;
         }
 
-        // Determine the final language to use
         byte finalLanguage = LanguageHelper.GetFinalLanguage(content, set, (byte)Info.Hub.Config.Legality.GenerateLanguage, TradeExtensions<T>.DetectShowdownLanguage);
-
         var template = AutoLegalityWrapper.GetTemplate(set);
 
         if (set.InvalidLines.Count != 0)
@@ -966,7 +864,6 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         {
             try
             {
-                // Get trainer info with the correct languageAdd commentMore actions
                 var sav = LanguageHelper.GetTrainerInfoWithLanguage<T>((LanguageID)finalLanguage);
                 var pkm = sav.GetLegal(template, out var result);
                 if (pkm == null)
@@ -1005,92 +902,47 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                     }
                 }
 
-                T pk;
-                bool setEdited = preCorrected;
-                List<string> allCorrectionMessages = new List<string>(initialCorrectionMessages);
-
-                if (pkm is not T initialPk || !la.Valid || !string.IsNullOrEmpty(set.Form.ToString()))
+                if (pkm is not T pk || !la.Valid)
                 {
-                    if (Info.Hub.Config.Trade.AutoCorrectConfig.EnableAutoCorrect && !la.Valid)
+                    var reason = result switch
                     {
-                        var (CorrectedContent, CorrectionMessages) = await AutoCorrectShowdown<T>.PerformAutoCorrect(finalContent, Info.Hub.Config.Trade.AutoCorrectConfig, pkm, la);
-                        string secondaryCorrection = CorrectedContent;
-                        List<string> secondaryCorrectionMessages = CorrectionMessages;
+                        "Timeout" => $"El **{spec}** tardó demasiado en generarse y se canceló.",
+                        "VersionMismatch" => "❌ **Solicitud denegada:** La versión de **PKHeX** y **Auto-Legality Mod** no coinciden.",
+                        _ => $"{Context.User.Mention}, no se pudo crear un **{spec}** con los datos proporcionados."
+                    };
 
-                        if (secondaryCorrectionMessages.Count > 0)
-                        {
-                            set = new ShowdownSet(secondaryCorrection);
-                            template = AutoLegalityWrapper.GetTemplate(set);
+                    var embed = new EmbedBuilder
+                    {
+                        Title = "⚠️ Error en la Legalidad del Conjunto",
+                        Description = $"{SysCordSettings.Settings.CustomEmojis.Error} **Oops!** {reason}",
+                        Color = new Color(255, 0, 0), // Bright red for visibility
+                        ImageUrl = "https://i.imgur.com/Y64hLzW.gif",
+                        ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
+                    };
 
-                            // Recalculate language in case it changed
-                            finalLanguage = LanguageHelper.GetFinalLanguage(secondaryCorrection, set, (byte)Info.Hub.Config.Legality.GenerateLanguage, TradeExtensions<T>.DetectShowdownLanguage);
-                            sav = LanguageHelper.GetTrainerInfoWithLanguage<T>((LanguageID)finalLanguage);
-
-                            pkm = sav.GetLegal(template, out result);
-                            la = new LegalityAnalysis(pkm);
-                            setEdited = true;
-                            allCorrectionMessages.AddRange(secondaryCorrectionMessages);
-                            finalContent = secondaryCorrection;
-                        }
+                    if (result == "Failed")
+                    {
+                        embed.Description = AutoLegalityWrapper.GetLegalizationHint(template, sav, pkm);
                     }
 
-                    if (pkm is not T correctedPk || !la.Valid)
-                    {
-                        var reason = result == "Timeout" ? $"El **{spec}** tardó demasiado en generarse y se canceló." :
-                                     result == "VersionMismatch" ? "**Solicitud denegada:** La versión de **PKHeX** y **Auto-Legality Mod** no coinciden." :
-                                     $"{Context.User.Mention}, no se pudo crear un **{spec}** con los datos proporcionados.";
+                    embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl())
+                         .WithFooter(footer =>
+                         {
+                             footer.Text = $"Solicitado por {Context.User.Username} • {DateTime.UtcNow:hh:mm tt} UTC";
+                             footer.IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
+                         });
 
-                        var embed = new EmbedBuilder
-                        {
-                            Title = "⚠️ Error en la Legalidad del Conjunto",
-                            Description = $"{SysCordSettings.Settings.CustomEmojis.Error} **Oops!** {reason}",
-                            Color = new Color(255, 0, 0), // Bright red for better visibility
-                            ImageUrl = "https://i.imgur.com/Y64hLzW.gif",
-                            ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
-                        };
+                    var message = await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
 
-                        if (result == "Failed")
-                            embed.Description = AutoLegalityWrapper.GetLegalizationHint(template, sav, pkm);
+                    // Elimina el mensaje original del usuario tras 2 segundos
+                    await Task.Delay(2000);
+                    await Context.Message.DeleteAsync();
 
-                        embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl())
-                             .WithFooter(footer =>
-                             {
-                                 footer.Text = $"Solicitado por {Context.User.Username} • {DateTime.UtcNow:hh:mm tt} UTC";
-                                 footer.IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
-                             });
+                    // Elimina el mensaje embed tras 20 segundos
+                    await Task.Delay(20000);
+                    await message.DeleteAsync();
 
-                        // Enviar el mensaje y almacenar la referencia
-                        var message = await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
-                        // Esperar 2 segundos antes de eliminar el mensaje original
-                        await Task.Delay(2000);
-                        await Context.Message.DeleteAsync();
-
-                        // Esperar 20 segundos antes de eliminar el mensaje de error
-                        await Task.Delay(20000);  // Se ajusta el tiempo a 20 segundos 
-                        await message.DeleteAsync();
-
-                        return;
-                    }
-                    pk = correctedPk;
-                }
-                else
-                {
-                    pk = (T)pkm;
-                }
-
-                // Show corrections if any were made
-                if (allCorrectionMessages.Count > 0 && la.Valid)
-                {
-                    var userName = Context.User.Mention;
-                    var changesEmbed = new EmbedBuilder()
-                        .WithTitle("Correcciones del set de Showdown")
-                        .WithColor(Color.Orange)
-                        .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/profoak.png")
-                        .WithDescription(string.Join("\n", allCorrectionMessages))
-                        .AddField("Set de Showdown corregido:", $"```{finalContent}```")
-                        .Build();
-                    var correctionMessage = await ReplyAsync($"{userName}, tu conjunto de showdown era incorrecto o inválido y lo hemos corregido.\nAquí están las correcciones hechas:", embed: changesEmbed).ConfigureAwait(false);
-                    _ = DeleteMessagesAfterDelayAsync(correctionMessage, Context.Message, 30);
+                    return;
                 }
 
                 TradeExtensions<T>.CheckAndSetUnrivaledDate(pk);
@@ -1098,7 +950,6 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 if (pk.WasEgg)
                     pk.EggMetDate = pk.MetDate;
 
-                // Set the final language on the PokemonAdd commentMore actions
                 pk.Language = finalLanguage;
 
                 if (!set.Nickname.Equals(pk.Nickname) && string.IsNullOrEmpty(set.Nickname))
@@ -1118,7 +969,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 }
 
                 var sig = Context.User.GetFavor();
-                await AddTradeToQueueAsync(code, Context.User.Username, pk, sig, Context.User, isBatchTrade: false, batchTradeNumber: 1, totalBatchTrades: 1, lgcode: lgcode, ignoreAutoOT: ignoreAutoOT, setEdited: setEdited).ConfigureAwait(false);
+                await AddTradeToQueueAsync(code, Context.User.Username, pk, sig, Context.User, isBatchTrade: false, batchTradeNumber: 1, totalBatchTrades: 1, lgcode: lgcode, ignoreAutoOT: ignoreAutoOT, setEdited: false).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -1416,40 +1267,12 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         tradeContent = ReusableActions.StripCodeBlock(tradeContent);
         var ignoreAutoOT = tradeContent.Contains("OT:") || tradeContent.Contains("TID:") || tradeContent.Contains("SID:");
 
-        string finalContent = tradeContent;
-        List<string> initialCorrectionMessages = [];
-        bool preCorrected = false;
+        _ = ShowdownParsing.TryParseAnyLanguage(tradeContent, out ShowdownSet? set);
 
-        // Parse the showdown set
-        _ = ShowdownParsing.TryParseAnyLanguage(finalContent, out ShowdownSet? set);
-
-        // If parsing failed or species is 0, try AutoCorrect if enabled
-        if ((set == null || set.Species == 0) && Info.Hub.Config.Trade.AutoCorrectConfig.EnableAutoCorrect)
-        {
-            try
-            {
-                var (CorrectedContent, CorrectionMessages) = await AutoCorrectShowdown<T>.PerformAutoCorrect(finalContent, Info.Hub.Config.Trade.AutoCorrectConfig);
-
-                // Try parsing the corrected content
-                if (ShowdownParsing.TryParseAnyLanguage(CorrectedContent, out var correctedSet) && correctedSet != null && correctedSet.Species != 0)
-                {
-                    finalContent = CorrectedContent;
-                    initialCorrectionMessages = CorrectionMessages;
-                    preCorrected = true;
-                    set = correctedSet;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogUtil.LogSafe(ex, "Preprocesamiento de AutoCorrect");
-            }
-        }
-
-        // Final validation
         if (set == null || set.Species == 0)
         {
             // Intentar extraer un nombre del Showdown Set (si posible)
-            var firstLine = finalContent.Split('\n').FirstOrDefault()?.Trim() ?? "";
+            var firstLine = tradeContent.Split('\n').FirstOrDefault()?.Trim() ?? "";
             var potentialName = firstLine.Split('@')[0].Trim();
             var nameError = BattleTemplateLegality.VerifyPokemonName(potentialName, (int)LanguageID.English);
 
@@ -1471,9 +1294,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             return;
         }
 
-        // Determine the final language to useAdd commentMore actions
         byte finalLanguage = LanguageHelper.GetFinalLanguage(tradeContent, set, (byte)Info.Hub.Config.Legality.GenerateLanguage, TradeExtensions<T>.DetectShowdownLanguage);
-
         var template = AutoLegalityWrapper.GetTemplate(set);
 
         if (set.InvalidLines.Count != 0)
@@ -1502,7 +1323,6 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         {
             try
             {
-                // Get trainer info with the correct language
                 var sav = LanguageHelper.GetTrainerInfoWithLanguage<T>((LanguageID)finalLanguage);
                 var pkm = sav.GetLegal(template, out var result);
                 if (pkm == null)
@@ -1514,84 +1334,47 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 var la = new LegalityAnalysis(pkm);
                 var spec = GameInfo.Strings.Species[template.Species];
 
-                T pk;
-                bool setEdited = preCorrected;
-                List<string> allCorrectionMessages = new List<string>(initialCorrectionMessages);
-
-                if (pkm is not T initialPk || !la.Valid || !string.IsNullOrEmpty(set.Form.ToString()))
+                if (pkm is not T pk || !la.Valid)
                 {
-                    if (Info.Hub.Config.Trade.AutoCorrectConfig.EnableAutoCorrect && !la.Valid)
+                    var reason = result switch
                     {
-                        var (CorrectedContent, CorrectionMessages) = await AutoCorrectShowdown<T>.PerformAutoCorrect(finalContent, Info.Hub.Config.Trade.AutoCorrectConfig, pkm, la);
-                        string secondaryCorrection = CorrectedContent;
-                        List<string> secondaryCorrectionMessages = CorrectionMessages;
+                        "Timeout" => $"El **{spec}** tardó demasiado en generarse y se canceló.",
+                        "VersionMismatch" => "❌ **Solicitud denegada:** La versión de **PKHeX** y **Auto-Legality Mod** no coinciden.",
+                        _ => $"{Context.User.Mention}, no se pudo crear un **{spec}** con los datos proporcionados."
+                    };
 
-                        if (secondaryCorrectionMessages.Count > 0)
-                        {
-                            set = new ShowdownSet(secondaryCorrection);
-                            template = AutoLegalityWrapper.GetTemplate(set);
+                    var embed = new EmbedBuilder
+                    {
+                        Title = "⚠️ Error en la Legalidad del Conjunto",
+                        Description = $"{SysCordSettings.Settings.CustomEmojis.Error} **Oops!** {reason}",
+                        Color = new Color(255, 0, 0), // Bright red for visibility
+                        ImageUrl = "https://i.imgur.com/Y64hLzW.gif",
+                        ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
+                    };
 
-                            // Recalculate language in case it changed
-                            finalLanguage = LanguageHelper.GetFinalLanguage(secondaryCorrection, set, (byte)Info.Hub.Config.Legality.GenerateLanguage, TradeExtensions<T>.DetectShowdownLanguage);
-                            sav = LanguageHelper.GetTrainerInfoWithLanguage<T>((LanguageID)finalLanguage);
-
-                            pkm = sav.GetLegal(template, out result);
-                            la = new LegalityAnalysis(pkm);
-                            setEdited = true;
-                            allCorrectionMessages.AddRange(secondaryCorrectionMessages);
-                            finalContent = secondaryCorrection;
-                        }
+                    if (result == "Failed")
+                    {
+                        embed.Description = AutoLegalityWrapper.GetLegalizationHint(template, sav, pkm);
                     }
 
-                    if (pkm is not T correctedPk || !la.Valid)
-                    {
-                        var reason = result == "Timeout" ? $"El conjunto **{spec}** tardó demasiado en generarse." :
-                                     result == "VersionMismatch" ? "Solicitud rechazada: La versión de **PKHeX** y **Auto-Legality Mod** no coinciden." :
-                                     $"No pude crear un **{spec}** a partir de ese conjunto..";
+                    embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl())
+                         .WithFooter(footer =>
+                         {
+                             footer.Text = $"Solicitado por {Context.User.Username} • {DateTime.UtcNow:hh:mm tt} UTC";
+                             footer.IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
+                         });
 
-                        var errorMessage = $"{SysCordSettings.Settings.CustomEmojis.Error} Oops! {reason}";
-                        if (result == "Failed")
-                            errorMessage += $"\n{AutoLegalityWrapper.GetLegalizationHint(template, sav, pkm)}";
+                    var message = await ReplyAsync(embed: embed.Build()).ConfigureAwait(false);
 
-                        var errorEmbed = new EmbedBuilder
-                        {
-                            Description = errorMessage,
-                            Color = Color.Red,
-                            ImageUrl = "https://i.imgur.com/Y64hLzW.gif",
-                            ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
-                        };
+                    // Elimina el mensaje original del usuario tras 2 segundos
+                    await Task.Delay(2000);
+                    await Context.Message.DeleteAsync();
 
-                        errorEmbed.WithAuthor("Error al procesar el trade", "https://i.imgur.com/0R7Yvok.gif")
-                             .WithFooter(footer =>
-                             {
-                                 footer.Text = $"{Context.User.Username} • {DateTime.UtcNow.ToString("hh:mm tt")}";
-                                 footer.IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl();
-                             });
+                    // Elimina el mensaje embed tras 20 segundos
+                    await Task.Delay(20000);
+                    await message.DeleteAsync();
 
-                        await ReplyAsync(embed: errorEmbed.Build()).ConfigureAwait(false);
-                        return;
-                    }
-
-                    pk = correctedPk;
-                }
-                else
-                {
-                    pk = (T)pkm;
-                }
-
-                // Show corrections if any were made
-                if (allCorrectionMessages.Count > 0 && la.Valid)
-                {
-                    var userName = Context.User.Mention;
-                    var changesEmbed = new EmbedBuilder()
-                        .WithTitle("Correcciones del set de Showdown")
-                        .WithColor(Color.Orange)
-                        .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/profoak.png")
-                        .WithDescription(string.Join("\n", allCorrectionMessages))
-                        .AddField("Set de Showdown corregido:", $"```{finalContent}```")
-                        .Build();
-                    var correctionMessage = await ReplyAsync($"{userName}, tu conjunto de showdown era incorrecto o inválido y lo hemos corregido.\nAquí están las correcciones hechas:", embed: changesEmbed).ConfigureAwait(false);
-                    _ = DeleteMessagesAfterDelayAsync(correctionMessage, Context.Message, 30);
+                    return;
                 }
 
                 if (pkm is PA8)
@@ -1620,7 +1403,6 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 if (pkm.WasEgg)
                     pkm.EggMetDate = pkm.MetDate;
 
-                // Set the final language on the Pokemon
                 pk.Language = finalLanguage;
 
                 if (!set.Nickname.Equals(pk.Nickname) && string.IsNullOrEmpty(set.Nickname))
@@ -1648,7 +1430,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 }
 
                 var sig = Context.User.GetFavor();
-                await AddTradeToQueueAsync(batchTradeCode, Context.User.Username, pk, sig, Context.User, isBatchTrade, batchTradeNumber, totalBatchTrades, lgcode: lgcode, tradeType: PokeTradeType.Batch, ignoreAutoOT: ignoreAutoOT, setEdited: setEdited).ConfigureAwait(false);
+                await AddTradeToQueueAsync(batchTradeCode, Context.User.Username, pk, sig, Context.User, isBatchTrade, batchTradeNumber, totalBatchTrades, lgcode: lgcode, tradeType: PokeTradeType.Batch, ignoreAutoOT: ignoreAutoOT, setEdited: false).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

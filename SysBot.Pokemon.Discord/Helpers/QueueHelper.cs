@@ -271,11 +271,6 @@ public static class QueueHelper<T> where T : PKM, new()
                 }
             }
 
-            if (setEdited && Info.Hub.Config.Trade.AutoCorrectConfig.AutoCorrectEmbedIndicator)
-            {
-                embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/setedited.png";
-                embedBuilder.AddField("__**Aviso**__: **Tu conjunto de showdown no era válido.**", $"{AutocorrectText}");
-            }
             // Check if the Pokemon is Non-Native and/or has a Home Tracker
             if (pk is IHomeTrack homeTrack)
             {
