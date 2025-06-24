@@ -67,9 +67,6 @@ public class DiscordSettings
     [Category(Startup), Description("Prefijo de comando del bot.")]
     public string CommandPrefix { get; set; } = "$";
 
-    [Category(Startup), Description("Si se activa, el estado del bot cambiará dinámicamente entre 🔄, 💤 y ⛔️ dependiendo de su actividad. Esto desactiva el estado personalizado."), DisplayName("Estado del bot dinámico")]
-    public bool EnableDynamicGameStatus { get; set; } = false;
-
     [Category(Operation), TypeConverter(typeof(ExpandableObjectConverter)), Description("Emojis personalizados que se usarán en los mensajes de alerta del bot."), DisplayName("Emojis Personalizados de alerta")]
     public AlertEmojiSettings CustomEmojis { get; set; } = new AlertEmojiSettings();
 

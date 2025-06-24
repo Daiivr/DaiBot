@@ -180,8 +180,8 @@ public sealed class SysCord<T> where T : PKM, new()
         var botName = string.IsNullOrEmpty(SysCordSettings.HubConfig.BotName) ? "SysBot" : SysCordSettings.HubConfig.BotName;
         var fullStatusMessage = $"**Estado**: {botName} esta {status}!";
         var thumbnailUrl = status == "En línea"
-            ? "https://raw.githubusercontent.com/bdawg1989/sprites/main/botgo.png"
-            : "https://raw.githubusercontent.com/bdawg1989/sprites/main/botstop.png";
+            ? "https://raw.githubusercontent.com/Daiivr/SysBot-Images/refs/heads/main/Bot%20Status/botgo.png"
+            : "https://raw.githubusercontent.com/Daiivr/SysBot-Images/refs/heads/main/Bot%20Status/botoff.png";
 
         var embed = new EmbedBuilder()
             .WithTitle("Informe de estado del bot")
@@ -578,14 +578,9 @@ public sealed class SysCord<T> where T : PKM, new()
         await Log(new LogMessage(LogSeverity.Info, "LoadLoggingAndEcho()", "Canales de registro y eco cargados!")).ConfigureAwait(false);
         MessageChannelsLoaded = true;
 
-        if (!SysCordSettings.Settings.EnableDynamicGameStatus)
-        {
-            var game = Hub.Config.Discord.BotGameStatus;
-            if (!string.IsNullOrWhiteSpace(game))
-            {
-                await _client.SetGameAsync(game).ConfigureAwait(false);
-            }
-        }
+        var game = Hub.Config.Discord.BotGameStatus;
+        if (!string.IsNullOrWhiteSpace(game))
+            await _client.SetGameAsync(game).ConfigureAwait(false);
     }
 
     private async Task MonitorStatusAsync(CancellationToken token)
@@ -593,13 +588,10 @@ public sealed class SysCord<T> where T : PKM, new()
         const int Interval = 20; // seconds
 
         UserStatus state = UserStatus.Idle;
-        string currentGameStatus = "";
-
         while (!token.IsCancellationRequested)
         {
             var time = DateTime.Now;
             var lastLogged = LogUtil.LastLogged;
-
             if (Hub.Config.Discord.BotColorStatusTradeOnly)
             {
                 var recent = Hub.Bots.ToArray()
@@ -607,11 +599,10 @@ public sealed class SysCord<T> where T : PKM, new()
                     .MaxBy(z => z.LastTime);
                 lastLogged = recent?.LastTime ?? time;
             }
-
             var delta = time - lastLogged;
             var gap = TimeSpan.FromSeconds(Interval) - delta;
-            bool noQueue = !Hub.Queues.Info.GetCanQueue();
 
+            bool noQueue = !Hub.Queues.Info.GetCanQueue();
             if (gap <= TimeSpan.Zero)
             {
                 var idle = noQueue ? UserStatus.DoNotDisturb : UserStatus.Idle;
@@ -620,21 +611,7 @@ public sealed class SysCord<T> where T : PKM, new()
                     state = idle;
                     await _client.SetStatusAsync(state).ConfigureAwait(false);
 
-                    if (SysCordSettings.Settings.EnableDynamicGameStatus)
-                    {
-                        string newGameStatus = state switch
-                        {
-                            UserStatus.DoNotDisturb => "⛔️ Pokémon",
-                            UserStatus.Idle => "💤 Pokémon",
-                            _ => "🔄 Pokémon"
-                        };
-
-                        if (newGameStatus != currentGameStatus)
-                        {
-                            currentGameStatus = newGameStatus;
-                            await _client.SetGameAsync(currentGameStatus).ConfigureAwait(false);
-                        }
-                    }
+                    await Task.Delay(2_000, token).ConfigureAwait(false);
                 }
 
                 await Task.Delay(2000, token).ConfigureAwait(false);
@@ -646,33 +623,7 @@ public sealed class SysCord<T> where T : PKM, new()
             {
                 state = active;
                 await _client.SetStatusAsync(state).ConfigureAwait(false);
-
-                if (SysCordSettings.Settings.EnableDynamicGameStatus)
-                {
-                    string newGameStatus = state switch
-                    {
-                        UserStatus.DoNotDisturb => "⛔️ Pokémon",
-                        UserStatus.Idle => "💤 Pokémon",
-                        _ => "🔄 Pokémon"
-                    };
-
-                    if (newGameStatus != currentGameStatus)
-                    {
-                        currentGameStatus = newGameStatus;
-                        await _client.SetGameAsync(currentGameStatus).ConfigureAwait(false);
-                    }
-                }
-                else
-                {
-                    var staticStatus = Hub.Config.Discord.BotGameStatus;
-                    if (staticStatus != currentGameStatus)
-                    {
-                        currentGameStatus = staticStatus;
-                        await _client.SetGameAsync(staticStatus).ConfigureAwait(false);
-                    }
-                }
             }
-
             await Task.Delay(gap, token).ConfigureAwait(false);
         }
     }
