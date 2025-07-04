@@ -226,7 +226,7 @@ namespace SysBot.Pokemon.Discord
                     LogUtil.LogError($"⚠️ No se pudo enviar el anuncio al canal {channel.Name}: {ex.Message}", nameof(AnnounceAsync));
                 }
             }
-            var confirmationMessage = await ReplyAsync("<a:yes:1206485105674166292> Anuncio enviado a todos los canales Echo.").ConfigureAwait(false);
+            var confirmationMessage = await ReplyAsync("✅ Anuncio enviado a todos los canales Echo.").ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             await confirmationMessage.DeleteAsync().ConfigureAwait(false);
             await Context.Message.DeleteAsync().ConfigureAwait(false);

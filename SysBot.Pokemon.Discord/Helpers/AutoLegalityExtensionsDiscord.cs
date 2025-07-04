@@ -16,7 +16,7 @@ public static class AutoLegalityExtensionsDiscord
     {
         if (set.Species <= 0)
         {
-            await channel.SendMessageAsync("<a:warning:1206483664939126795> Oops! No he podido interpretar tu mensaje. Si pretendías convertir algo, ¡por favor, vuelve a comprobar lo que estás pegando!").ConfigureAwait(false);
+            await channel.SendMessageAsync("⚠️ Oops! No he podido interpretar tu mensaje. Si pretendías convertir algo, ¡por favor, vuelve a comprobar lo que estás pegando!").ConfigureAwait(false);
             return;
         }
 

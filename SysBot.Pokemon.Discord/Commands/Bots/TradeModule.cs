@@ -1893,7 +1893,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         var pk = GetRequest(att);
         if (pk == null)
         {
-            await ReplyAsync($"⚠️ ¡El archivo adjunto proporcionado no es compatible con este módulo!").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ {Context.User.Mention}, ¡el archivo adjunto proporcionado no es compatible con este módulo!").ConfigureAwait(false);
             return;
         }
         await AddTradeToQueueAsync(code, usr.Username, pk, sig, usr, isHiddenTrade: true, ignoreAutoOT: ignoreAutoOT).ConfigureAwait(false);

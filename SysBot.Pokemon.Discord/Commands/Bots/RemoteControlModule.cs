@@ -187,7 +187,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
         var b = bot.Bot;
         var crlf = b is SwitchRoutineExecutor<PokeBotState> { UseCRLF: true };
         await b.Connection.SendAsync(SwitchCommand.SetScreen(on ? ScreenState.On : ScreenState.Off, crlf), CancellationToken.None).ConfigureAwait(false);
-        await ReplyAsync("<a:yes:1206485105674166292> Estado de la pantalla establecido en: " + (on ? "On" : "Off")).ConfigureAwait(false);
+        await ReplyAsync("✅ Estado de la pantalla establecido en: " + (on ? "On" : "Off")).ConfigureAwait(false);
     }
 
     private async Task SetStickAsyncImpl(SwitchStick s, short x, short y, ushort ms, BotSource<PokeBotState> bot)

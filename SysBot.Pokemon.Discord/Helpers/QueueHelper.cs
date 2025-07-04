@@ -325,7 +325,7 @@ public static class QueueHelper<T> where T : PKM, new()
                 if (embed == null)
                 {
                     Console.WriteLine("Error: El embed es nulo.");
-                    await context.Channel.SendMessageAsync("<a:warning:1206483664939126795> Se produjo un error al preparar los detalles comerciales..");
+                    await context.Channel.SendMessageAsync("⚠️ Se produjo un error al preparar los detalles comerciales..");
                     return new TradeQueueResult(false);
                 }
 

@@ -44,7 +44,7 @@ public sealed class SwitchSocketAsync : SwitchSocket, ISwitchConnectionAsync
             throw new Exception("No se pudo conectar al dispositivo.");
         }
         Connection.EndConnect(result);
-        Log("Connected!");
+        Log("Conectado!");
         Label = Name;
     }
 

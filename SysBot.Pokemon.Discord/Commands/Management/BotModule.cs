@@ -23,7 +23,7 @@ namespace SysBot.Pokemon.Discord
 #pragma warning restore CA2021 // Do not call Enumerable.Cast<T> or Enumerable.OfType<T> with incompatible types
             if (bots.Length == 0)
             {
-                await ReplyAsync("<a:warning:1206483664939126795> No hay bots configurados.").ConfigureAwait(false);
+                await ReplyAsync("⚠️ No hay bots configurados.").ConfigureAwait(false);
                 return;
             }
 

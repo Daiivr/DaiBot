@@ -155,12 +155,12 @@ public class HelloModule : ModuleBase<SocketCommandContext>
         using var avatarImage = ImageSharpImage.Load<Rgba32>(avatarStream);
 
         // Set avatar size
-        int avatarSize = 205;
+        int avatarSize = 223;
         avatarImage.Mutate(x => x.Resize(avatarSize, avatarSize));
         avatarImage.ApplyRoundedCorners(avatarSize / 2f); // Apply circle crop
 
         // Adjusted position to center it on Snorlax's face
-        var position = new Point(700, 465);
+        var position = new Point(692, 445);
 
         background.Mutate(ctx =>
         {
