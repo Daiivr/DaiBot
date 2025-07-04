@@ -8,7 +8,6 @@ namespace SysBot.Pokemon;
 public class QueueMonitor<T>(PokeTradeHub<T> Hub)
     where T : PKM, new()
 {
-    public DiscordSettings Settings => Settings;
 
     public async Task MonitorOpenQueue(CancellationToken token)
     {
@@ -31,8 +30,8 @@ public class QueueMonitor<T>(PokeTradeHub<T> Hub)
             // Queue setting has been updated. Echo out that things have changed.
             secWaited = 0;
             var state = queues.GetCanQueue()
-                ? $"{Settings.CustomEmojis.Success} Los usuarios ahora pueden unirse a la cola comercial."
-                : $"{Settings.CustomEmojis.Warning} Configuración de la cola modificada: **Los usuarios NO PUEDEN unirse a la cola hasta que se vuelva a activar.**";
+                ? $"✅ Los usuarios ahora pueden unirse a la cola comercial."
+                : $"⚠️ Configuración de la cola modificada: **Los usuarios NO PUEDEN unirse a la cola hasta que se vuelva a activar.**";
             EchoUtil.Echo(state);
         }
     }

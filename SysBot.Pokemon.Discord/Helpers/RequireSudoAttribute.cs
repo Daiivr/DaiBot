@@ -17,12 +17,12 @@ public sealed class RequireSudoAttribute : PreconditionAttribute
 
         // Check if this user is a Guild User, which is the only context where roles exist
         if (context.User is not SocketGuildUser gUser)
-            return Task.FromResult(PreconditionResult.FromError($"{SysCordSettings.Settings.CustomEmojis.Warning} Lo siento {context.User.Mention}, este comando solo puede ser usado dentro de un servidor y no en mensajes directos."));
+            return Task.FromResult(PreconditionResult.FromError($"⚠️ Lo siento {context.User.Mention}, este comando solo puede ser usado dentro de un servidor y no en mensajes directos."));
 
         if (mgr.CanUseSudo(gUser.Roles.Select(z => z.Name)))
             return Task.FromResult(PreconditionResult.FromSuccess());
 
         // Since it wasn't, fail
-        return Task.FromResult(PreconditionResult.FromError($"{SysCordSettings.Settings.CustomEmojis.Error} {context.User.Mention} no estás autorizado a ejecutar este comando."));
+        return Task.FromResult(PreconditionResult.FromError($"❌ {context.User.Mention} no estás autorizado a ejecutar este comando."));
     }
 }

@@ -16,6 +16,7 @@ using static SysBot.Pokemon.DiscordSettings;
 using Discord.Net;
 using Newtonsoft.Json;
 using SysBot.Pokemon.Discord.Commands.Bots;
+using SysBot.Pokemon.Discord.Models;
 
 namespace SysBot.Pokemon.Discord;
 
@@ -36,6 +37,8 @@ public sealed class SysCord<T> where T : PKM, new()
     private readonly Dictionary<ulong, ulong> _announcementMessageIds = [];
     private readonly DiscordSocketClient _client;
     private readonly CommandService _commands;
+
+    private static readonly Random SharedRandom = new();
 
     private readonly IServiceProvider _services;
 
@@ -454,8 +457,7 @@ public sealed class SysCord<T> where T : PKM, new()
         if (DateTime.UtcNow - userStats.LastXPGain < TimeSpan.FromMinutes(2))
             return;
         // Grant random XP between 5 and 10, doubled if double XP is active
-        var random = new Random();
-        int xpGained = random.Next(5, 11);
+        int xpGained = SharedRandom.Next(5, 11);
         if (AdminModule.IsDoubleXPActive())
         {
             xpGained *= 2; // Double XP
@@ -529,7 +531,7 @@ public sealed class SysCord<T> where T : PKM, new()
                 var command = content.Split(' ')[0][1..];
                 if (_validCommands.Contains(command))
                 {
-                    await SafeSendMessageAsync(msg.Channel, $"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {msg.Author.Mention}, usaste el prefijo incorrecto! El comando correcto es: **{correctPrefix}{command}**").ConfigureAwait(false);
+                    await SafeSendMessageAsync(msg.Channel, $"❌ Lo siento {msg.Author.Mention}, usaste el prefijo incorrecto! El comando correcto es: **{correctPrefix}{command}**").ConfigureAwait(false);
                     return;
                 }
             }
@@ -648,21 +650,21 @@ public sealed class SysCord<T> where T : PKM, new()
             // Check if the user is in the bannedIDs list
             if (msg.Author is SocketGuildUser user && AbuseSettings.BannedIDs.List.Any(z => z.ID == user.Id))
             {
-                await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"{SysCordSettings.Settings.CustomEmojis.Error}  Lo siento {msg.Author.Mention}, tienes prohibido usar este bot.").ConfigureAwait(false);
+                await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"❌  Lo siento {msg.Author.Mention}, tienes prohibido usar este bot.").ConfigureAwait(false);
                 return true;
             }
 
             var mgr = Manager;
             if (!mgr.CanUseCommandUser(msg.Author.Id))
             {
-                await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"{SysCordSettings.Settings.CustomEmojis.Error}  Lo siento {msg.Author.Mention}, no tiene permitido usar este comando").ConfigureAwait(false);
+                await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"❌  Lo siento {msg.Author.Mention}, no tiene permitido usar este comando").ConfigureAwait(false);
                 return true;
             }
 
             if (!mgr.CanUseCommandChannel(msg.Channel.Id) && msg.Author.Id != mgr.Owner)
             {
                 if (Hub.Config.Discord.ReplyCannotUseCommandInChannel)
-                    await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"{SysCordSettings.Settings.CustomEmojis.Error}  Lo siento {msg.Author.Mention}, no puedes usar ese comando aquí, usalo en el canal o servidor correspondiente.").ConfigureAwait(false);
+                    await SysCord<T>.SafeSendMessageAsync(msg.Channel, $"❌  Lo siento {msg.Author.Mention}, no puedes usar ese comando aquí, usalo en el canal o servidor correspondiente.").ConfigureAwait(false);
                 return true;
             }
 
@@ -705,16 +707,5 @@ public sealed class SysCord<T> where T : PKM, new()
     {
         var json = JsonConvert.SerializeObject(stats, Formatting.Indented);
         File.WriteAllText(StatsFilePath, json);
-    }
-
-    public class UserStats
-    {
-        public int Wins { get; set; }
-        public int Losses { get; set; }
-        public int Points { get; set; }
-        public int XP { get; set; } // New property for XP
-        public int Level { get; set; } // New property for Level
-        public DateTime LastXPGain { get; set; } // New property to track the last time XP was gained
-        public DateTime CooldownEnd { get; set; } // Cooldown end time
     }
 }

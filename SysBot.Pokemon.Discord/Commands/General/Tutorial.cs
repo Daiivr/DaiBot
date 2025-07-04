@@ -38,7 +38,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                     await Context.Message.DeleteAsync();
 
                     // Enviar confirmación en el canal
-                    var confirmation = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention}, la información de ayuda sobre el comando `{command}` ha sido enviada a tu MD. Por favor, revisa tus mensajes directos.");
+                    var confirmation = await ReplyAsync($"✅ {Context.User.Mention}, la información de ayuda sobre el comando `{command}` ha sido enviada a tu MD. Por favor, revisa tus mensajes directos.");
 
                     // Borrar el mensaje de confirmación después de 5 segundos
                     await Task.Delay(TimeSpan.FromSeconds(5));
@@ -47,7 +47,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 catch
                 {
                     // Si el usuario tiene los DMs bloqueados, notificar en el canal
-                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention}, no puedo enviarte un mensaje privado. Asegúrate de tener los DMs habilitados.**");
+                    await ReplyAsync($"❌ {Context.User.Mention}, no puedo enviarte un mensaje privado. Asegúrate de tener los DMs habilitados.**");
                 }
 
                 return;

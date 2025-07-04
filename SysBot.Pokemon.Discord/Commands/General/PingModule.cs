@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System;
 using System.Threading;
+using SysBot.Pokemon.Discord.Models;
 
 namespace SysBot.Pokemon.Discord;
 
@@ -27,12 +28,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
         var userId = Context.User.Id.ToString();
         var stats = LoadOrCreateStats();
 
-        if (!stats.ContainsKey(userId))
-        {
-            stats[userId] = new UserStats { Wins = 0, Losses = 0, Points = 0, CooldownEnd = DateTime.MinValue };
-        }
-
-        var userStats = stats[userId];
+        var userStats = EnsureUserStats(stats, userId);
 
         // Check if the user already has an active challenge
         if (ActiveChallenges.ContainsKey(Context.User.Id))
@@ -41,7 +37,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
             await Context.Message.DeleteAsync().ConfigureAwait(false);
 
             // Send a message indicating they must wait
-            var waitMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention}, ya tienes un desafío pendiente. Espera a que el oponente responda antes de iniciar otro.");
+            var waitMessage = await ReplyAsync($"❌ {Context.User.Mention}, ya tienes un desafío pendiente. Espera a que el oponente responda antes de iniciar otro.");
 
             // Delete the bot's response message after 30 seconds
             _ = DeleteMessageAfterDelayAsync(waitMessage, TimeSpan.FromSeconds(30));
@@ -61,7 +57,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
                 await Context.Message.DeleteAsync().ConfigureAwait(false);
 
                 // Send a message indicating they are on cooldown
-                var cooldownMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, debes esperar un poco antes de volver a usar el comando, podrás volver a usarlo <t:{unixTime}:R>.");
+                var cooldownMessage = await ReplyAsync($"❌ Lo siento {Context.User.Mention}, debes esperar un poco antes de volver a usar el comando, podrás volver a usarlo <t:{unixTime}:R>.");
 
                 // Delete the bot's response message after 30 seconds
                 _ = DeleteMessageAfterDelayAsync(cooldownMessage, TimeSpan.FromSeconds(30));
@@ -93,7 +89,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
         {
             var embed = new EmbedBuilder()
                 .WithTitle("¿Jugar contra ti mismo? 🤔")
-                .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention}, eso es un nivel de soledad que ni yo puedo manejar. Encuentra a alguien más para jugar. 🏓")
+                .WithDescription($"❌ {Context.User.Mention}, eso es un nivel de soledad que ni yo puedo manejar. Encuentra a alguien más para jugar. 🏓")
                 .WithImageUrl("https://github.com/Daiivr/SysBot-Images/blob/main/Ping%20Pong/IFMCv6Y.gif?raw=true")
                 .WithThumbnailUrl(avatarUrl)
                 .WithColor(color)
@@ -139,25 +135,20 @@ public class PingModule : ModuleBase<SocketCommandContext>
         }
 
         var opponentId = opponent.Id.ToString();
-        if (!stats.ContainsKey(opponentId))
-        {
-            stats[opponentId] = new UserStats { Wins = 0, Losses = 0, Points = 0, CooldownEnd = DateTime.MinValue };
-        }
-
-        var opponentStats = stats[opponentId];
+        var opponentStats = EnsureUserStats(stats, opponentId);
 
         // Validar puntos disponibles para la apuesta
         if (betPoints > 0)
         {
             if (userStats.Points < betPoints)
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, no tienes suficientes puntos para apostar {betPoints} puntos. Tus puntos actuales: {userStats.Points}");
+                await ReplyAsync($"❌ Lo siento {Context.User.Mention}, no tienes suficientes puntos para apostar {betPoints} puntos. Tus puntos actuales: {userStats.Points}");
                 return;
             }
 
             if (opponentStats.Points < betPoints)
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, {opponent.Username} no tiene suficientes puntos para igualar tu apuesta de {betPoints} puntos. Sus puntos actuales: {opponentStats.Points}");
+                await ReplyAsync($"❌ Lo siento {Context.User.Mention}, {opponent.Username} no tiene suficientes puntos para igualar tu apuesta de {betPoints} puntos. Sus puntos actuales: {opponentStats.Points}");
                 return;
             }
         }
@@ -220,8 +211,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
         ActiveChallenges.Remove(Context.User.Id); // Remove the challenge since it was accepted
 
         // Juego con apuesta
-        var randomMatch = new Random();
-        bool userWinsMatch = randomMatch.Next(2) == 0;
+        bool userWinsMatch = SharedRandom.Next(2) == 0;
 
         var embedDescription = $"Partida de ping-pong entre {Context.User.Mention} y {opponent.Mention}";
         if (betPoints > 0)
@@ -332,7 +322,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
                 var embedBuilder = new EmbedBuilder()
                     .WithTitle("¡Desafío de Ping-Pong!")
                     .WithDescription($"{Context.User.Mention} ha desafiado a <@{userId}> a un partido de ping-pong.\n\n" +
-                                    $"{SysCordSettings.Settings.CustomEmojis.Error} **<@{userId}> no respondió a tiempo.**")
+                                    $"❌ **<@{userId}> no respondió a tiempo.**")
                     .WithColor(Color.Red)
                     .WithCurrentTimestamp();
 
@@ -376,7 +366,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
                 if (componentInteraction.Data.CustomId == "accept_challenge")
                 {
                     embedBuilder.WithDescription($"{Context.User.Mention} ha desafiado a {componentInteraction.User.Mention} a un partido de ping-pong.\n\n" +
-                                                $"{SysCordSettings.Settings.CustomEmojis.Success} **{componentInteraction.User.Username} ha aceptado el desafío.**\n" +
+                                                $"✅ **{componentInteraction.User.Username} ha aceptado el desafío.**\n" +
                                                 "El partido comenzará en **5 segundos**...");
 
                     // Update the embed with the acceptance message
@@ -395,7 +385,7 @@ public class PingModule : ModuleBase<SocketCommandContext>
                 else if (componentInteraction.Data.CustomId == "decline_challenge")
                 {
                     embedBuilder.WithDescription($"{Context.User.Mention} ha desafiado a {componentInteraction.User.Mention} a un partido de ping-pong.\n\n" +
-                                                $"{SysCordSettings.Settings.CustomEmojis.Error} **{componentInteraction.User.Username} ha rechazado el desafío.**");
+                                                $"❌ **{componentInteraction.User.Username} ha rechazado el desafío.**");
 
                     // Update the embed with the decline message
                     await message.ModifyAsync(msg =>
@@ -438,6 +428,16 @@ public class PingModule : ModuleBase<SocketCommandContext>
         await message.DeleteAsync().ConfigureAwait(false);
     }
 
+    private UserStats EnsureUserStats(Dictionary<string, UserStats> stats, string userId)
+    {
+        if (!stats.TryGetValue(userId, out var userStats))
+        {
+            userStats = new UserStats();
+            stats[userId] = userStats;
+        }
+        return userStats;
+    }
+
     private async Task<Color> GetDominantColorAsync(string imageUrl)
     {
         using var client = new HttpClient();
@@ -462,17 +462,6 @@ public class PingModule : ModuleBase<SocketCommandContext>
         var dominant = histogram.OrderByDescending(kvp => kvp.Value).First().Key;
         return new Color(dominant.R, dominant.G, dominant.B);
     }
-}
-
-public class UserStats
-{
-    public int Wins { get; set; }
-    public int Losses { get; set; }
-    public int Points { get; set; }
-    public int XP { get; set; } // New property for XP
-    public int Level { get; set; } // New property for Level
-    public DateTime LastXPGain { get; set; } // New property to track the last time XP was gained
-    public DateTime CooldownEnd { get; set; } // Cooldown end time
 }
 
 public class ChallengeRequest

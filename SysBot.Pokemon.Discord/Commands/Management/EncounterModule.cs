@@ -21,6 +21,6 @@ public class EchoModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new
             x.Acknowledge();
         }
 
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Listo.").ConfigureAwait(false);
+        await ReplyAsync($"✅ Listo.").ConfigureAwait(false);
     }
 }

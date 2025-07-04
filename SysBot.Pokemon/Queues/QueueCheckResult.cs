@@ -15,8 +15,6 @@ public sealed record QueueCheckResult<T> where T : PKM, new()
     public readonly int BatchNumber;
     public readonly int TotalBatchTrades;
 
-    public DiscordSettings Settings => Settings;
-
     public static readonly QueueCheckResult<T> None = new();
 
     public QueueCheckResult(bool inQueue = false, TradeEntry<T>? detail = default, int position = -1, int queueCount = -1, int batchNumber = 1, int totalBatchTrades = 1)
@@ -32,7 +30,7 @@ public sealed record QueueCheckResult<T> where T : PKM, new()
     public string GetMessage()
     {
         if (!InQueue || Detail is null)
-            return $"{Settings.CustomEmojis.Warning} Actualmente no te encuentras en alguna cola de espera.";
+            return $"⚠️ Actualmente no te encuentras en alguna cola de espera.";
 
         var position = $"{Position + BatchNumber - 1}/{QueueCount}";
         var msg = $"Estás en la cola: **{Detail.Type}**! Posición: **{position} (ID {Detail.Trade.ID})**";

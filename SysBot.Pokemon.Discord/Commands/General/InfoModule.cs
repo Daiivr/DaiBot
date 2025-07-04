@@ -31,7 +31,7 @@ public class InfoModule : ModuleBase<SocketCommandContext>
     {
         if (Context.User.Id == DisallowedUserId)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} No permitimos que personas turbias usen este comando.").ConfigureAwait(false);
+            await ReplyAsync($"❌ No permitimos que personas turbias usen este comando.").ConfigureAwait(false);
             return;
         }
         var app = await Context.Client.GetApplicationInfoAsync().ConfigureAwait(false);

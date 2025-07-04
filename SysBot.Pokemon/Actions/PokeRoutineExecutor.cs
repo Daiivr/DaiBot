@@ -21,8 +21,6 @@ public abstract class PokeRoutineExecutor<T>(IConsoleBotManaged<IConsoleConnecti
     // Check if either Tesla or dmnt are active if the sanity check for Trainer Data fails, as these are common culprits.
     private const ulong ovlloaderID = 0x420000000007e51a;
 
-    protected DiscordSettings Settings => Settings;
-
     public static void DumpPokemon(string folder, string subfolder, T pk)
     {
         if (!Directory.Exists(folder))
@@ -134,7 +132,7 @@ public abstract class PokeRoutineExecutor<T>(IConsoleBotManaged<IConsoleConnecti
         {
             var protocol = Config.Connection.Protocol;
             var msg = protocol is SwitchProtocol.WiFi ? "sys-botbase" : "usb-botbase";
-            msg += $" {Settings.CustomEmojis.Warning} Versión no compatible. Versión esperada **{BotbaseVersion}** o superior, y la versión actual es **{version}**. Descargue la última versión desde: ";
+            msg += $" ⚠️ Versión no compatible. Versión esperada **{BotbaseVersion}** o superior, y la versión actual es **{version}**. Descargue la última versión desde: ";
             if (protocol is SwitchProtocol.WiFi)
                 msg += "https://github.com/olliz0r/sys-botbase/releases/latest";
             else
@@ -165,7 +163,7 @@ public abstract class PokeRoutineExecutor<T>(IConsoleBotManaged<IConsoleConnecti
             if (AbuseSettings.BlockDetectedBannedUser && bot is PokeRoutineExecutor8SWSH)
                 await BlockUser(token).ConfigureAwait(false);
 
-            var msg = $"{Settings.CustomEmojis.Warning} {user.TrainerName}{useridmsg} es un usuario baneado, y fue encontrado en el juego usando el OT: {TrainerName}.";
+            var msg = $"⚠️ {user.TrainerName}{useridmsg} es un usuario baneado, y fue encontrado en el juego usando el OT: {TrainerName}.";
             if (!string.IsNullOrWhiteSpace(entry.Comment))
                 msg += $"\nEl usuario fue baneado por: {entry.Comment}";
             if (!string.IsNullOrWhiteSpace(AbuseSettings.BannedIDMatchEchoMention))
@@ -189,8 +187,8 @@ public abstract class PokeRoutineExecutor<T>(IConsoleBotManaged<IConsoleConnecti
                 if (delta < abuseExpiration)
                 {
                     var msg = AbuseSettings.EchoNintendoOnlineIDMulti
-                        ? $"{Settings.CustomEmojis.Warning} Se ha detectado el mismo NID: {TrainerNID} utilizando diferentes cuentas de Discord.\n"
-                        : $"{Settings.CustomEmojis.Warning} Se ha detectado el mismo NID utilizando diferentes cuentas de Discord.\n";
+                        ? $"⚠️ Se ha detectado el mismo NID: {TrainerNID} utilizando diferentes cuentas de Discord.\n"
+                        : $"⚠️ Se ha detectado el mismo NID utilizando diferentes cuentas de Discord.\n";
 
                     msg += $"Anterior: {previous.Name} (Discord ID: {previous.RemoteID})\n" +
                            $"Actual: {user.TrainerName} (Discord ID: {user.ID})";
@@ -208,7 +206,7 @@ public abstract class PokeRoutineExecutor<T>(IConsoleBotManaged<IConsoleConnecti
                             if (AbuseSettings.BanIDWhenBlockingUser)
                             {
                                 AbuseSettings.BannedIDs.AddIfNew(new[] { GetReference(TrainerName, TrainerNID, "Múltiples cuentas de Discord") });
-                                Log($"{Settings.CustomEmojis.Success} Se agregó {TrainerNID} a la lista de BannedIDs por usar varias cuentas de Discord.");
+                                Log($"✅ Se agregó {TrainerNID} a la lista de BannedIDs por usar varias cuentas de Discord.");
                             }
                         }
                         quit = true;
@@ -221,11 +219,11 @@ public abstract class PokeRoutineExecutor<T>(IConsoleBotManaged<IConsoleConnecti
             if (cd != 0 && delta < TimeSpan.FromMinutes(cd))
             {
                 var wait = TimeSpan.FromMinutes(cd) - delta;
-                poke.Notifier.SendNotification(bot, poke, $"{Settings.CustomEmojis.Warning} Todavía estás en cooldown de comercio y no puedes comerciar por otros {wait.TotalMinutes:F1} minuto(s).");
+                poke.Notifier.SendNotification(bot, poke, $"⚠️ Todavía estás en cooldown de comercio y no puedes comerciar por otros {wait.TotalMinutes:F1} minuto(s).");
 
                 var msg = AbuseSettings.EchoNintendoOnlineIDCooldown
-                    ? $"{Settings.CustomEmojis.Warning} NID encontrado: {TrainerNID} (OT: {TrainerName}) ignorando el tiempo de reutilización de intercambio de {cd} minuto. Encontrado por última vez hace {delta.TotalMinutes:F1} minutos."
-                    : $"{Settings.CustomEmojis.Warning} Se ha encontrado un usuario (OT: {TrainerName}) que ignora el tiempo de reutilización de la operación de {cd} minuto. Encontrado por última vez hace {delta.TotalMinutes:F1} minutos.";
+                    ? $"⚠️ NID encontrado: {TrainerNID} (OT: {TrainerName}) ignorando el tiempo de reutilización de intercambio de {cd} minuto. Encontrado por última vez hace {delta.TotalMinutes:F1} minutos."
+                    : $"⚠️ Se ha encontrado un usuario (OT: {TrainerName}) que ignora el tiempo de reutilización de la operación de {cd} minuto. Encontrado por última vez hace {delta.TotalMinutes:F1} minutos.";
 
                 if (!string.IsNullOrWhiteSpace(AbuseSettings.CooldownAbuseEchoMention))
                     msg = $"{AbuseSettings.CooldownAbuseEchoMention} {msg}";

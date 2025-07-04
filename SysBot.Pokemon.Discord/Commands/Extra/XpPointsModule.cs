@@ -9,6 +9,7 @@ using System.IO;
 using System;
 using System.Threading;
 using System.Text.RegularExpressions;
+using SysBot.Pokemon.Discord.Models;
 
 namespace SysBot.Pokemon.Discord
 {
@@ -31,11 +32,11 @@ namespace SysBot.Pokemon.Discord
             {
                 stats[userId].Points = 0;
                 SaveStats(stats);
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Los puntos de **{user.Username}** han sido reiniciados a 0.");
+                await ReplyAsync($"✅ Los puntos de **{user.Username}** han sido reiniciados a 0.");
             }
             else
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} El usuario **{user.Username}** no tiene estadísticas registradas.");
+                await ReplyAsync($"⚠️ El usuario **{user.Username}** no tiene estadísticas registradas.");
             }
         }
 
@@ -47,22 +48,19 @@ namespace SysBot.Pokemon.Discord
         {
             if (points < 0)
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No puedes dar puntos negativos.");
+                await ReplyAsync($"⚠️ No puedes dar puntos negativos.");
                 return;
             }
 
             var stats = LoadOrCreateStats();
             var userId = user.Id.ToString();
 
-            if (!stats.ContainsKey(userId))
-            {
-                stats[userId] = new UserStats { Wins = 0, Losses = 0, Points = 0, CooldownEnd = DateTime.MinValue };
-            }
+            var userStats = EnsureUserStats(stats, userId);
 
             stats[userId].Points += points;
             SaveStats(stats);
 
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Se han dado **{points}** puntos a **{user.Username}**. Ahora tiene **{stats[userId].Points}** puntos.");
+            await ReplyAsync($"✅ Se han dado **{points}** puntos a **{user.Username}**. Ahora tiene **{stats[userId].Points}** puntos.");
         }
 
         [Command("subtractpoints")]
@@ -73,7 +71,7 @@ namespace SysBot.Pokemon.Discord
         {
             if (points < 0)
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No puedes restar puntos negativos.");
+                await ReplyAsync($"⚠️ No puedes restar puntos negativos.");
                 return;
             }
 
@@ -82,7 +80,7 @@ namespace SysBot.Pokemon.Discord
 
             if (!stats.ContainsKey(userId))
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} El usuario **{user.Username}** no tiene estadísticas registradas.");
+                await ReplyAsync($"⚠️ El usuario **{user.Username}** no tiene estadísticas registradas.");
                 return;
             }
 
@@ -96,7 +94,7 @@ namespace SysBot.Pokemon.Discord
             }
 
             SaveStats(stats);
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Se han restado **{points}** puntos a **{user.Username}**. Ahora tiene **{stats[userId].Points}** puntos.");
+            await ReplyAsync($"✅ Se han restado **{points}** puntos a **{user.Username}**. Ahora tiene **{stats[userId].Points}** puntos.");
         }
 
         [Command("rank")]
@@ -108,7 +106,7 @@ namespace SysBot.Pokemon.Discord
 
             if (stats.Count == 0)
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No hay estadísticas disponibles.");
+                await ReplyAsync($"⚠️ No hay estadísticas disponibles.");
                 return;
             }
 
@@ -278,13 +276,13 @@ namespace SysBot.Pokemon.Discord
         {
             if (_doubleXPActive)
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} El doble XP ya está activo.");
+                await ReplyAsync($"⚠️ El doble XP ya está activo.");
                 return;
             }
 
             if (!TryParseDuration(duration, out var timeSpan))
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Formato de duración inválido. Usa `1d`, `30m`, o `20s`.");
+                await ReplyAsync($"⚠️ Formato de duración inválido. Usa `1d`, `30m`, o `20s`.");
                 return;
             }
 
@@ -292,7 +290,7 @@ namespace SysBot.Pokemon.Discord
             _doubleXPCTS.Cancel(); // Cancel any existing double XP timer
             _doubleXPCTS = new CancellationTokenSource();
 
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} ¡Doble XP activado! Los usuarios ganarán el doble de XP durante los próximos **{timeSpan:hh\\:mm\\:ss}**.");
+            await ReplyAsync($"✅ ¡Doble XP activado! Los usuarios ganarán el doble de XP durante los próximos **{timeSpan:hh\\:mm\\:ss}**.");
 
             // Deactivate double XP after the specified duration
             _ = Task.Run(async () =>
@@ -301,7 +299,7 @@ namespace SysBot.Pokemon.Discord
                 {
                     await Task.Delay(timeSpan, _doubleXPCTS.Token);
                     _doubleXPActive = false;
-                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} El doble XP ha sido desactivado.");
+                    await ReplyAsync($"✅ El doble XP ha sido desactivado.");
                 }
                 catch (TaskCanceledException)
                 {
@@ -318,13 +316,13 @@ namespace SysBot.Pokemon.Discord
         {
             if (!_doubleXPActive)
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} El doble XP no está activo.");
+                await ReplyAsync($"⚠️ El doble XP no está activo.");
                 return;
             }
 
             _doubleXPCTS.Cancel(); // Cancel the double XP timer
             _doubleXPActive = false;
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} El doble XP ha sido desactivado manualmente.");
+            await ReplyAsync($"✅ El doble XP ha sido desactivado manualmente.");
         }
 
         private bool TryParseDuration(string input, out TimeSpan timeSpan)
@@ -362,6 +360,16 @@ namespace SysBot.Pokemon.Discord
 
             var json = File.ReadAllText(StatsFilePath);
             return JsonConvert.DeserializeObject<Dictionary<string, UserStats>>(json) ?? new Dictionary<string, UserStats>();
+        }
+
+        private UserStats EnsureUserStats(Dictionary<string, UserStats> stats, string userId)
+        {
+            if (!stats.TryGetValue(userId, out var userStats))
+            {
+                userStats = new UserStats();
+                stats[userId] = userStats;
+            }
+            return userStats;
         }
 
         private void SaveStats(Dictionary<string, UserStats> stats)

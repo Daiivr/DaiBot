@@ -67,9 +67,6 @@ public class DiscordSettings
     [Category(Startup), Description("Prefijo de comando del bot.")]
     public string CommandPrefix { get; set; } = "$";
 
-    [Category(Operation), TypeConverter(typeof(ExpandableObjectConverter)), Description("Emojis personalizados que se usarán en los mensajes de alerta del bot."), DisplayName("Emojis Personalizados de alerta")]
-    public AlertEmojiSettings CustomEmojis { get; set; } = new AlertEmojiSettings();
-
     [Category(Startup), Description("Estado personalizado del bot."), DisplayName("Estado de Juego del Bot")]
     public string BotGameStatus { get; set; } = "Pokémon";
 
@@ -298,15 +295,4 @@ public class Badge
     }
 
     public override string ToString() => $"{Emoji}";
-}
-
-public class AlertEmojiSettings
-{
-    public string Success { get; set; } = "✅";
-    public string Warning { get; set; } = "⚠️";
-    public string Error { get; set; } = "❌";
-    public string Info { get; set; } = "ℹ️";
-    public string Loading { get; set; } = "⏳";
-
-    public override string ToString() => "(Configuración de Emojis de Alertas)";
 }

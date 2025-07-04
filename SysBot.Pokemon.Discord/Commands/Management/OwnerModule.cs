@@ -47,7 +47,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
         var dmChannel = await Context.User.CreateDMChannelAsync();
         await dmChannel.SendMessageAsync(embed: embedBuilder.Build());
 
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention}, Te envié un DM con la lista de servidores. (Pagina {page}).");
+        await ReplyAsync($"✅ {Context.User.Mention}, Te envié un DM con la lista de servidores. (Pagina {page}).");
 
         if (Context.Message is IUserMessage userMessage)
         {
@@ -66,14 +66,14 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
 
         if (settings.ServerBlacklist.Contains(serverId))
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Este servidor ya está en la lista negra.");
+            await ReplyAsync($"⚠️ Este servidor ya está en la lista negra.");
             return;
         }
 
         var server = Context.Client.GetGuild(serverId);
         if (server == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se puede encontrar un servidor con el ID proporcionado. Asegúrese de que el bot sea miembro del servidor que desea incluir en la lista negra.");
+            await ReplyAsync($"⚠️ No se puede encontrar un servidor con el ID proporcionado. Asegúrese de que el bot sea miembro del servidor que desea incluir en la lista negra.");
             return;
         }
 
@@ -82,7 +82,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
         settings.ServerBlacklist.AddIfNew([newServerAccess]);
 
         await server.LeaveAsync();
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} He dejado el servidor '{server.Name}' y lo agregue a la lista negra.");
+        await ReplyAsync($"✅ He dejado el servidor '{server.Name}' y lo agregue a la lista negra.");
     }
 
     [Command("unblacklistserver")]
@@ -95,7 +95,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
 
         if (!settings.ServerBlacklist.Contains(serverId))
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Este servidor no está actualmente en la lista negra.");
+            await ReplyAsync($"⚠️ Este servidor no está actualmente en la lista negra.");
             return;
         }
 
@@ -103,11 +103,11 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
 
         if (wasRemoved)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} El servidor con ID {serverId} ha sido eliminado de la lista negra.");
+            await ReplyAsync($"✅ El servidor con ID {serverId} ha sido eliminado de la lista negra.");
         }
         else
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Se produjo un error al intentar eliminar el servidor de la lista negra. Verifique la ID del servidor e inténtelo nuevamente.");
+            await ReplyAsync($"⚠️ Se produjo un error al intentar eliminar el servidor de la lista negra. Verifique la ID del servidor e inténtelo nuevamente.");
         }
     }
 
@@ -119,7 +119,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
         var users = Context.Message.MentionedUsers;
         var objects = users.Select(GetReference);
         SysCordSettings.Settings.GlobalSudoList.AddIfNew(objects);
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Listo.").ConfigureAwait(false);
+        await ReplyAsync($"✅ Listo.").ConfigureAwait(false);
     }
 
     [Command("removeSudo")]
@@ -130,7 +130,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
         var users = Context.Message.MentionedUsers;
         var objects = users.Select(GetReference);
         SysCordSettings.Settings.GlobalSudoList.RemoveAll(z => objects.Any(o => o.ID == z.ID));
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Listo.").ConfigureAwait(false);
+        await ReplyAsync($"✅ Listo.").ConfigureAwait(false);
     }
 
     [Command("addChannel")]
@@ -140,7 +140,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
     {
         var obj = GetReference(Context.Message.Channel);
         SysCordSettings.Settings.ChannelWhitelist.AddIfNew([obj]);
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Listo.").ConfigureAwait(false);
+        await ReplyAsync($"✅ Listo.").ConfigureAwait(false);
     }
 
     [Command("syncChannels")]
@@ -165,11 +165,11 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
 
         if (changesMade)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} La lista blanca de canales se ha sincronizado correctamente con los canales de anuncios.").ConfigureAwait(false);
+            await ReplyAsync($"✅ La lista blanca de canales se ha sincronizado correctamente con los canales de anuncios.").ConfigureAwait(false);
         }
         else
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Todos los canales de la lista blanca ya están en los canales de anuncios, no se realizaron cambios.").ConfigureAwait(false);
+            await ReplyAsync($"✅ Todos los canales de la lista blanca ya están en los canales de anuncios, no se realizaron cambios.").ConfigureAwait(false);
         }
     }
 
@@ -180,7 +180,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
     {
         var obj = GetReference(Context.Message.Channel);
         SysCordSettings.Settings.ChannelWhitelist.RemoveAll(z => z.ID == obj.ID);
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Listo.").ConfigureAwait(false);
+        await ReplyAsync($"✅ Listo.").ConfigureAwait(false);
     }
 
     [Command("leave")]
@@ -201,14 +201,14 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
     {
         if (!ulong.TryParse(userInput, out ulong id))
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Proporcione una identificación válida de servidor!").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ Proporcione una identificación válida de servidor!").ConfigureAwait(false);
             return;
         }
 
         var guild = Context.Client.Guilds.FirstOrDefault(x => x.Id == id);
         if (guild is null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} La entrada proporcionada ({{userInput}}) no es un ID de server válido o el bot no está en el servidor especificado.").ConfigureAwait(false);
+            await ReplyAsync($"✅ La entrada proporcionada ({{userInput}}) no es un ID de server válido o el bot no está en el servidor especificado.").ConfigureAwait(false);
             return;
         }
 
@@ -221,7 +221,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
     [RequireOwner]
     public async Task LeaveAll()
     {
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Abandonando todos los servidores.").ConfigureAwait(false);
+        await ReplyAsync($"✅ Abandonando todos los servidores.").ConfigureAwait(false);
         foreach (var guild in Context.Client.Guilds)
         {
             await guild.LeaveAsync().ConfigureAwait(false);
@@ -240,7 +240,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
         var bot = SysCord<T>.Runner.GetBot(address);
         if (bot == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se encontró ningún bot con la dirección IP: ({address}).").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ No se encontró ningún bot con la dirección IP: ({address}).").ConfigureAwait(false);
             return;
         }
 
@@ -252,13 +252,13 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
         }
         catch (Exception ex)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Error al recuperar píxeles: {ex.Message}");
+            await ReplyAsync($"⚠️ Error al recuperar píxeles: {ex.Message}");
             return;
         }
 
         if (bytes.Length == 0)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se recibieron datos de captura de pantalla.");
+            await ReplyAsync($"⚠️ No se recibieron datos de captura de pantalla.");
             return;
         }
 
@@ -289,7 +289,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
                 var bot = SysCord<T>.Runner.GetBot(ip);
                 if (bot == null)
                 {
-                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se encontró ningún bot con la dirección IP: ({ip}).").ConfigureAwait(false);
+                    await ReplyAsync($"⚠️ No se encontró ningún bot con la dirección IP: ({ip}).").ConfigureAwait(false);
                     return;
                 }
                 const int screenshotCount = 10;
@@ -306,12 +306,12 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
                     }
                     catch (Exception ex)
                     {
-                        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Error al recuperar píxeles: {ex.Message}").ConfigureAwait(false);
+                        await ReplyAsync($"⚠️ Error al recuperar píxeles: {ex.Message}").ConfigureAwait(false);
                         return;
                     }
                     if (bytes.Length == 0)
                     {
-                        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se recibieron datos de captura de pantalla.").ConfigureAwait(false);
+                        await ReplyAsync($"⚠️ No se recibieron datos de captura de pantalla.").ConfigureAwait(false);
                         return;
                     }
                     using (var ms = new MemoryStream(bytes))
@@ -358,7 +358,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
             }
             catch (Exception ex)
             {
-                await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Error al procesar GIF: {ex.Message}").ConfigureAwait(false);
+                await ReplyAsync($"⚠️ Error al procesar GIF: {ex.Message}").ConfigureAwait(false);
             }
         });
     }
@@ -377,7 +377,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"{SysCordSettings.Settings.CustomEmojis.Warning} Error al leer el archivo de configuración: {ex.Message}");
+            Console.WriteLine($"⚠️ Error al leer el archivo de configuración: {ex.Message}");
             return "192.168.1.1";
         }
     }
@@ -388,7 +388,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
     [RequireOwner]
     public async Task ExitProgram()
     {
-        await Context.Channel.EchoAndReply($"{SysCordSettings.Settings.CustomEmojis.Success} Cerrando... ¡adiós! **Los servicios de bots se están desconectando.**").ConfigureAwait(false);
+        await Context.Channel.EchoAndReply($"✅ Cerrando... ¡adiós! **Los servicios de bots se están desconectando.**").ConfigureAwait(false);
         Environment.Exit(0);
     }
 
@@ -451,14 +451,14 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
 
             await dmChannel.SendMessageAsync(embed: embed.Build());
 
-            var confirmationMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Mensaje enviado exitosamente a **{user.Username}**.");
+            var confirmationMessage = await ReplyAsync($"✅ Mensaje enviado exitosamente a **{user.Username}**.");
             await Context.Message.DeleteAsync();
             await Task.Delay(TimeSpan.FromSeconds(10));
             await confirmationMessage.DeleteAsync();
         }
         catch (Exception ex)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se pudo enviar el mensaje a **{user.Username}**. Error: {ex.Message}");
+            await ReplyAsync($"⚠️ No se pudo enviar el mensaje a **{user.Username}**. Error: {ex.Message}");
         }
     }
 
@@ -474,7 +474,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
         var indexOfChannelMentionEnd = message.LastIndexOf('>');
         if (indexOfChannelMentionStart == -1 || indexOfChannelMentionEnd == -1)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, por favor mencione un canal correctamente usando #channel.");
+            await ReplyAsync($"⚠️ {Context.User.Mention}, por favor mencione un canal correctamente usando #channel.");
             return;
         }
 
@@ -485,13 +485,13 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
 
         if (channel == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Canal no encontrado.");
+            await ReplyAsync($"⚠️ Canal no encontrado.");
             return;
         }
 
         if (channel is not IMessageChannel messageChannel)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} El canal mencionado no es un canal de texto.");
+            await ReplyAsync($"⚠️ El canal mencionado no es un canal de texto.");
             return;
         }
 
@@ -512,7 +512,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
         }
 
         // Send confirmation message to the user
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention}, mensaje publicado exitosamente en {channelMention}.");
+        await ReplyAsync($"✅ {Context.User.Mention}, mensaje publicado exitosamente en {channelMention}.");
     }
 
     private RemoteControlAccess GetReference(IUser channel) => new()

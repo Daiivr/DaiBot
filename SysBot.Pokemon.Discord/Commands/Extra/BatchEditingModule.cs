@@ -18,7 +18,7 @@ public class BatchEditingModule : ModuleBase<SocketCommandContext>
         if (BatchEditing.TryGetPropertyType(propertyName, out string? result))
             await ReplyAsync($"{propertyName}: {result}").ConfigureAwait(false);
         else
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No pude encuentra información sobre: {propertyName}.").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ No pude encuentra información sobre: {propertyName}.").ConfigureAwait(false);
     }
 
     [Command("batchValidate"), Alias("bev")]
@@ -30,7 +30,7 @@ public class BatchEditingModule : ModuleBase<SocketCommandContext>
         if (!valid)
         {
             var msg = invalid.Select(z => $"{z.PropertyName}, {z.PropertyValue}");
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Líneas no válidas detectadas:\r\n{Format.Code(string.Join(Environment.NewLine, msg))}")
+            await ReplyAsync($"⚠️ Líneas no válidas detectadas:\r\n{Format.Code(string.Join(Environment.NewLine, msg))}")
                 .ConfigureAwait(false);
         }
         else

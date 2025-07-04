@@ -34,7 +34,7 @@ public class CloneModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -55,7 +55,7 @@ public class CloneModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         _ = QueueHelper<T>.AddToQueueAsync(Context, code, Context.User.Username, sig, new T(), PokeRoutineType.Clone, PokeTradeType.Clone, Context.User, false, 1, 1, false, false, false, lgcode);
 
         // Immediately send a confirmation message without waiting
-        var confirmationMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Loading} Procesando su solicitud de clonación...").ConfigureAwait(false);
+        var confirmationMessage = await ReplyAsync($"⏳ Procesando su solicitud de clonación...").ConfigureAwait(false);
 
         // Use a fire-and-forget approach for the delay and deletion
         _ = Task.Delay(2000).ContinueWith(async _ =>
@@ -91,7 +91,7 @@ public class CloneModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -113,7 +113,7 @@ public class CloneModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         _ = QueueHelper<T>.AddToQueueAsync(Context, tradeCode == 0 ? Info.GetRandomTradeCode(userID) : tradeCode, Context.User.Username, sig, new T(), PokeRoutineType.Clone, PokeTradeType.Clone, Context.User, false, 1, 1, false, false, false, lgcode);
 
         // Immediately send a confirmation message without waiting
-        var confirmationMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Loading} Procesando su solicitud de clonación...").ConfigureAwait(false);
+        var confirmationMessage = await ReplyAsync($"⏳ Procesando su solicitud de clonación...").ConfigureAwait(false);
 
         // Use a fire-and-forget approach for the delay and deletion
         _ = Task.Delay(2000).ContinueWith(async _ =>

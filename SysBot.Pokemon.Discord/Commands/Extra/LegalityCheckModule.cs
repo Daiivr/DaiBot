@@ -42,7 +42,7 @@ public class LegalityCheckModule : ModuleBase<SocketCommandContext>
 
         builder.AddField(x =>
         {
-            x.Name = la.Valid ? $"{SysCordSettings.Settings.CustomEmojis.Success} Válido" : $"{SysCordSettings.Settings.CustomEmojis.Error} Inválido";
+            x.Name = la.Valid ? $"✅ Válido" : $"❌ Inválido";
             x.Value = la.Report(verbose);
             x.IsInline = false;
         });

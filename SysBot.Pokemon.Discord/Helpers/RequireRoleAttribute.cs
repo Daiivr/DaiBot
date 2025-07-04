@@ -19,13 +19,13 @@ public sealed class RequireRoleAttribute(string RoleName) : PreconditionAttribut
 
         // Check if this user is a Guild User, which is the only context where roles exist
         if (context.User is not SocketGuildUser gUser)
-            return Task.FromResult(PreconditionResult.FromError($"{SysCordSettings.Settings.CustomEmojis.Warning} Lo siento {context.User.Mention}, este comando solo puede ser usado dentro de un servidor y no en mensajes directos."));
+            return Task.FromResult(PreconditionResult.FromError($"⚠️ Lo siento {context.User.Mention}, este comando solo puede ser usado dentro de un servidor y no en mensajes directos."));
 
         // If this command was executed by a user with the appropriate role, return a success
         if (gUser.Roles.Any(r => r.Name == RoleName))
             return Task.FromResult(PreconditionResult.FromSuccess());
 
         // Since it wasn't, fail
-        return Task.FromResult(PreconditionResult.FromError($"{SysCordSettings.Settings.CustomEmojis.Error} {context.User.Mention} debe tener un rol llamado {RoleName} para ejecutar este comando."));
+        return Task.FromResult(PreconditionResult.FromError($"❌ {context.User.Mention} debe tener un rol llamado {RoleName} para ejecutar este comando."));
     }
 }

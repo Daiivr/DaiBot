@@ -43,7 +43,7 @@ public class HubModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new(
             var lines = bots.SelectMany(z => z.Counts.GetNonZeroCounts()).Distinct();
             var msg = string.Join("\n", lines);
             if (string.IsNullOrWhiteSpace(msg))
-                msg = $"{SysCordSettings.Settings.CustomEmojis.Warning} Aún no se ha contabilizado nada!";
+                msg = $"⚠️ Aún no se ha contabilizado nada!";
             x.Name = "Recuentos:";
             x.Value = msg;
             x.IsInline = false;
@@ -73,8 +73,8 @@ public class HubModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new(
         {
             builder.AddField(x =>
             {
-                x.Name = $"{SysCordSettings.Settings.CustomEmojis.Warning} Las colas de espera están vacías.";
-                x.Value = $"{SysCordSettings.Settings.CustomEmojis.Warning} Nadie en la cola!";
+                x.Name = $"⚠️ Las colas de espera están vacías.";
+                x.Value = $"⚠️ Nadie en la cola!";
                 x.IsInline = false;
             });
         }
@@ -100,7 +100,7 @@ public class HubModule<T> : ModuleBase<SocketCommandContext> where T : PKM, new(
     private static string SummarizeBots(IReadOnlyCollection<RoutineExecutor<PokeBotState>> bots)
     {
         if (bots.Count == 0)
-            return $"{SysCordSettings.Settings.CustomEmojis.Warning} No hay bots configurados.";
+            return $"⚠️ No hay bots configurados.";
         var summaries = bots.Select(z => $"- {z.GetSummary()}");
         return Environment.NewLine + string.Join(Environment.NewLine, summaries);
     }

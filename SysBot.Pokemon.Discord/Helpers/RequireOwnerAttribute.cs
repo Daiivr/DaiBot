@@ -17,6 +17,6 @@ public sealed class RequireOwnerAttribute : PreconditionAttribute
             return PreconditionResult.FromSuccess();
 
         // If the user is not the owner, return an error
-        return PreconditionResult.FromError($"{SysCordSettings.Settings.CustomEmojis.Warning} {context.User.Mention} solo el dueño del bot puede ejecutar este comando.");
+        return PreconditionResult.FromError($"⚠️ {context.User.Mention} solo el dueño del bot puede ejecutar este comando.");
     }
 }

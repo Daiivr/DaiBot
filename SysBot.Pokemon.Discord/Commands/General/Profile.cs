@@ -12,6 +12,8 @@ using ImageSharp = SixLabors.ImageSharp;
 using System.Threading;
 using System;
 
+using SysBot.Pokemon.Discord.Models;
+
 namespace SysBot.Pokemon.Discord;
 
 public class ProfileModule : ModuleBase<SocketCommandContext>
@@ -134,7 +136,7 @@ public class ProfileModule : ModuleBase<SocketCommandContext>
             }
             catch
             {
-                var errorMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} {targetUser.Mention} No se pudo enviar tu perfil por mensaje directo. Por favor, habilita los mensajes directos.").ConfigureAwait(false);
+                var errorMessage = await ReplyAsync($"❌ {targetUser.Mention} No se pudo enviar tu perfil por mensaje directo. Por favor, habilita los mensajes directos.").ConfigureAwait(false);
                 _ = Task.Delay(10000).ContinueWith(_ => errorMessage.DeleteAsync());
 
                 await Context.Message.DeleteAsync();

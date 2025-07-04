@@ -18,7 +18,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
         var bot = SysCord<T>.Runner.Bots.Find(z => IsRemoteControlBot(z.Bot));
         if (bot == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No hay ningún bot disponible para ejecutar tu comando: {b}").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ No hay ningún bot disponible para ejecutar tu comando: {b}").ConfigureAwait(false);
             return;
         }
 
@@ -33,7 +33,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
         var bot = SysCord<T>.Runner.GetBot(ip);
         if (bot == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No hay ningún bot disponible para ejecutar tu comando: {b}").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ No hay ningún bot disponible para ejecutar tu comando: {b}").ConfigureAwait(false);
             return;
         }
 
@@ -81,7 +81,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
         var bots = SysCord<T>.Runner.Bots;
         if (bots.Count == 0)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {SysCordSettings.Settings.CustomEmojis.Warning} No hay bots actualmente conectados.").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ ⚠️ No hay bots actualmente conectados.").ConfigureAwait(false);
             return;
         }
 
@@ -112,7 +112,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
         var bot = SysCord<T>.Runner.Bots.Find(z => IsRemoteControlBot(z.Bot));
         if (bot == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No hay ningún bot disponible para ejecutar tu comando: {s}").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ No hay ningún bot disponible para ejecutar tu comando: {s}").ConfigureAwait(false);
             return;
         }
 
@@ -127,7 +127,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
         var bot = SysCord<T>.Runner.GetBot(ip);
         if (bot == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ Ningún bot tiene esa dirección IP: ({ip}).").ConfigureAwait(false);
             return;
         }
 
@@ -147,7 +147,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
     {
         if (!Enum.IsDefined(typeof(SwitchButton), button))
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Valor del botón desconocido: {button}").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ Valor del botón desconocido: {button}").ConfigureAwait(false);
             return;
         }
 
@@ -180,7 +180,7 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
         var bot = GetBot(ip);
         if (bot == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Ningún bot tiene esa dirección IP ({ip}).").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ Ningún bot tiene esa dirección IP ({ip}).").ConfigureAwait(false);
             return;
         }
 
@@ -194,16 +194,16 @@ public class RemoteControlModule<T> : ModuleBase<SocketCommandContext> where T :
     {
         if (!Enum.IsDefined(typeof(SwitchStick), s))
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Stick desconocido: {s}").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ Stick desconocido: {s}").ConfigureAwait(false);
             return;
         }
 
         var b = bot.Bot;
         var crlf = b is SwitchRoutineExecutor<PokeBotState> { UseCRLF: true };
         await b.Connection.SendAsync(SwitchCommand.SetStick(s, x, y, crlf), CancellationToken.None).ConfigureAwait(false);
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {b.Connection.Name} ha realizado: {s}").ConfigureAwait(false);
+        await ReplyAsync($"✅ {b.Connection.Name} ha realizado: {s}").ConfigureAwait(false);
         await Task.Delay(ms).ConfigureAwait(false);
         await b.Connection.SendAsync(SwitchCommand.ResetStick(s, crlf), CancellationToken.None).ConfigureAwait(false);
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {b.Connection.Name} ha restablecido la posición del stick.").ConfigureAwait(false);
+        await ReplyAsync($"✅ {b.Connection.Name} ha restablecido la posición del stick.").ConfigureAwait(false);
     }
 }

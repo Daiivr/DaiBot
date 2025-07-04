@@ -39,7 +39,7 @@ public static class AutoLegalityExtensionsDiscord
                 var reason = result == "Timeout" ? $"Este **{spec}** tomó demasiado tiempo para generarse." :
                              result == "VersionMismatch" ? "Solicitud denegada: Las versiones de **PKHeX** y **Auto-Legality Mod** no coinciden." :
                              $"No se puede crear un **{spec}** con esos datos.";
-                var imsg = $"{SysCordSettings.Settings.CustomEmojis.Error} Oops! {reason}";
+                var imsg = $"❌ Oops! {reason}";
                 if (result == "Failed")
                     imsg += $"\n{AutoLegalityWrapper.GetLegalizationHint(template, sav, pkm)}";
                 // Create an embed
@@ -107,7 +107,7 @@ public static class AutoLegalityExtensionsDiscord
         catch (Exception ex)
         {
             LogUtil.LogSafe(ex, nameof(AutoLegalityExtensionsDiscord));
-            var errorMessage = $"{SysCordSettings.Settings.CustomEmojis.Error} Oops! Ocurrió un problema inesperado con este Showdown Set:\n```{string.Join("\n", set.GetSetLines())}```";
+            var errorMessage = $"❌ Oops! Ocurrió un problema inesperado con este Showdown Set:\n```{string.Join("\n", set.GetSetLines())}```";
 
             var embedError = new EmbedBuilder()
                 .WithDescription(errorMessage)

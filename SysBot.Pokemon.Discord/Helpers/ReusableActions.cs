@@ -90,7 +90,7 @@ public static class ReusableActions
             .Build();
 
         var botMessage = await channel.SendMessageAsync(embed: embed).ConfigureAwait(false); // Send the embed
-        var warningMessage = await channel.SendMessageAsync($"{SysCordSettings.Settings.CustomEmojis.Loading} Este mensaje se autodestruirá en 15 segundos. Por favor copie sus datos.").ConfigureAwait(false);
+        var warningMessage = await channel.SendMessageAsync($"⏳ Este mensaje se autodestruirá en 15 segundos. Por favor copie sus datos.").ConfigureAwait(false);
 
         _ = Task.Run(async () =>
         {

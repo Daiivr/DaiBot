@@ -132,8 +132,8 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
         {
             // This is part of a batch, but we still want to confirm each individual trade
             message = tradedToUser != 0
-                ? $"{SysCordSettings.Settings.CustomEmojis.Success} Trade {info.BatchTradeNumber}/{info.TotalBatchTrades} finalizado. Disfruta de tu **{(Species)tradedToUser}**!"
-                : $"{SysCordSettings.Settings.CustomEmojis.Success} Trade {info.BatchTradeNumber}/{info.TotalBatchTrades} finalizado!";
+                ? $"✅ Trade {info.BatchTradeNumber}/{info.TotalBatchTrades} finalizado. Disfruta de tu **{(Species)tradedToUser}**!"
+                : $"✅ Trade {info.BatchTradeNumber}/{info.TotalBatchTrades} finalizado!";
 
             // Send the embed only on the first trade of the batch
             if (info.BatchTradeNumber == 1)
@@ -146,15 +146,15 @@ public class DiscordTradeNotifier<T> : IPokeTradeNotifier<T>
             if (info.Type == PokeTradeType.Item)
             {
                 string itemName = GameInfo.GetStrings("en").itemlist[Data.HeldItem];
-                message = $"{SysCordSettings.Settings.CustomEmojis.Success} Trade finalizado. ¡Disfruta de tu **{itemName}**!";
+                message = $"✅ Trade finalizado. ¡Disfruta de tu **{itemName}**!";
             }
             else
             {
                 message = tradedToUser != 0
-                    ? (info.IsMysteryTrade ? $"{SysCordSettings.Settings.CustomEmojis.Success} Trade finalizado. ¡Has recibido un **Pokemon Misterioso**!" :
-                       info.IsMysteryEgg ? $"{SysCordSettings.Settings.CustomEmojis.Success} Trade finalizado. ¡Disfruta de tu **Huevo Misterioso**!" :
-                       $"{SysCordSettings.Settings.CustomEmojis.Success} Trade finalizado. Disfruta de tu **{(Species)tradedToUser}**!")
-                    : $"{SysCordSettings.Settings.CustomEmojis.Success} Trade finalizado!";
+                    ? (info.IsMysteryTrade ? $"✅ Trade finalizado. ¡Has recibido un **Pokemon Misterioso**!" :
+                       info.IsMysteryEgg ? $"✅ Trade finalizado. ¡Disfruta de tu **Huevo Misterioso**!" :
+                       $"✅ Trade finalizado. Disfruta de tu **{(Species)tradedToUser}**!")
+                    : $"✅ Trade finalizado!";
             }
 
             EmbedHelper.SendTradeFinishedEmbedAsync(Trader, message, Data, info.IsMysteryTrade, info.IsMysteryEgg).ConfigureAwait(false);

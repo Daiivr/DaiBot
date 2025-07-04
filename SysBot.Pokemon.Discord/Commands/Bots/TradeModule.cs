@@ -54,7 +54,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -104,7 +104,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -169,7 +169,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -215,7 +215,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -237,7 +237,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         }
         else
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No pude reconocer el idioma solicitado: {language}.", 2, Context.Message);
+            _ = ReplyAndDeleteAsync($"⚠️ No pude reconocer el idioma solicitado: {language}.", 2, Context.Message);
             return;
         }
 
@@ -252,7 +252,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         if (pkm is not T pk || !la.Valid)
         {
             var reason = result == "Timeout" ? "El conjunto solicitado tardó demasiado en generarse." : "No fui capaz de crear algo a partir de los datos proporcionados.";
-            var imsg = $"{SysCordSettings.Settings.CustomEmojis.Warning} Oops! {reason} Aquí está mi mejor intento para ese **Ditto**!";
+            var imsg = $"⚠️ Oops! {reason} Aquí está mi mejor intento para ese **Ditto**!";
             await Context.Channel.SendPKMAsync(pkm, imsg).ConfigureAwait(false);
             return;
         }
@@ -264,7 +264,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         {
             if (TradeExtensions<T>.HasAdName(pk, out string ad))
             {
-                await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
+                await ReplyAndDeleteAsync($"❌ Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
                 return;
             }
         }
@@ -300,7 +300,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -341,7 +341,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -364,7 +364,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
 
         if (pkm.HeldItem == 0)
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, el item que has solicitado no ha sido reconocido.", 2, Context.Message);
+            _ = ReplyAndDeleteAsync($"⚠️ {Context.User.Mention}, el item que has solicitado no ha sido reconocido.", 2, Context.Message);
             return;
         }
 
@@ -372,7 +372,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         if (pkm is not T pk || !la.Valid)
         {
             var reason = result == "Timeout" ? "El conjunto solicitado tardó demasiado en generarse." : "No fui capaz de crear algo a partir de los datos proporcionados.";
-            var imsg = $"{SysCordSettings.Settings.CustomEmojis.Warning} Oops! {reason} Aquí está mi mejor intento para: **{species}**!";
+            var imsg = $"⚠️ Oops! {reason} Aquí está mi mejor intento para: **{species}**!";
             await Context.Channel.SendPKMAsync(pkm, imsg).ConfigureAwait(false);
             return;
         }
@@ -439,7 +439,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -465,7 +465,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
 
                 if (pkm is not T pk)
                 {
-                    _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Oops! {Context.User.Mention}, No pude crear un huevo con el pokemon solicitado.", 2, Context.Message);
+                    _ = ReplyAndDeleteAsync($"⚠️ Oops! {Context.User.Mention}, No pude crear un huevo con el pokemon solicitado.", 2, Context.Message);
                     return;
                 }
 
@@ -481,7 +481,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             catch (Exception ex)
             {
                 LogUtil.LogSafe(ex, nameof(TradeModule<T>));
-                _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, Se produjo un error al procesar la solicitud.", 2, Context.Message);
+                _ = ReplyAndDeleteAsync($"⚠️ {Context.User.Mention}, Se produjo un error al procesar la solicitud.", 2, Context.Message);
             }
             if (Context.Message is IUserMessage userMessage)
             {
@@ -529,7 +529,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -582,7 +582,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             var invalidLines = string.Join("\n", set.InvalidLines);
             var embed = new EmbedBuilder()
                 .WithTitle("Set de Showdown inválido")
-                .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} Hubo un error al analizar el conjunto de Showdown.\n\n Las siguientes líneas son inválidas:\n\n**{invalidLines}**")
+                .WithDescription($"❌ Hubo un error al analizar el conjunto de Showdown.\n\n Las siguientes líneas son inválidas:\n\n**{invalidLines}**")
                 .WithColor(Color.Red)
                 .WithImageUrl("https://i.imgur.com/Y64hLzW.gif")
                 .WithThumbnailUrl("https://i.imgur.com/DWLEXyu.png")
@@ -608,7 +608,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
 
                 if (pkm == null)
                 {
-                    var response = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} El set tardó demasiado en legalizarse.");
+                    var response = await ReplyAsync($"⚠️ El set tardó demasiado en legalizarse.");
                     return;
                 }
 
@@ -636,7 +636,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                         lgcode = GenerateRandomPictocodes(3);
                         if (pkm.Species == (int)Species.Mew && pkm.IsShiny)
                         {
-                            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Lo siento {Context.User.Mention}, Mew **no** puede ser Shiny en LGPE. PoGo Mew no se transfiere y Pokeball Plus Mew tiene shiny lock.");
+                            await ReplyAsync($"⚠️ Lo siento {Context.User.Mention}, Mew **no** puede ser Shiny en LGPE. PoGo Mew no se transfiere y Pokeball Plus Mew tiene shiny lock.");
                             return;
                         }
                     }
@@ -654,7 +654,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                     var embed = new EmbedBuilder
                     {
                         Title = "⚠️ Error en la Legalidad del Conjunto",
-                        Description = $"{SysCordSettings.Settings.CustomEmojis.Error} **Oops!** {reason}",
+                        Description = $"❌ **Oops!** {reason}",
                         Color = new Color(255, 0, 0), // Bright red for visibility
                         ImageUrl = "https://i.imgur.com/Y64hLzW.gif",
                         ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
@@ -703,7 +703,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 {
                     if (TradeExtensions<T>.HasAdName(pk, out string ad))
                     {
-                        await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
+                        await ReplyAndDeleteAsync($"❌ Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
                         return;
                     }
                 }
@@ -714,7 +714,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             catch (Exception ex)
             {
                 LogUtil.LogSafe(ex, nameof(TradeModule<T>));
-                var msg = $"{SysCordSettings.Settings.CustomEmojis.Warning} ¡Oops! Ocurrió un problema inesperado con este conjunto de showdown:\n```{string.Join("\n", set.GetSetLines())}```";
+                var msg = $"⚠️ ¡Oops! Ocurrió un problema inesperado con este conjunto de showdown:\n```{string.Join("\n", set.GetSetLines())}```";
                 _ = ReplyAndDeleteAsync(msg, 2, Context.Message);
             }
             if (Context.Message is IUserMessage userMessage)
@@ -790,7 +790,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -843,7 +843,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             var invalidLines = string.Join("\n", set.InvalidLines);
             var embed = new EmbedBuilder()
                 .WithTitle("Set de Showdown inválido")
-                .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} Hubo un error al analizar el conjunto de Showdown.\n\n Las siguientes líneas son inválidas:\n\n**{invalidLines}**")
+                .WithDescription($"❌ Hubo un error al analizar el conjunto de Showdown.\n\n Las siguientes líneas son inválidas:\n\n**{invalidLines}**")
                 .WithColor(Color.Red)
                 .WithImageUrl("https://i.imgur.com/Y64hLzW.gif")
                 .WithThumbnailUrl("https://i.imgur.com/DWLEXyu.png")
@@ -868,7 +868,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 var pkm = sav.GetLegal(template, out var result);
                 if (pkm == null)
                 {
-                    var response = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} El Showdown Set tardó demasiado en legalizarse.");
+                    var response = await ReplyAsync($"⚠️ El Showdown Set tardó demasiado en legalizarse.");
                     return;
                 }
 
@@ -896,7 +896,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                         lgcode = GenerateRandomPictocodes(3);
                         if (pkm.Species == (int)Species.Mew && pkm.IsShiny)
                         {
-                            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Lo siento {Context.User.Mention}, Mew **no** puede ser Shiny en LGPE. PoGo Mew no se transfiere y Pokeball Plus Mew tiene shiny lock.");
+                            await ReplyAsync($"⚠️ Lo siento {Context.User.Mention}, Mew **no** puede ser Shiny en LGPE. PoGo Mew no se transfiere y Pokeball Plus Mew tiene shiny lock.");
                             return;
                         }
                     }
@@ -914,7 +914,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                     var embed = new EmbedBuilder
                     {
                         Title = "⚠️ Error en la Legalidad del Conjunto",
-                        Description = $"{SysCordSettings.Settings.CustomEmojis.Error} **Oops!** {reason}",
+                        Description = $"❌ **Oops!** {reason}",
                         Color = new Color(255, 0, 0), // Bright red for visibility
                         ImageUrl = "https://i.imgur.com/Y64hLzW.gif",
                         ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
@@ -963,7 +963,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 {
                     if (TradeExtensions<T>.HasAdName(pk, out string ad))
                     {
-                        await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
+                        await ReplyAndDeleteAsync($"❌ Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
                         return;
                     }
                 }
@@ -974,7 +974,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             catch (Exception ex)
             {
                 LogUtil.LogSafe(ex, nameof(TradeModule<T>));
-                var msg = $"{SysCordSettings.Settings.CustomEmojis.Warning} ¡Oops! Ocurrió un problema inesperado con este conjunto de showdown:\n```{string.Join("\n", set.GetSetLines())}```";
+                var msg = $"⚠️ ¡Oops! Ocurrió un problema inesperado con este conjunto de showdown:\n```{string.Join("\n", set.GetSetLines())}```";
                 _ = ReplyAndDeleteAsync(msg, 2, null);
             }
             if (Context.Message is IUserMessage userMessage)
@@ -1026,7 +1026,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // First, check if batch trades are allowed
         if (!SysCord<T>.Runner.Config.Trade.TradeConfiguration.AllowBatchTrades)
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Los intercambios por lotes están actualmente deshabilitados.", 2);
+            _ = ReplyAndDeleteAsync($"⚠️ Los intercambios por lotes están actualmente deshabilitados.", 2);
             return;
         }
 
@@ -1047,7 +1047,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -1068,7 +1068,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Check if batch mode is allowed and if the number of trades exceeds the limit
         if (maxTradesAllowed < 1 || trades.Count > maxTradesAllowed)
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention} Sólo puedes procesar hasta **{maxTradesAllowed}** trades a la vez. Por favor, reduzca el número de operaciones en su lote.", 5, Context.Message);
+            _ = ReplyAndDeleteAsync($"⚠️ {Context.User.Mention} Sólo puedes procesar hasta **{maxTradesAllowed}** trades a la vez. Por favor, reduzca el número de operaciones en su lote.", 5, Context.Message);
             _ = DeleteMessagesAfterDelayAsync(null, Context.Message, 2);
             return;
         }
@@ -1126,7 +1126,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // First, check if batch trades are allowed
         if (!SysCord<T>.Runner.Config.Trade.TradeConfiguration.AllowBatchTrades)
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} Los intercambios por lotes están actualmente deshabilitados.", 2);
+            _ = ReplyAndDeleteAsync($"❌ {Context.User.Mention} Los intercambios por lotes están actualmente deshabilitados.", 2);
             return;
         }
 
@@ -1147,7 +1147,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -1164,13 +1164,13 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         var attachment = Context.Message.Attachments.FirstOrDefault();
         if (attachment == default)
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, no se ha adjuntado ningún archivo. ¡Por favor intenta de nuevo!", 2);
+            _ = ReplyAndDeleteAsync($"⚠️ {Context.User.Mention}, no se ha adjuntado ningún archivo. ¡Por favor intenta de nuevo!", 2);
             return;
         }
 
         if (!attachment.Filename.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, el formato de archivo no es válido. Por favor, proporciona un archivo en formato .zip.", 2);
+            _ = ReplyAndDeleteAsync($"⚠️ {Context.User.Mention}, el formato de archivo no es válido. Por favor, proporciona un archivo en formato .zip.", 2);
             return;
         }
 
@@ -1184,7 +1184,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Check if batch mode is allowed and if the number of trades exceeds the limit
         if (maxTradesAllowed < 1 || entries.Count > maxTradesAllowed)
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, solo puedes procesar hasta {maxTradesAllowed} intercambios a la vez. Reduce la cantidad de Pokémon en tu archivo .zip.", 5, Context.Message);
+            _ = ReplyAndDeleteAsync($"⚠️ {Context.User.Mention}, solo puedes procesar hasta {maxTradesAllowed} intercambios a la vez. Reduce la cantidad de Pokémon en tu archivo .zip.", 5, Context.Message);
             return;
         }
 
@@ -1227,7 +1227,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
 
                 if (!la.Valid)
                 {
-                    await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} El {spec} en el archivo proporcionado no es legal.").ConfigureAwait(false);
+                    await ReplyAsync($"⚠️ El {spec} en el archivo proporcionado no es legal.").ConfigureAwait(false);
                     return;
                 }
                 // Set correct MetDate for Mightiest Mark
@@ -1243,7 +1243,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 {
                     if (TradeExtensions<T>.HasAdName(pk, out string ad))
                     {
-                        await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
+                        await ReplyAndDeleteAsync($"❌ Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
                         return;
                     }
                 }
@@ -1302,7 +1302,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             var invalidLines = string.Join("\n", set.InvalidLines);
             var embed = new EmbedBuilder()
                 .WithTitle("Set de Showdown inválido")
-                .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} Hubo un error al analizar el conjunto de Showdown.\n\n Las siguientes líneas son inválidas:\n\n**{invalidLines}**")
+                .WithDescription($"❌ Hubo un error al analizar el conjunto de Showdown.\n\n Las siguientes líneas son inválidas:\n\n**{invalidLines}**")
                 .WithColor(Color.Red)
                 .WithImageUrl("https://i.imgur.com/Y64hLzW.gif")
                 .WithThumbnailUrl("https://i.imgur.com/DWLEXyu.png")
@@ -1327,7 +1327,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 var pkm = sav.GetLegal(template, out var result);
                 if (pkm == null)
                 {
-                    var response = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Showdown Set tardó demasiado en legalizarse.");
+                    var response = await ReplyAsync($"⚠️ Showdown Set tardó demasiado en legalizarse.");
                     return;
                 }
 
@@ -1346,7 +1346,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                     var embed = new EmbedBuilder
                     {
                         Title = "⚠️ Error en la Legalidad del Conjunto",
-                        Description = $"{SysCordSettings.Settings.CustomEmojis.Error} **Oops!** {reason}",
+                        Description = $"❌ **Oops!** {reason}",
                         Color = new Color(255, 0, 0), // Bright red for visibility
                         ImageUrl = "https://i.imgur.com/Y64hLzW.gif",
                         ThumbnailUrl = "https://i.imgur.com/DWLEXyu.png"
@@ -1392,7 +1392,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                     {
                         if (pkm.IsShiny)
                         {
-                            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Mew **no** puede ser Shiny en LGPE. PoGo Mew no se transfiere y Pokeball Plus Mew tiene shiny lock.");
+                            await ReplyAsync($"⚠️ Mew **no** puede ser Shiny en LGPE. PoGo Mew no se transfiere y Pokeball Plus Mew tiene shiny lock.");
                             return;
                         }
                     }
@@ -1424,7 +1424,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 {
                     if (TradeExtensions<T>.HasAdName(pk, out string ad))
                     {
-                        await ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
+                        await ReplyAndDeleteAsync($"❌ Nombre de anuncio detectado en el nombre del Pokémon o en el nombre del entrenador, lo cual no está permitido.", 5);
                         return;
                     }
                 }
@@ -1454,7 +1454,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Check if the events folder path is not set or empty
         if (string.IsNullOrEmpty(eventsFolderPath))
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, Este bot no tiene esta función configurada.", 2, Context.Message);
+            _ = ReplyAndDeleteAsync($"❌ Lo siento {Context.User.Mention}, Este bot no tiene esta función configurada.", 2, Context.Message);
             return;
         }
 
@@ -1493,7 +1493,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Check if there are no files matching the filter
         if (!filteredEventFiles.Any())
         {
-            replyMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention} No se encontraron eventos que coincidan con el filtro '{filter}'.");
+            replyMessage = await ReplyAsync($"⚠️ {Context.User.Mention} No se encontraron eventos que coincidan con el filtro '{filter}'.");
             _ = DeleteMessagesAfterDelayAsync(replyMessage, Context.Message, 10);
         }
         else
@@ -1520,17 +1520,17 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 {
                     var dmChannel = await user.CreateDMChannelAsync();
                     await dmChannel.SendMessageAsync(embed: embed.Build());
-                    replyMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention}, Te envié un DM con la lista de eventos.");
+                    replyMessage = await ReplyAsync($"✅ {Context.User.Mention}, Te envié un DM con la lista de eventos.");
                 }
                 catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Forbidden)
                 {
                     // This exception is thrown when the bot cannot send DMs to the user
-                    replyMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, No puedo enviarte un DM. Por favor verifique su **Configuración de privacidad del servidor**.");
+                    replyMessage = await ReplyAsync($"⚠️ {Context.User.Mention}, No puedo enviarte un DM. Por favor verifique su **Configuración de privacidad del servidor**.");
                 }
             }
             else
             {
-                replyMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} **Error**: No se puede enviar un DM. Por favor verifique su **Configuración de privacidad del servidor**.");
+                replyMessage = await ReplyAsync($"❌ **Error**: No se puede enviar un DM. Por favor verifique su **Configuración de privacidad del servidor**.");
             }
 
             _ = DeleteMessagesAfterDelayAsync(replyMessage, Context.Message, 10);
@@ -1561,7 +1561,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -1586,13 +1586,13 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             // Check if the events folder path is not set or empty
             if (string.IsNullOrEmpty(eventsFolderPath))
             {
-                _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, Este bot no tiene esta función configurada.", 2, Context.Message);
+                _ = ReplyAndDeleteAsync($"❌ Lo siento {Context.User.Mention}, Este bot no tiene esta función configurada.", 2, Context.Message);
                 return;
             }
 
             if (index < 1 || index > eventFiles.Count)
             {
-                _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, Índice de eventos no válido. Utilice un número de evento válido mostrado en la lista que te envie al MD cuando usaste el comando `.le`.", 2, Context.Message);
+                _ = ReplyAndDeleteAsync($"⚠️ {Context.User.Mention}, Índice de eventos no válido. Utilice un número de evento válido mostrado en la lista que te envie al MD cuando usaste el comando `.le`.", 2, Context.Message);
                 return;
             }
 
@@ -1609,7 +1609,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             var pk = GetRequest(download);
             if (pk == null)
             {
-                _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se pudo convertir el archivo de eventos al tipo PKM requerido.", 2, Context.Message);
+                _ = ReplyAndDeleteAsync($"⚠️ No se pudo convertir el archivo de eventos al tipo PKM requerido.", 2, Context.Message);
                 return;
             }
 
@@ -1617,12 +1617,12 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             var lgcode = Info.GetRandomLGTradeCode();
             var sig = Context.User.GetFavor();
 
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention} Evento solicitado, agregado a la cola.").ConfigureAwait(false);
+            await ReplyAsync($"✅ {Context.User.Mention} Evento solicitado, agregado a la cola.").ConfigureAwait(false);
             await AddTradeToQueueAsync(code, Context.User.Username, pk, sig, Context.User, lgcode: lgcode).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Ocurrió un error: {ex.Message}", 2, Context.Message);
+            _ = ReplyAndDeleteAsync($"❌ Ocurrió un error: {ex.Message}", 2, Context.Message);
         }
         finally
         {
@@ -1646,7 +1646,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Check if the battleready folder path is not set or empty
         if (string.IsNullOrEmpty(battleReadyFolderPath))
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, Este bot no tiene esta función configurada.", 2, Context.Message);
+            _ = ReplyAndDeleteAsync($"❌ Lo siento {Context.User.Mention}, Este bot no tiene esta función configurada.", 2, Context.Message);
             return;
         }
 
@@ -1685,7 +1685,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Check if there are no files matching the filter
         if (!filteredBattleReadyFiles.Any())
         {
-            replyMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se encontraron archivos listos para la batalla que coincidan con el filtro. '{filter}'.");
+            replyMessage = await ReplyAsync($"⚠️ No se encontraron archivos listos para la batalla que coincidan con el filtro. '{filter}'.");
             _ = DeleteMessagesAfterDelayAsync(replyMessage, Context.Message, 10);
         }
         else
@@ -1712,17 +1712,17 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 {
                     var dmChannel = await user.CreateDMChannelAsync();
                     await dmChannel.SendMessageAsync(embed: embed.Build());
-                    replyMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention}, Te envié un DM con la lista de archivos pokemon listos para batalla.");
+                    replyMessage = await ReplyAsync($"✅ {Context.User.Mention}, Te envié un DM con la lista de archivos pokemon listos para batalla.");
                 }
                 catch (HttpException ex) when (ex.HttpCode == HttpStatusCode.Forbidden)
                 {
                     // This exception is thrown when the bot cannot send DMs to the user
-                    replyMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, No puedo enviarte un DM. Por favor verifique su **Configuración de privacidad del servidor**.");
+                    replyMessage = await ReplyAsync($"⚠️ {Context.User.Mention}, No puedo enviarte un DM. Por favor verifique su **Configuración de privacidad del servidor**.");
                 }
             }
             else
             {
-                replyMessage = await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Error} **Error**: No se puede enviar un MD. Por favor verifique su **Configuración de privacidad del servidor**.");
+                replyMessage = await ReplyAsync($"❌ **Error**: No se puede enviar un MD. Por favor verifique su **Configuración de privacidad del servidor**.");
             }
 
             _ = DeleteMessagesAfterDelayAsync(replyMessage, Context.Message, 10);
@@ -1753,7 +1753,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             queueEmbed.WithAuthor("Error al intentar agregarte a la lista", "https://i.imgur.com/0R7Yvok.gif");
 
             // Añadir un field al Embed para indicar el error
-            queueEmbed.AddField("__**Error**__:", $"{SysCordSettings.Settings.CustomEmojis.Error} {Context.User.Mention} No pude agregarte a la cola", true);
+            queueEmbed.AddField("__**Error**__:", $"❌ {Context.User.Mention} No pude agregarte a la cola", true);
             queueEmbed.AddField("__**Razón**__:", "No puedes agregar más operaciones hasta que la actual se procese.", true);
             queueEmbed.AddField("__**Solución**__:", "Espera un poco hasta que la operación existente se termine e intentalo de nuevo.");
 
@@ -1778,13 +1778,13 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             // Check if the battleready folder path is not set or empty
             if (string.IsNullOrEmpty(battleReadyFolderPath))
             {
-                _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Lo siento {Context.User.Mention}, Este bot no tiene esta función configurada.", 2, Context.Message);
+                _ = ReplyAndDeleteAsync($"❌ Lo siento {Context.User.Mention}, Este bot no tiene esta función configurada.", 2, Context.Message);
                 return;
             }
 
             if (index < 1 || index > battleReadyFiles.Count)
             {
-                _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, Índice de archivos listos para la batalla no válido. Utilice un número de archivo mostrado en la lista que te envie al MD cuando usaste el comando `.blr`.", 2, Context.Message);
+                _ = ReplyAndDeleteAsync($"⚠️ {Context.User.Mention}, Índice de archivos listos para la batalla no válido. Utilice un número de archivo mostrado en la lista que te envie al MD cuando usaste el comando `.blr`.", 2, Context.Message);
                 return;
             }
 
@@ -1801,7 +1801,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             var pk = GetRequest(download);
             if (pk == null)
             {
-                _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} No se pudo convertir el archivo listo para batalla al tipo PKM requerido.", 2, Context.Message);
+                _ = ReplyAndDeleteAsync($"⚠️ No se pudo convertir el archivo listo para batalla al tipo PKM requerido.", 2, Context.Message);
                 return;
             }
 
@@ -1809,12 +1809,12 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             var lgcode = Info.GetRandomLGTradeCode();
             var sig = Context.User.GetFavor();
 
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} {Context.User.Mention}, solicitud de Pokemon listo para batalla agregada a la cola.").ConfigureAwait(false);
+            await ReplyAsync($"✅ {Context.User.Mention}, solicitud de Pokemon listo para batalla agregada a la cola.").ConfigureAwait(false);
             await AddTradeToQueueAsync(code, Context.User.Username, pk, sig, Context.User, lgcode: lgcode).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            _ = ReplyAndDeleteAsync($"{SysCordSettings.Settings.CustomEmojis.Error} Ocurrió un error: {ex.Message}", 2, Context.Message);
+            _ = ReplyAndDeleteAsync($"❌ Ocurrió un error: {ex.Message}", 2, Context.Message);
         }
         finally
         {
@@ -1833,13 +1833,13 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
     {
         if (Context.Message.MentionedUsers.Count > 1)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Demasiadas menciones. Solo puedes agregar a la lista un usario a la vez.").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ Demasiadas menciones. Solo puedes agregar a la lista un usario a la vez.").ConfigureAwait(false);
             return;
         }
 
         if (Context.Message.MentionedUsers.Count == 0)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Un usuario debe ser mencionado para hacer esto.").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ Un usuario debe ser mencionado para hacer esto.").ConfigureAwait(false);
             return;
         }
 
@@ -1867,14 +1867,14 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         var attachment = Context.Message.Attachments.FirstOrDefault();
         if (attachment == default)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, no se ha proporcionado ningún archivo adjunto. ¡Por favor, inténtalo de nuevo!").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ {Context.User.Mention}, no se ha proporcionado ningún archivo adjunto. ¡Por favor, inténtalo de nuevo!").ConfigureAwait(false);
             return;
         }
         var att = await NetUtil.DownloadPKMAsync(attachment).ConfigureAwait(false);
         var pk = GetRequest(att);
         if (pk == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, ¡el archivo adjunto proporcionado no es compatible con este módulo!").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ {Context.User.Mention}, ¡el archivo adjunto proporcionado no es compatible con este módulo!").ConfigureAwait(false);
             return;
         }
         await AddTradeToQueueAsync(code, usr.Username, pk, sig, usr, ignoreAutoOT: ignoreAutoOT).ConfigureAwait(false);
@@ -1885,7 +1885,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         var attachment = Context.Message.Attachments.FirstOrDefault();
         if (attachment == default)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {Context.User.Mention}, no se ha proporcionado ningún archivo adjunto. ¡Por favor, inténtalo de nuevo!").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ {Context.User.Mention}, no se ha proporcionado ningún archivo adjunto. ¡Por favor, inténtalo de nuevo!").ConfigureAwait(false);
             return;
         }
 
@@ -1893,7 +1893,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         var pk = GetRequest(att);
         if (pk == null)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} ¡El archivo adjunto proporcionado no es compatible con este módulo!").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ ¡El archivo adjunto proporcionado no es compatible con este módulo!").ConfigureAwait(false);
             return;
         }
         await AddTradeToQueueAsync(code, usr.Username, pk, sig, usr, isHiddenTrade: true, ignoreAutoOT: ignoreAutoOT).ConfigureAwait(false);
@@ -1916,7 +1916,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         lgcode ??= TradeModule<T>.GenerateRandomPictocodes(3);
         if (pk is not null && !pk.CanBeTraded())
         {
-            var errorMessage = $"{SysCordSettings.Settings.CustomEmojis.Error} {usr.Mention} revisa el conjunto enviado, algun dato esta bloqueando el intercambio.\n\n```📝Soluciones:\n• Revisa detenidamente cada detalle del conjunto y vuelve a intentarlo!```";
+            var errorMessage = $"❌ {usr.Mention} revisa el conjunto enviado, algun dato esta bloqueando el intercambio.\n\n```📝Soluciones:\n• Revisa detenidamente cada detalle del conjunto y vuelve a intentarlo!```";
             var errorEmbed = new EmbedBuilder
             {
                 Description = errorMessage,
@@ -1949,7 +1949,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             {
                 string speciesName = SpeciesName.GetSpeciesName(pk.Species, (int)LanguageID.English);
                 embedBuilder.WithAuthor("Conjunto de showdown no válido!", customIconUrl);
-                embedBuilder.WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} {usr.Mention} El conjunto de showdown __no es válido__ para un huevo de **{speciesName}**.");
+                embedBuilder.WithDescription($"❌ {usr.Mention} El conjunto de showdown __no es válido__ para un huevo de **{speciesName}**.");
                 embedBuilder.AddField("__**Error**__", $"Puede que __**{speciesName}**__ no se pueda obtener en un huevo o algún dato esté impidiendo el trade.", inline: true);
                 embedBuilder.AddField("__**Solución**__", $"Revisa tu __información__ y vuelve a intentarlo.", inline: true);
                 embedBuilder.AddField("Reporte:", $"\n```{la.Report()}```");
@@ -1958,7 +1958,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             {
                 string speciesName = SpeciesName.GetSpeciesName(pk!.Species, (int)LanguageID.English);
                 embedBuilder.WithAuthor("Archivo adjunto no valido!", customIconUrl);
-                embedBuilder.WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} {usr.Mention}, este **{speciesName}** no es nativo de este juego y no se puede intercambiar!\n### He aquí la razón:\n```{legalityReport}```\n```🔊Consejo:\n• Por favor verifica detenidamente la informacion en PKHeX e intentalo de nuevo!\n• Puedes utilizar el plugin de ALM para legalizar tus pokemons y ahorrarte estos problemas.```");
+                embedBuilder.WithDescription($"❌ {usr.Mention}, este **{speciesName}** no es nativo de este juego y no se puede intercambiar!\n### He aquí la razón:\n```{legalityReport}```\n```🔊Consejo:\n• Por favor verifica detenidamente la informacion en PKHeX e intentalo de nuevo!\n• Puedes utilizar el plugin de ALM para legalizar tus pokemons y ahorrarte estos problemas.```");
             }
             embedBuilder.WithThumbnailUrl("https://i.imgur.com/DWLEXyu.png");
             embedBuilder.WithImageUrl("https://usagif.com/wp-content/uploads/gify/37-pikachu-usagif.gif");
@@ -1989,7 +1989,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             // Allow the owner to prevent trading entities that require a HOME Tracker even if the file has one already.
             var embedBuilder = new EmbedBuilder()
                 .WithAuthor("Error al intentar agregarte a la cola.", customIconUrl)
-                .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} {usr.Mention}, este **{speciesName}** no es nativo de este juego y no se puede intercambiar!")
+                .WithDescription($"❌ {usr.Mention}, este **{speciesName}** no es nativo de este juego y no se puede intercambiar!")
                 .WithColor(Color.Red)
                 .WithImageUrl(customImageUrl)
                 .WithThumbnailUrl(customthumbnail);
@@ -2017,7 +2017,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             // Allow the owner to prevent trading entities that already have a HOME Tracker.
             var embedBuilder = new EmbedBuilder()
                 .WithAuthor("Error al intentar agregarte a la cola.", customIconUrl)
-                .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} {usr.Mention}, este archivo de **{speciesName}** ya tiene un **HOME Tracker** y ni puede ser tradeado!")
+                .WithDescription($"❌ {usr.Mention}, este archivo de **{speciesName}** ya tiene un **HOME Tracker** y ni puede ser tradeado!")
                 .WithColor(Color.Red)
                 .WithImageUrl(customImageUrl)
                 .WithThumbnailUrl(customthumbnail);

@@ -54,7 +54,7 @@ namespace SysBot.Pokemon.WinForms
             for (int i = 1; i < opt.Length; i++)
             {
                 var cmd = opt[i];
-                var item = new ToolStripMenuItem(GetCommandText(cmd))
+                var item = new ToolStripMenuItem(cmd.ToString())
                 {
                     ForeColor = Color.FromArgb(224, 224, 224),
                     BackColor = Color.FromArgb(35, 35, 35),

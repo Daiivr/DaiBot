@@ -19,7 +19,7 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
     public async Task ChangeQueueModeAsync([Summary("Queue mode")] QueueOpening mode)
     {
         SysCord<T>.Runner.Hub.Config.Queues.QueueToggleMode = mode;
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Modo de cola cambiado a {mode}.").ConfigureAwait(false);
+        await ReplyAsync($"✅ Modo de cola cambiado a {mode}.").ConfigureAwait(false);
     }
 
     [Command("queueClearAll")]
@@ -29,7 +29,7 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
     public async Task ClearAllTradesAsync()
     {
         Info.ClearAllQueues();
-        await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Success} Borrados todo en la cola de espera.").ConfigureAwait(false);
+        await ReplyAsync($"✅ Borrados todo en la cola de espera.").ConfigureAwait(false);
     }
 
     [Command("queueClear")]
@@ -73,7 +73,7 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         var users = Context.Message.MentionedUsers;
         if (users.Count == 0)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} Ningún usuario fue mencionado").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ Ningún usuario fue mencionado").ConfigureAwait(false);
             return;
         }
         foreach (var u in users)
@@ -124,8 +124,8 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
     {
         var state = Info.ToggleQueue();
         var msg = state
-            ? $"{SysCordSettings.Settings.CustomEmojis.Success} **Configuración de cola modificada**: Los usuarios ahora __pueden unirse__ a la **cola**."
-            : $"{SysCordSettings.Settings.CustomEmojis.Warning} **Configuración de cola modificada**: Los usuarios __**NO PUEDEN**__ unirse a la `cola` hasta que se vuelva a `habilitar`.";
+            ? $"✅ **Configuración de cola modificada**: Los usuarios ahora __pueden unirse__ a la **cola**."
+            : $"⚠️ **Configuración de cola modificada**: Los usuarios __**NO PUEDEN**__ unirse a la `cola` hasta que se vuelva a `habilitar`.";
 
         return Context.Channel.EchoAndReply(msg);
     }
@@ -140,7 +140,7 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
 
         if (tradeCode < 0 || tradeCode > 99999999)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {user.Mention}, lo siento, el código de comercio debe estar entre **00000000** y **99999999**.").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ {user.Mention}, lo siento, el código de comercio debe estar entre **00000000** y **99999999**.").ConfigureAwait(false);
         }
         else
         {
@@ -167,7 +167,7 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         {
             embedBuilder.WithColor(Color.Green)
                         .WithTitle("Código de Comercio Almacenado")
-                        .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Success} {user.Mention}, tu código de comercio ha sido almacenado correctamente.\n\n__**Código:**__\n# {formattedCode}")
+                        .WithDescription($"✅ {user.Mention}, tu código de comercio ha sido almacenado correctamente.\n\n__**Código:**__\n# {formattedCode}")
                         .WithThumbnailUrl("https://i.imgur.com/Zs9hmNq.gif");
         }
         else
@@ -176,7 +176,7 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             string formattedExistingCode = FormatTradeCode(existingTradeCode);
             embedBuilder.WithColor(Color.Red)
                         .WithTitle("Código de Comercio Existente")
-                        .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} {user.Mention}, ya tienes un código de comercio establecido.")
+                        .WithDescription($"❌ {user.Mention}, ya tienes un código de comercio establecido.")
                         .AddField("__**Código Existente**__", $"Tu código actual es:\n __**{formattedExistingCode}**__", true)
                         .AddField("\u200B", "\u200B", true)
                         .AddField("__**Solución**__", $"Si deseas cambiarlo, usa `{botPrefix}utc` seguido del nuevo código.", true)
@@ -196,7 +196,7 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         // Validate the trade code range before updating
         if (newTradeCode < 0 || newTradeCode > 99999999)
         {
-            await ReplyAsync($"{SysCordSettings.Settings.CustomEmojis.Warning} {user.Mention}, lo siento, el código de comercio debe estar entre **00000000** y **99999999**.").ConfigureAwait(false);
+            await ReplyAsync($"⚠️ {user.Mention}, lo siento, el código de comercio debe estar entre **00000000** y **99999999**.").ConfigureAwait(false);
         }
         else
         {
@@ -223,14 +223,14 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         {
             embedBuilder.WithColor(Color.Green)
                         .WithTitle("Código de Comercio Actualizado")
-                        .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Success} {user.Mention}, tu código de comercio se ha actualizado correctamente.\n\n__**Nuevo Código:**__\n# **{formattedCode}**")
+                        .WithDescription($"✅ {user.Mention}, tu código de comercio se ha actualizado correctamente.\n\n__**Nuevo Código:**__\n# **{formattedCode}**")
                         .WithThumbnailUrl("https://i.imgur.com/Zs9hmNq.gif");
         }
         else
         {
             embedBuilder.WithColor(Color.Red)
                         .WithTitle("Error al Actualizar Código de Comercio")
-                        .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} {user.Mention}, hubo un problema al actualizar tu código de comercio.")
+                        .WithDescription($"❌ {user.Mention}, hubo un problema al actualizar tu código de comercio.")
                         .AddField("__**Razón**__", $"Al parecer, aún no has establecido un **código** de tradeo permanente.", true)
                         .AddField("\u200B", "\u200B", true)
                         .AddField("__**Solución**__", $"Si deseas establecer un **código**, usa `{botPrefix}atc` seguido del código.", true)
@@ -268,14 +268,14 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
         {
             embedBuilder.WithColor(Color.Green)
                         .WithTitle("Código de Comercio Eliminado")
-                        .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Success} {user.Mention}, tu código de comercio se ha eliminado correctamente.")
+                        .WithDescription($"✅ {user.Mention}, tu código de comercio se ha eliminado correctamente.")
                         .WithThumbnailUrl("https://i.imgur.com/Zs9hmNq.gif");
         }
         else
         {
             embedBuilder.WithColor(Color.Red)
                         .WithTitle("Error al Eliminar Código de Comercio")
-                        .WithDescription($"{SysCordSettings.Settings.CustomEmojis.Error} {user.Mention}, no se pudo eliminar tu código de comercio.")
+                        .WithDescription($"❌ {user.Mention}, no se pudo eliminar tu código de comercio.")
                         .AddField("__**Razón**__", $"Es posible que no tengas un **código** de comercio establecido.", true)
                         .AddField("\u200B", "\u200B", true)
                         .AddField("__**Solución**__", $"Para establecer un **código**, usa `{botPrefix}atc` seguido del código que deseas.", true)
@@ -302,10 +302,10 @@ public class QueueModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
     {
         return result switch
         {
-            QueueResultRemove.Removed => $"{SysCordSettings.Settings.CustomEmojis.Success} {userMention}, eliminé tus operaciones pendientes de la cola.",
-            QueueResultRemove.CurrentlyProcessing => $"{SysCordSettings.Settings.CustomEmojis.Warning} {userMention}, parece que actualmente tienes operaciones en proceso! No las eliminé de la cola.",
-            QueueResultRemove.CurrentlyProcessingRemoved => $"{SysCordSettings.Settings.CustomEmojis.Warning} {userMention}, parece que tiene operaciones en proceso. Se han eliminado otras operaciones pendientes de la cola.",
-            QueueResultRemove.NotInQueue => $"{SysCordSettings.Settings.CustomEmojis.Warning} Lo sentimos {userMention}, actualmente no estás en la lista.",
+            QueueResultRemove.Removed => $"✅ {userMention}, eliminé tus operaciones pendientes de la cola.",
+            QueueResultRemove.CurrentlyProcessing => $"⚠️ {userMention}, parece que actualmente tienes operaciones en proceso! No las eliminé de la cola.",
+            QueueResultRemove.CurrentlyProcessingRemoved => $"⚠️ {userMention}, parece que tiene operaciones en proceso. Se han eliminado otras operaciones pendientes de la cola.",
+            QueueResultRemove.NotInQueue => $"⚠️ Lo sentimos {userMention}, actualmente no estás en la lista.",
             _ => throw new ArgumentOutOfRangeException(nameof(result), result, null),
         };
     }
