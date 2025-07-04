@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.IO;
 using System;
 using System.Threading;
-using SysBot.Pokemon.Discord.Models;
 
 namespace SysBot.Pokemon.Discord;
 
@@ -28,7 +27,12 @@ public class PingModule : ModuleBase<SocketCommandContext>
         var userId = Context.User.Id.ToString();
         var stats = LoadOrCreateStats();
 
-        var userStats = EnsureUserStats(stats, userId);
+        if (!stats.ContainsKey(userId))
+        {
+            stats[userId] = new UserStats { Wins = 0, Losses = 0, Points = 0, CooldownEnd = DateTime.MinValue };
+        }
+
+        var userStats = stats[userId];
 
         // Check if the user already has an active challenge
         if (ActiveChallenges.ContainsKey(Context.User.Id))
@@ -135,7 +139,12 @@ public class PingModule : ModuleBase<SocketCommandContext>
         }
 
         var opponentId = opponent.Id.ToString();
-        var opponentStats = EnsureUserStats(stats, opponentId);
+        if (!stats.ContainsKey(opponentId))
+        {
+            stats[opponentId] = new UserStats { Wins = 0, Losses = 0, Points = 0, CooldownEnd = DateTime.MinValue };
+        }
+
+        var opponentStats = stats[opponentId];
 
         // Validar puntos disponibles para la apuesta
         if (betPoints > 0)
@@ -211,7 +220,8 @@ public class PingModule : ModuleBase<SocketCommandContext>
         ActiveChallenges.Remove(Context.User.Id); // Remove the challenge since it was accepted
 
         // Juego con apuesta
-        bool userWinsMatch = SharedRandom.Next(2) == 0;
+        var randomMatch = new Random();
+        bool userWinsMatch = randomMatch.Next(2) == 0;
 
         var embedDescription = $"Partida de ping-pong entre {Context.User.Mention} y {opponent.Mention}";
         if (betPoints > 0)
@@ -428,16 +438,6 @@ public class PingModule : ModuleBase<SocketCommandContext>
         await message.DeleteAsync().ConfigureAwait(false);
     }
 
-    private UserStats EnsureUserStats(Dictionary<string, UserStats> stats, string userId)
-    {
-        if (!stats.TryGetValue(userId, out var userStats))
-        {
-            userStats = new UserStats();
-            stats[userId] = userStats;
-        }
-        return userStats;
-    }
-
     private async Task<Color> GetDominantColorAsync(string imageUrl)
     {
         using var client = new HttpClient();
@@ -462,6 +462,17 @@ public class PingModule : ModuleBase<SocketCommandContext>
         var dominant = histogram.OrderByDescending(kvp => kvp.Value).First().Key;
         return new Color(dominant.R, dominant.G, dominant.B);
     }
+}
+
+public class UserStats
+{
+    public int Wins { get; set; }
+    public int Losses { get; set; }
+    public int Points { get; set; }
+    public int XP { get; set; } // New property for XP
+    public int Level { get; set; } // New property for Level
+    public DateTime LastXPGain { get; set; } // New property to track the last time XP was gained
+    public DateTime CooldownEnd { get; set; } // Cooldown end time
 }
 
 public class ChallengeRequest

@@ -9,7 +9,6 @@ using System.IO;
 using System;
 using System.Threading;
 using System.Text.RegularExpressions;
-using SysBot.Pokemon.Discord.Models;
 
 namespace SysBot.Pokemon.Discord
 {
@@ -55,7 +54,10 @@ namespace SysBot.Pokemon.Discord
             var stats = LoadOrCreateStats();
             var userId = user.Id.ToString();
 
-            var userStats = EnsureUserStats(stats, userId);
+            if (!stats.ContainsKey(userId))
+            {
+                stats[userId] = new UserStats { Wins = 0, Losses = 0, Points = 0, CooldownEnd = DateTime.MinValue };
+            }
 
             stats[userId].Points += points;
             SaveStats(stats);
@@ -360,16 +362,6 @@ namespace SysBot.Pokemon.Discord
 
             var json = File.ReadAllText(StatsFilePath);
             return JsonConvert.DeserializeObject<Dictionary<string, UserStats>>(json) ?? new Dictionary<string, UserStats>();
-        }
-
-        private UserStats EnsureUserStats(Dictionary<string, UserStats> stats, string userId)
-        {
-            if (!stats.TryGetValue(userId, out var userStats))
-            {
-                userStats = new UserStats();
-                stats[userId] = userStats;
-            }
-            return userStats;
         }
 
         private void SaveStats(Dictionary<string, UserStats> stats)

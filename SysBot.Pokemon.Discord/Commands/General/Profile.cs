@@ -12,8 +12,6 @@ using ImageSharp = SixLabors.ImageSharp;
 using System.Threading;
 using System;
 
-using SysBot.Pokemon.Discord.Models;
-
 namespace SysBot.Pokemon.Discord;
 
 public class ProfileModule : ModuleBase<SocketCommandContext>

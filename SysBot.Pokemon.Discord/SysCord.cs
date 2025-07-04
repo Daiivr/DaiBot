@@ -16,7 +16,6 @@ using static SysBot.Pokemon.DiscordSettings;
 using Discord.Net;
 using Newtonsoft.Json;
 using SysBot.Pokemon.Discord.Commands.Bots;
-using SysBot.Pokemon.Discord.Models;
 
 namespace SysBot.Pokemon.Discord;
 
@@ -37,8 +36,6 @@ public sealed class SysCord<T> where T : PKM, new()
     private readonly Dictionary<ulong, ulong> _announcementMessageIds = [];
     private readonly DiscordSocketClient _client;
     private readonly CommandService _commands;
-
-    private static readonly Random SharedRandom = new();
 
     private readonly IServiceProvider _services;
 
@@ -457,7 +454,8 @@ public sealed class SysCord<T> where T : PKM, new()
         if (DateTime.UtcNow - userStats.LastXPGain < TimeSpan.FromMinutes(2))
             return;
         // Grant random XP between 5 and 10, doubled if double XP is active
-        int xpGained = SharedRandom.Next(5, 11);
+        var random = new Random();
+        int xpGained = random.Next(5, 11);
         if (AdminModule.IsDoubleXPActive())
         {
             xpGained *= 2; // Double XP
@@ -707,5 +705,16 @@ public sealed class SysCord<T> where T : PKM, new()
     {
         var json = JsonConvert.SerializeObject(stats, Formatting.Indented);
         File.WriteAllText(StatsFilePath, json);
+    }
+
+    public class UserStats
+    {
+        public int Wins { get; set; }
+        public int Losses { get; set; }
+        public int Points { get; set; }
+        public int XP { get; set; } // New property for XP
+        public int Level { get; set; } // New property for Level
+        public DateTime LastXPGain { get; set; } // New property to track the last time XP was gained
+        public DateTime CooldownEnd { get; set; } // Cooldown end time
     }
 }
