@@ -461,21 +461,37 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
             {
                 var sav = AutoLegalityWrapper.GetTrainerInfo<T>();
                 var pkm = sav.GetLegal(template, out var result);
+                if (pkm == null)
+                {
+                    var response = await ReplyAsync($"⚠️ {Context.User.Mention}, El conjunto tardó demasiado en legalizarse.");
+                    return;
+                }
                 pkm = EntityConverter.ConvertToType(pkm, typeof(T), out _) ?? pkm;
-
                 if (pkm is not T pk)
                 {
                     _ = ReplyAndDeleteAsync($"⚠️ Oops! {Context.User.Mention}, No pude crear un huevo con el pokemon solicitado.", 2, Context.Message);
                     return;
                 }
 
-                // Use the EggTrade method without setting the nickname
-                pk.IsNicknamed = false; // Make sure we don't set a nickname
+                bool versionSpecified = content.Contains(".Version=", StringComparison.OrdinalIgnoreCase);
+
+                if (!versionSpecified)
+                {
+                    if (pk is PB8 pb8)
+                    {
+                        pb8.Version = (GameVersion)GameVersion.BD;
+                    }
+                    else if (pk is PK8 pk8)
+                    {
+                        pk8.Version = (GameVersion)GameVersion.SW;
+                    }
+                }
+
+                pk.IsNicknamed = false;
                 TradeExtensions<T>.EggTrade(pk, template);
 
                 var sig = Context.User.GetFavor();
                 await AddTradeToQueueAsync(code, Context.User.Username, pk, sig, Context.User).ConfigureAwait(false);
-
                 _ = DeleteMessagesAfterDelayAsync(null, Context.Message, 2);
             }
             catch (Exception ex)
@@ -608,7 +624,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
 
                 if (pkm == null)
                 {
-                    var response = await ReplyAsync($"⚠️ El set tardó demasiado en legalizarse.");
+                    var response = await ReplyAsync($"⚠️ {Context.User.Mention} El Showdown Set tardó demasiado en legalizarse.");
                     return;
                 }
 
@@ -868,7 +884,7 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
                 var pkm = sav.GetLegal(template, out var result);
                 if (pkm == null)
                 {
-                    var response = await ReplyAsync($"⚠️ El Showdown Set tardó demasiado en legalizarse.");
+                    var response = await ReplyAsync($"⚠️ {Context.User.Mention} El Showdown Set tardó demasiado en legalizarse.");
                     return;
                 }
 
@@ -877,6 +893,20 @@ public class TradeModule<T> : ModuleBase<SocketCommandContext> where T : PKM, ne
 
                 if (isEgg && pkm is T eggPk)
                 {
+                    bool versionSpecified = content.Contains(".Version=", StringComparison.OrdinalIgnoreCase);
+
+                    if (!versionSpecified)
+                    {
+                        if (eggPk is PB8 pb8)
+                        {
+                            pb8.Version = (GameVersion)GameVersion.BD;
+                        }
+                        else if (eggPk is PK8 pk8)
+                        {
+                            pk8.Version = (GameVersion)GameVersion.SW;
+                        }
+                    }
+
                     eggPk.IsNicknamed = false;
                     TradeExtensions<T>.EggTrade(eggPk, template);
                     pkm = eggPk;

@@ -84,14 +84,14 @@ public class TradeStartModule<T> : ModuleBase<SocketCommandContext> where T : PK
             if (user == null) { Console.WriteLine($"⚠️ Usuario no encontrado para ID {detail.Trainer.ID}."); return; }
 
             string speciesName = detail.TradeData != null ? GameInfo.Strings.Species[detail.TradeData.Species] : "";
-            string ballImgUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/36e891cc02fe283cd70d9fc8fef2f3c490096d6c/imgs/difficulty.png";
+            string ballImgUrl = "https://raw.githubusercontent.com/hexbyt3/sprites/36e891cc02fe283cd70d9fc8fef2f3c490096d6c/imgs/difficulty.png";
 
             if (detail.TradeData != null && detail.Type != PokeTradeType.Clone && detail.Type != PokeTradeType.Dump && detail.Type != PokeTradeType.Seed && detail.Type != PokeTradeType.FixOT)
             {
                 var ballName = GameInfo.GetStrings("en").balllist[detail.TradeData.Ball]
                     .Replace(" ", "").Replace("(LA)", "").ToLower();
                 ballName = ballName == "pokéball" ? "pokeball" : (ballName.Contains("(la)") ? "la" + ballName : ballName);
-                ballImgUrl = $"https://raw.githubusercontent.com/bdawg1989/sprites/main/AltBallImg/28x28/{ballName}.png";
+                ballImgUrl = $"https://raw.githubusercontent.com/hexbyt3/sprites/main/AltBallImg/28x28/{ballName}.png";
             }
 
 #pragma warning disable CS8604 // Possible null reference argument.

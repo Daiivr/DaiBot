@@ -424,7 +424,7 @@ public class OwnerModule<T> : SudoModule<T> where T : PKM, new()
             Description = $"### Mensaje:\n{message}",
             Color = (DiscordColor?)Color.Gold,
             Timestamp = DateTimeOffset.Now,
-            ThumbnailUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/pikamail.png"
+            ThumbnailUrl = "https://raw.githubusercontent.com/hexbyt3/sprites/main/pikamail.png"
         };
 
         // Set the first image as the main embed image if available

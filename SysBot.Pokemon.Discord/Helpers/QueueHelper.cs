@@ -276,7 +276,7 @@ public static class QueueHelper<T> where T : PKM, new()
             {
                 if (homeTrack.HasTracker && isNonNative)
                 {
-                    embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/exclamation.gif";
+                    embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/hexbyt3/sprites/main/exclamation.gif";
                     string trackerInfo = SysCord<T>.Runner.Config.Trade.TradeEmbedSettings.ShowTracker
                         ? $"\n\n **Home Tracker:** ||{homeTrack.Tracker}||"
                         : string.Empty;
@@ -286,7 +286,7 @@ public static class QueueHelper<T> where T : PKM, new()
                 }
                 else if (homeTrack.HasTracker)
                 {
-                    embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/exclamation.gif";
+                    embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/hexbyt3/sprites/main/exclamation.gif";
                     string trackerInfo = SysCord<T>.Runner.Config.Trade.TradeEmbedSettings.ShowTracker
                         ? $"\n\n **Home Tracker:** ||{homeTrack.Tracker}||"
                         : string.Empty;
@@ -297,14 +297,14 @@ public static class QueueHelper<T> where T : PKM, new()
                 else if (isNonNative)
                 {
                     // Only Non-Native
-                    embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/exclamation.gif";
+                    embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/hexbyt3/sprites/main/exclamation.gif";
                     embedBuilder.AddField("__**Aviso**__: **Este Pokémon no es nativo.**", $"{NonNative}");
                 }
             }
             else if (isNonNative)
             {
                 // Fallback for Non-Native Pokemon that don't implement IHomeTrack
-                embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/bdawg1989/sprites/main/exclamation.gif";
+                embedBuilder.Footer.IconUrl = "https://raw.githubusercontent.com/hexbyt3/sprites/main/exclamation.gif";
                 embedBuilder.AddField("__**Aviso**__: **Este Pokémon no es nativo.**", $"{NonNative}");
             }
             if (!isMysteryTrade && t != PokeTradeType.Item)
@@ -440,7 +440,7 @@ public static class QueueHelper<T> where T : PKM, new()
             ballName = ballName.Replace(" ", "").ToLower();
         }
 
-        string ballImgUrl = $"https://raw.githubusercontent.com/bdawg1989/sprites/main/AltBallImg/20x20/{ballName}.png";
+        string ballImgUrl = $"https://raw.githubusercontent.com/hexbyt3/sprites/main/AltBallImg/20x20/{ballName}.png";
 
         // Check if embedImageUrl is a local file or a web URL
         if (Uri.TryCreate(embedImageUrl, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeFile)

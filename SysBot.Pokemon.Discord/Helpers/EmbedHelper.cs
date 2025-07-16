@@ -14,7 +14,7 @@ public static class EmbedHelper
             .WithTitle("Aviso")
             .WithDescription(message)
             .WithTimestamp(DateTimeOffset.Now)
-            .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/exclamation.gif")
+            .WithThumbnailUrl("https://raw.githubusercontent.com/hexbyt3/sprites/main/exclamation.gif")
             .WithColor(Color.Red)
             .Build();
 
@@ -27,7 +27,7 @@ public static class EmbedHelper
             .WithTitle("Su trade fue cancelado...")
             .WithDescription($"Su trade ha sido cancelado.\nInténtelo de nuevo. Si el problema persiste, reinicie su consola y compruebe su conexión a Internet:\n\n**Razón**: {reason}")
             .WithTimestamp(DateTimeOffset.Now)
-            .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/dmerror.gif")
+            .WithThumbnailUrl("https://raw.githubusercontent.com/hexbyt3/sprites/main/dmerror.gif")
             .WithColor(Color.Red)
             .Build();
 
@@ -40,7 +40,7 @@ public static class EmbedHelper
             .WithTitle("¡Agregado a la Cola!")
             .WithDescription($"✅ Te he añadido a la __lista__! Te enviaré un __mensaje__ aquí cuando comience tu operación...\n\n¡Aquí está tu código comercial!\n# {code:0000 0000}")
             .WithTimestamp(DateTimeOffset.Now)
-            .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/tradecode.gif")
+            .WithThumbnailUrl("https://raw.githubusercontent.com/hexbyt3/sprites/main/tradecode.gif")
             .WithColor(Color.Blue)
             .Build();
 
@@ -91,7 +91,7 @@ public static class EmbedHelper
             .WithTitle("Cargando el Pokeportal...")
             .WithDescription($"**Pokemon**: {speciesName}\n**Trade Code**: {code:0000 0000}")
             .WithTimestamp(DateTimeOffset.Now)
-            .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/initializing.gif")
+            .WithThumbnailUrl("https://raw.githubusercontent.com/hexbyt3/sprites/main/initializing.gif")
             .WithColor(Color.Orange);
 
         if (!string.IsNullOrEmpty(message))
@@ -109,7 +109,7 @@ public static class EmbedHelper
             .WithTitle($"Buscando entrenador...")
             .WithDescription($"**Esperando por**: {trainerName}\n**Mi IGN**: {inGameName}")
             .WithTimestamp(DateTimeOffset.Now)
-            .WithThumbnailUrl("https://raw.githubusercontent.com/bdawg1989/sprites/main/searching.gif")
+            .WithThumbnailUrl("https://raw.githubusercontent.com/hexbyt3/sprites/main/searching.gif")
             .WithColor(Color.Green);
 
         if (!string.IsNullOrEmpty(message))

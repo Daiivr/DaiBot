@@ -18,7 +18,7 @@ public class InfoModule : ModuleBase<SocketCommandContext>
 {
     private const string detail = "Soy un bot de Discord impulsado por PKHeX.Core y otros software de código abierto.";
 
-    private const string gengar = "https://github.com/bdawg1989/PokeBot";
+    private const string gengar = "https://github.com/hexbyt3/PokeBot";
 
     private const string daifork = "https://github.com/Daiivr/DaiBot";
 
@@ -43,7 +43,7 @@ public class InfoModule : ModuleBase<SocketCommandContext>
         };
 
         builder.AddField("Info",
-            $"- [Código fuente de Mergebot]({gengar})\n" +
+            $"- [Código fuente de PokeBot]({gengar})\n" +
             $"- [Codigo Fuente de este Bot]({daifork})\n" +
             $"- {Format.Bold("Propietario")}: {app.Owner} ({app.Owner.Id})\n" +
             $"- {Format.Bold("Biblioteca")}: Discord.Net ({DiscordConfig.Version})\n" +

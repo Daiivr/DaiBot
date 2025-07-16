@@ -75,7 +75,7 @@ public class LegalitySettings
         EncounterTypeGroup.Trade,
     ];
 
-    [Category(Generate), Description("Si PrioritizeGame está establecido en \"True\", se usa PriorityOrder para comenzar a buscar encuentros. Si está en \"False\", se usa el juego más reciente como la versión. Se recomienda dejar esto como \"True\"."), DisplayName("Priorizar Juego")]
+    [Category(Generate), Description("Si PrioritizeGame está establecido en \"True\", se usa PriorityOrder para comenzar a buscar encuentros."), DisplayName("Priorizar Juego")]
     public bool PrioritizeGame { get; set; } = false;
 
     [Category(Generate), Description("El orden de las versiones de juego desde las cuales ALM intentará legalizar.")]
