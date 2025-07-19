@@ -260,10 +260,16 @@ namespace SysBot.Pokemon
 
                 sst = SpecialTradeType.TeraChange;
             }
-            else if (pk.HeldItem >= 55 && pk.HeldItem <= 62) // guard spec <> x sp.def
+            else if (pk.HeldItem >= 51 && pk.HeldItem <= 62) // pp up <> x sp.def
             {
                 switch (pk.HeldItem)
                 {
+                    case 51: // pp up
+                        pk.Language = (int)LanguageID.Italian;
+                        break;
+                    // skip 52 zinc
+                    // skip 53 pp max
+                    // skip 54 Old Gateau
                     case 55: // guard spec
                         pk.Language = (int)LanguageID.Japanese;
                         break;
