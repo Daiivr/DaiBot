@@ -11,9 +11,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SixLabors.ImageSharp.Memory;
+using System.Drawing;
 using SysBot.Base;
-using static System.Windows.Forms.Design.AxImporter;
 
 namespace SysBot.Pokemon.WinForms.WebApi;
 
@@ -27,7 +26,6 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
     private readonly Main _mainForm = mainForm ?? throw new ArgumentNullException(nameof(mainForm));
     private volatile bool _running;
     private string? _htmlTemplate;
-    private byte[]? _faviconBytes;
 
     private string HtmlTemplate
     {
@@ -38,18 +36,6 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
                 _htmlTemplate = LoadEmbeddedResource("BotControlPanel.html");
             }
             return _htmlTemplate;
-        }
-    }
-
-    private byte[] FaviconBytes
-    {
-        get
-        {
-            if (_faviconBytes == null)
-            {
-                _faviconBytes = LoadEmbeddedBinaryResource("favicon.png");
-            }
-            return _faviconBytes;
         }
     }
 
@@ -163,7 +149,6 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
 
                 while (_running && !asyncResult.AsyncWaitHandle.WaitOne(100))
                 {
-                    // Check if we should continue listening
                 }
 
                 if (!_running)
@@ -220,18 +205,6 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
                 return;
             }
 
-            // ✅ Servir favicon desde recurso embebido
-            if (request.Url?.AbsolutePath == "/favicon.png")
-            {
-                byte[] buffer = FaviconBytes;
-                response.ContentType = "image/png";
-                response.ContentLength64 = buffer.Length;
-                response.Headers.Add("Cache-Control", "public, max-age=86400"); // cache for 1 day
-                await response.OutputStream.WriteAsync(buffer);
-                response.Close();
-                return;
-            }
-
             string? responseString = request.Url?.LocalPath switch
             {
                 "/" => HtmlTemplate,
@@ -244,6 +217,11 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
                 "/api/bot/update/check" => await CheckForUpdates(),
                 "/api/bot/update/idle-status" => GetIdleStatus(),
                 "/api/bot/update/all" => await UpdateAllInstances(request),
+                "/api/bot/update/active" => GetActiveUpdates(),
+                "/api/bot/restart/all" => await RestartAllInstances(request),
+                "/api/bot/restart/proceed" => await ProceedWithRestarts(request),
+                "/api/bot/restart/schedule" => await UpdateRestartSchedule(request),
+                "/icon.ico" => ServeIcon(),
                 _ => null
             };
 
@@ -255,7 +233,33 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
             else
             {
                 response.StatusCode = 200;
-                response.ContentType = request.Url?.LocalPath == "/" ? "text/html" : "application/json";
+
+                // Set appropriate content type
+                if (request.Url?.LocalPath == "/")
+                {
+                    response.ContentType = "text/html";
+                }
+                else if (request.Url?.LocalPath == "/icon.ico")
+                {
+                    response.ContentType = "image/x-icon";
+                }
+                else
+                {
+                    response.ContentType = "application/json";
+                }
+            }
+
+            // Handle binary content for icon
+            if (request.Url?.LocalPath == "/icon.ico" && responseString == "BINARY_ICON")
+            {
+                var iconBytes = GetIconBytes();
+                if (iconBytes != null)
+                {
+                    response.ContentLength64 = iconBytes.Length;
+                    await response.OutputStream.WriteAsync(iconBytes, 0, iconBytes.Length);
+                    await response.OutputStream.FlushAsync();
+                    return;
+                }
             }
 
             var bufferMain = Encoding.UTF8.GetBytes(responseString);
@@ -307,71 +311,149 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
     {
         try
         {
-            // Read request body to check for stage parameter
             using var reader = new StreamReader(request.InputStream);
             var body = await reader.ReadToEndAsync();
-            var stage = "start"; // default
 
+            // Check if this is a status check for an existing update
             if (!string.IsNullOrEmpty(body))
             {
                 try
                 {
                     var requestData = JsonSerializer.Deserialize<Dictionary<string, string>>(body);
-                    if (requestData?.ContainsKey("stage") == true)
+                    if (requestData?.ContainsKey("updateId") == true)
                     {
-                        stage = requestData["stage"];
+                        // Return status of existing update
+                        var status = UpdateManager.GetUpdateStatus(requestData["updateId"]);
+                        if (status != null)
+                        {
+                            return JsonSerializer.Serialize(new
+                            {
+                                status.Id,
+                                status.Stage,
+                                status.Message,
+                                status.Progress,
+                                status.IsComplete,
+                                status.Success,
+                                StartTime = status.StartTime.ToString("o"),
+                                Result = status.Result != null ? new
+                                {
+                                    status.Result.TotalInstances,
+                                    status.Result.UpdatesNeeded,
+                                    status.Result.UpdatesStarted,
+                                    status.Result.UpdatesFailed
+                                } : null
+                            });
+                        }
+                        return CreateErrorResponse("No se encontró la actualización solicitada");
                     }
                 }
-                catch { }
+                catch
+                {
+                    // Not a status check, proceed with starting new update
+                }
             }
 
-            if (stage == "proceed")
-            {
-                // Proceed with actual updates after all bots are idle
-                var result = await UpdateManager.ProceedWithUpdatesAsync(_mainForm, _tcpPort);
+            // Start a new fire-and-forget background update
+            var updateStatus = UpdateManager.StartBackgroundUpdate(_mainForm, _tcpPort);
 
-                return JsonSerializer.Serialize(new
-                {
-                    Stage = "updating",
-                    Success = result.UpdatesFailed == 0 && result.UpdatesNeeded > 0,
+            LogUtil.LogInfo($"Se inició una actualización en segundo plano con ID: {updateStatus.Id}", "WebServer");
+
+            return JsonSerializer.Serialize(new
+            {
+                updateStatus.Id,
+                updateStatus.Stage,
+                updateStatus.Message,
+                updateStatus.Progress,
+                StartTime = updateStatus.StartTime.ToString("o"),
+                Success = true,
+                Info = "El proceso de actualización se inició en segundo plano. Continuará incluso si esta conexión se cierra."
+            });
+        }
+        catch (Exception ex)
+        {
+            LogUtil.LogError($"Error al iniciar la actualización: {ex.Message}", "WebServer");
+            return CreateErrorResponse(ex.Message);
+        }
+    }
+
+    private async Task<string> RestartAllInstances(HttpListenerRequest request)
+    {
+        try
+        {
+            var result = await UpdateManager.RestartAllInstancesAsync(_mainForm, _tcpPort);
+
+            return JsonSerializer.Serialize(new
+            {
+                result.Success,
                 result.TotalInstances,
-                result.UpdatesNeeded,
-                result.UpdatesStarted,
-                result.UpdatesFailed,
-                Results = result.InstanceResults.Select(r => new
-                    {
-                        r.Port,
-                        r.ProcessId,
-                        r.CurrentVersion,
-                        r.LatestVersion,
-                        r.NeedsUpdate,
-                        r.UpdateStarted,
-                        r.Error
-                    })
-                });
-            }
-            else
-            {
-                // Start the idle process
-                var result = await UpdateManager.StartUpdateProcessAsync(_mainForm, _tcpPort);
+                result.Error,
+                Message = result.Success ? "Reinicio iniciado con éxito" : "Error al iniciar el reinicio"
+            });
+        }
+        catch (Exception ex)
+        {
+            return CreateErrorResponse(ex.Message);
+        }
+    }
 
-                return JsonSerializer.Serialize(new
+    private async Task<string> ProceedWithRestarts(HttpListenerRequest request)
+    {
+        try
+        {
+            var result = await UpdateManager.ProceedWithRestartsAsync(_mainForm, _tcpPort);
+
+            return JsonSerializer.Serialize(new
+            {
+                result.Success,
+                result.TotalInstances,
+                result.MasterRestarting,
+                result.Error,
+                Results = result.InstanceResults.Select(r => new
                 {
-                    Stage = "idling",
-                    Success = result.UpdatesFailed == 0,
-                    TotalInstances = result.TotalInstances,
-                    UpdatesNeeded = result.UpdatesNeeded,
-                    Results = result.InstanceResults.Select(r => new
-                    {
-                        r.Port,
-                        r.ProcessId,
-                        r.CurrentVersion,
-                        r.LatestVersion,
-                        r.NeedsUpdate,
-                        r.Error
-                    })
-                });
+                    r.Port,
+                    r.ProcessId,
+                    r.RestartStarted,
+                    r.Error
+                })
+            });
+        }
+        catch (Exception ex)
+        {
+            return CreateErrorResponse(ex.Message);
+        }
+    }
+
+    private async Task<string> UpdateRestartSchedule(HttpListenerRequest request)
+    {
+        try
+        {
+            if (request.HttpMethod == "GET")
+            {
+                var workingDir = Path.GetDirectoryName(Application.ExecutablePath) ?? Environment.CurrentDirectory;
+                var schedulePath = Path.Combine(workingDir, "restart_schedule.json");
+
+                if (File.Exists(schedulePath))
+                {
+                    var scheduleJson = File.ReadAllText(schedulePath);
+                    return scheduleJson;
+                }
+
+                return JsonSerializer.Serialize(new { Enabled = false, Time = "00:00" });
             }
+            else if (request.HttpMethod == "POST")
+            {
+                using var reader = new StreamReader(request.InputStream);
+                var body = await reader.ReadToEndAsync();
+
+                var workingDir = Path.GetDirectoryName(Application.ExecutablePath) ?? Environment.CurrentDirectory;
+                var schedulePath = Path.Combine(workingDir, "restart_schedule.json");
+
+                File.WriteAllText(schedulePath, body);
+
+                return JsonSerializer.Serialize(new { Success = true });
+            }
+
+            return CreateErrorResponse("Método no válido");
         }
         catch (Exception ex)
         {
@@ -385,7 +467,6 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
         {
             var instances = new List<object>();
 
-            // Local instance
             var localBots = GetBotControllers();
             var localIdleCount = 0;
             var localTotalCount = localBots.Count;
@@ -420,7 +501,6 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
                 AllIdle = localIdleCount == localTotalCount
             });
 
-            // Remote instances
             var remoteInstances = ScanRemoteInstances().Where(i => i.IsOnline);
             foreach (var instance in remoteInstances)
             {
@@ -458,8 +538,8 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
 
                             instances.Add(new
                             {
-                                Port = instance.Port,
-                                ProcessId = instance.ProcessId,
+                                instance.Port,
+                                instance.ProcessId,
                                 TotalBots = bots.Count,
                                 IdleBots = idleCount,
                                 NonIdleBots = nonIdleBots,
@@ -900,7 +980,7 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
             return [.. flpBots.Controls.OfType<BotController>()];
         }
 
-        return new List<BotController>();
+        return [];
     }
 
     private ProgramConfig? GetConfig()
@@ -923,6 +1003,84 @@ public class BotServer(Main mainForm, int port = 8080, int tcpPort = 8081) : IDi
             Success = false,
             Message = $"Error: {message}"
         });
+    }
+
+    private string GetActiveUpdates()
+    {
+        try
+        {
+            var activeUpdates = UpdateManager.GetActiveUpdates()
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Stage,
+                    u.Message,
+                    u.Progress,
+                    u.IsComplete,
+                    u.Success,
+                    StartTime = u.StartTime.ToString("o")
+                })
+                .ToList();
+
+            return JsonSerializer.Serialize(activeUpdates);
+        }
+        catch (Exception ex)
+        {
+            return CreateErrorResponse(ex.Message);
+        }
+    }
+
+    private string ServeIcon()
+    {
+        return "BINARY_ICON"; // Special marker for binary content
+    }
+
+    private byte[]? GetIconBytes()
+    {
+        try
+        {
+            // First try to find icon.ico in the executable directory
+            var exePath = Application.ExecutablePath;
+            var exeDir = Path.GetDirectoryName(exePath) ?? Environment.CurrentDirectory;
+            var iconPath = Path.Combine(exeDir, "icon.ico");
+
+            if (File.Exists(iconPath))
+            {
+                return File.ReadAllBytes(iconPath);
+            }
+
+            // If not found, try to extract from embedded resources
+            var assembly = Assembly.GetExecutingAssembly();
+            var iconStream = assembly.GetManifestResourceStream("SysBot.Pokemon.WinForms.icon.ico");
+
+            if (iconStream != null)
+            {
+                using (iconStream)
+                {
+                    var buffer = new byte[iconStream.Length];
+                    iconStream.ReadExactly(buffer);
+                    return buffer;
+                }
+            }
+
+            // Try to get the application icon as a fallback
+            var icon = Icon.ExtractAssociatedIcon(exePath);
+            if (icon != null)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    icon.Save(ms);
+                    return ms.ToArray();
+                }
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            LogUtil.LogError($"Error al cargar el ícono: {ex.Message}", "WebServer");
+            return null;
+        }
     }
 
     public void Dispose()

@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <title>DaiBot</title>
-    <link rel="preload" href="favicon.png" as="image" type="image/png">
-    <link rel="icon" href="favicon.png" type="image/png">
-    <link rel="shortcut icon" href="favicon.png" type="image/png">
+    <link rel="icon" type="image/x-icon" href="/icon.ico">
     <style>
         :root {
             --bg-primary: #0a0e27;
@@ -242,6 +240,135 @@
             border-color: var(--danger);
         }
 
+        .scheduled-restart-section {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+            border: 1px solid var(--border);
+        }
+
+        .scheduled-restart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+            .scheduled-restart-header h2 {
+                font-size: clamp(1rem, 3vw, 1.2rem);
+                color: var(--text-secondary);
+            }
+
+        .restart-schedule-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .schedule-toggle {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+            .toggle-switch input {
+                display: none;
+            }
+
+        .toggle-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+        }
+
+            .toggle-slider::before {
+                content: '';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                left: 4px;
+                bottom: 3px;
+                background: var(--text-secondary);
+                border-radius: 50%;
+                transition: all 0.3s ease;
+            }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+            .toggle-switch input:checked + .toggle-slider::before {
+                transform: translateX(24px);
+                background: white;
+            }
+
+        .time-input-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .time-input {
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-family: monospace;
+            width: 100px;
+            transition: all 0.2s ease;
+        }
+
+            .time-input:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+            }
+
+            .time-input:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+        .schedule-status {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            padding: var(--spacing-sm);
+            background: var(--bg-hover);
+            border-radius: var(--border-radius-sm);
+        }
+
+            .schedule-status.active {
+                color: var(--success);
+                background: rgba(16, 185, 129, 0.1);
+                border: 1px solid rgba(16, 185, 129, 0.3);
+            }
+
+        .next-restart-time {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
         .instances-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
@@ -448,7 +575,7 @@
             display: flex;
             align-items: center;
             gap: var(--spacing-sm);
-            max-width: min(400px, calc(100vw - 2rem));
+            max-width: min(500px, calc(100vw - 2rem));
             word-break: break-word;
             opacity: 1;
         }
@@ -624,138 +751,6 @@
             height: 1px;
             background: var(--border);
             margin: var(--spacing-xs) 0;
-        }
-
-        @media (max-width: 1024px) {
-            .instances-grid {
-                grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            :root {
-                --spacing-lg: 1rem;
-                --spacing-xl: 1.5rem;
-            }
-
-            .header {
-                padding: var(--spacing-md);
-            }
-
-            .header-content {
-                flex-wrap: wrap;
-            }
-
-            .refresh-status {
-                order: 3;
-                width: 100%;
-                justify-content: center;
-                margin-top: var(--spacing-sm);
-            }
-
-            .main {
-                padding: var(--spacing-md);
-            }
-
-            .instances-grid {
-                grid-template-columns: 1fr;
-                gap: var(--spacing-md);
-            }
-
-            .control-buttons {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: var(--spacing-xs);
-            }
-
-            .instance-info {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                gap: var(--spacing-sm);
-            }
-
-            .instance-header {
-                padding: var(--spacing-md);
-                flex-direction: column;
-                align-items: flex-start;
-                gap: var(--spacing-sm);
-            }
-
-            .instance-title {
-                width: 100%;
-            }
-
-            .bot-status-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: var(--spacing-xs);
-            }
-
-                .bot-status-item .bot-name {
-                    width: 100%;
-                }
-
-            .toast {
-                bottom: 0;
-                right: 0;
-                left: 0;
-                max-width: none;
-                transform: translateY(100%);
-                border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
-                margin: 0;
-            }
-
-                .toast.show {
-                    transform: translateY(0);
-                }
-
-            .action-menu {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                top: auto;
-                border-radius: var(--border-radius) var(--border-radius) 0 0;
-                max-height: 70vh;
-                overflow-y: auto;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .control-buttons {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .btn {
-                font-size: 0.75rem;
-                padding: var(--spacing-sm);
-            }
-
-            .global-controls {
-                padding: var(--spacing-md);
-            }
-
-            .instance-body {
-                padding: var(--spacing-md);
-            }
-
-            .logo h1 {
-                font-size: 1.1rem;
-            }
-        }
-
-        @media (hover: none) and (pointer: coarse) {
-            .btn:hover {
-                transform: none;
-                box-shadow: none;
-            }
-
-            .instance-card:hover {
-                transform: none;
-                box-shadow: none;
-            }
-
-            .action-menu-button:hover {
-                transform: none;
-            }
         }
 
         /* Modal Styles */
@@ -1119,7 +1114,109 @@
             line-height: 1.5;
         }
 
+        @media (max-width: 1024px) {
+            .instances-grid {
+                grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+            }
+        }
+
         @media (max-width: 768px) {
+            :root {
+                --spacing-lg: 1rem;
+                --spacing-xl: 1.5rem;
+            }
+
+            .header {
+                padding: var(--spacing-md);
+            }
+
+            .header-content {
+                flex-wrap: wrap;
+            }
+
+            .refresh-status {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                margin-top: var(--spacing-sm);
+            }
+
+            .main {
+                padding: var(--spacing-md);
+            }
+
+            .instances-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+
+            .control-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: var(--spacing-xs);
+            }
+
+            .instance-info {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: var(--spacing-sm);
+            }
+
+            .instance-header {
+                padding: var(--spacing-md);
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-sm);
+            }
+
+            .instance-title {
+                width: 100%;
+            }
+
+            .bot-status-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-xs);
+            }
+
+                .bot-status-item .bot-name {
+                    width: 100%;
+                }
+
+            .toast {
+                bottom: 0;
+                right: 0;
+                left: 0;
+                max-width: none;
+                transform: translateY(100%);
+                border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+                margin: 0;
+            }
+
+                .toast.show {
+                    transform: translateY(0);
+                }
+
+            .action-menu {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: auto;
+                border-radius: var(--border-radius) var(--border-radius) 0 0;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+
+            .restart-schedule-controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-md);
+            }
+
+            .schedule-status {
+                width: 100%;
+                text-align: center;
+            }
+
             .modal-content {
                 max-height: 100vh;
                 margin: 0;
@@ -1139,6 +1236,45 @@
                 font-size: 1.5rem;
             }
         }
+
+        @media (max-width: 480px) {
+            .control-buttons {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .btn {
+                font-size: 0.75rem;
+                padding: var(--spacing-sm);
+            }
+
+            .global-controls {
+                padding: var(--spacing-md);
+            }
+
+            .instance-body {
+                padding: var(--spacing-md);
+            }
+
+            .logo h1 {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .btn:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            .instance-card:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            .action-menu-button:hover {
+                transform: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1155,7 +1291,32 @@
                 </div>
             </div>
         </header>
+
         <main class="main">
+            <div class="scheduled-restart-section">
+                <div class="scheduled-restart-header">
+                    <h2>Reinicio Programado</h2>
+                </div>
+                <div class="restart-schedule-controls">
+                    <div class="schedule-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="schedule-restart-toggle" onchange="toggleScheduledRestart()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <label for="schedule-restart-toggle">Activar reinicio diario</label>
+                    </div>
+                    <div class="time-input-group">
+                        <label for="restart-time">Tiempo:</label>
+                        <input type="time" id="restart-time" class="time-input" value="00:00" onchange="updateRestartSchedule()">
+                    </div>
+                    <button class="btn btn-warning" onclick="restartAllInstances()">🔄 Reiniciar Ahora</button>
+                </div>
+                <div id="schedule-status" class="schedule-status" style="display: none;">
+                    <span>⏰</span>
+                    <span>Próximo reinicio programado para: <span id="next-restart-time" class="next-restart-time">-</span></span>
+                </div>
+            </div>
+
             <div class="global-controls">
                 <h2>Controles Globales - Todas las Instancias</h2>
                 <div class="control-buttons">
@@ -1170,11 +1331,13 @@
                     <button class="btn btn-primary" onclick="updateAllInstances()">⬆️ Actualizar Todo</button>
                 </div>
             </div>
+
             <div id="instances-container" class="instances-grid">
                 <div class="loading"><div class="spinner"></div></div>
             </div>
         </main>
     </div>
+
     <div id="toast" class="toast">
         <span class="toast-icon"></span>
         <div class="toast-content">
@@ -1217,17 +1380,17 @@
         </div>
     </div>
 
-    <!-- Update Progress Modal -->
+    <!-- Progress Modal (Update/Restart) -->
     <div id="progress-modal" class="modal">
         <div class="modal-content progress-modal-content">
             <div class="modal-header">
-                <h2>Actualización en progreso</h2>
+                <h2 id="progress-modal-title">Actualización en progreso</h2>
             </div>
             <div class="modal-body">
                 <div class="progress-step">
                     <div class="step-icon">⏳</div>
                     <div class="step-info">
-                        <div id="progress-status" class="step-title">Preparando actualización...</div>
+                        <div id="progress-status" class="step-title">Preparando...</div>
                         <div id="progress-details" class="step-details"></div>
                     </div>
                 </div>
@@ -1251,37 +1414,67 @@
                             <div class="idle-label">Tiempo de espera (s)</div>
                         </div>
                     </div>
-
                     <div id="bot-details" class="bot-details"></div>
                 </div>
 
                 <div id="update-log" class="update-log"></div>
             </div>
             <div class="modal-footer">
-                <button id="force-update-btn" class="btn btn-warning" onclick="forceUpdate()" style="display: none;">
-                    ⚡ Forzar actualización ahora
-                </button>
+                <div id="force-update-info" style="display: none; color: var(--warning); margin-right: auto; font-size: 0.875rem;">
+                    ⚡ La actualización se aplicará automáticamente después del tiempo de espera
+                </div>
             </div>
         </div>
     </div>
+
     <script>
         const API_BASE = '/api/bot';
         let instances = [];
         let refreshInterval;
         let activeToasts = [];
-
+        let restartScheduleInterval;
         let isInteracting = false;
         let refreshPaused = false;
         let lastRefreshTime = Date.now();
 
-        document.addEventListener('DOMContentLoaded', () => {
-            refreshInstances();
-            startAutoRefresh();
-            startConnectionMonitor(); // Add this line
+        // State objects for updates and restarts
+        let updateState = {
+            id: null,
+            interval: null,
+            type: null
+        };
 
-            // Close menus when clicking outside
+        let restartState = {
+            startTime: null,
+            timeout: 300,
+            idleCheckInterval: null,
+            countdownInterval: null
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for ongoing operations BEFORE anything else
+            checkForOngoingOperations().then(() => {
+                // Only refresh instances if not reconnecting to an update
+                if (!updateState.id) {
+                    refreshInstances();
+                }
+            });
+
+            startAutoRefresh();
+            startConnectionMonitor();
+            loadRestartSchedule();
+            checkRestartSchedule();
+
+            // Event listeners
             document.addEventListener('click', (e) => {
-                if (!e.target.closest('.instance-controls')) {
+                if (e.target && e.target.nodeType === 1 && typeof e.target.closest === 'function') {
+                    if (!e.target.closest('.instance-controls')) {
+                        document.querySelectorAll('.action-menu.show').forEach(menu => {
+                            menu.classList.remove('show');
+                        });
+                    }
+                } else {
                     document.querySelectorAll('.action-menu.show').forEach(menu => {
                         menu.classList.remove('show');
                     });
@@ -1290,21 +1483,27 @@
 
             // Track mouse interaction
             document.addEventListener('mouseenter', (e) => {
-                if (e.target.closest('.instance-card')) {
-                    isInteracting = true;
+                if (e.target && e.target.nodeType === 1 && typeof e.target.closest === 'function') {
+                    if (e.target.closest('.instance-card')) {
+                        isInteracting = true;
+                    }
                 }
             }, true);
 
             document.addEventListener('mouseleave', (e) => {
-                if (e.target.closest('.instance-card')) {
-                    isInteracting = false;
+                if (e.target && e.target.nodeType === 1 && typeof e.target.closest === 'function') {
+                    if (e.target.closest('.instance-card')) {
+                        isInteracting = false;
+                    }
                 }
             }, true);
 
             // Track touch interaction
             document.addEventListener('touchstart', (e) => {
-                if (e.target.closest('.instance-card')) {
-                    isInteracting = true;
+                if (e.target && e.target.nodeType === 1 && typeof e.target.closest === 'function') {
+                    if (e.target.closest('.instance-card')) {
+                        isInteracting = true;
+                    }
                 }
             });
 
@@ -1317,168 +1516,796 @@
 
         window.addEventListener('beforeunload', () => {
             if (refreshInterval) clearInterval(refreshInterval);
+            if (restartScheduleInterval) clearInterval(restartScheduleInterval);
+            if (updateState.interval) clearInterval(updateState.interval);
+            if (restartState.idleCheckInterval) clearInterval(restartState.idleCheckInterval);
+            if (restartState.countdownInterval) clearInterval(restartState.countdownInterval);
         });
 
-        let updateState = {
-            newVersion: '',
-            changelog: '',
-            instances: [],
-            idleCheckInterval: null,
-            countdownInterval: null,
-            startTime: null,
-            timeout: 300,
-            forcedUpdate: false
-        };
+        // New function to check backend for active operations
+        async function checkForOngoingOperations() {
+            try {
+                // First, check if any updates are in progress
+                const response = await fetch(`${API_BASE}/update/active`);
+                if (!response.ok) return;
 
-        async function updateAllInstances() {
-            // First, check what updates are availableAdd commentMore actions
-            showModal('update-modal');
+                const activeUpdates = await response.json();
+                if (!activeUpdates || activeUpdates.length === 0) return;
 
-            // Reset state
-            updateState = {
-                newVersion: '',
-                changelog: '',
-                instances: [],
-                idleCheckInterval: null,
-                countdownInterval: null,
-                startTime: null,
-                timeout: 300,
-                forcedUpdate: false
-            };
+                // Get the most recent non-complete update
+                const activeUpdate = activeUpdates.find(u => !u.IsComplete);
+                if (!activeUpdate) return;
+
+                console.log('Actualización activa encontrada:', activeUpdate);
+
+                // Determine type from stage
+                updateState.id = activeUpdate.Id;
+                updateState.type = activeUpdate.Stage.includes('restart') ? 'restart' : 'update';
+
+                // Set the start time from the active update
+                if (activeUpdate.StartTime) {
+                    updateState.startTime = new Date(activeUpdate.StartTime).getTime();
+                } else {
+                    updateState.startTime = Date.now();
+                }
+
+                // Show progress modal with current state
+                showModal('progress-modal');
+                document.getElementById('progress-modal-title').textContent =
+                    updateState.type === 'restart' ? 'Reinicio en progreso' : 'Actualización en progreso';
+
+                // Set progress immediately
+                updateProgress(
+                    activeUpdate.Stage === 'checking' ? 'Buscando actualizaciones' :
+                        activeUpdate.Stage === 'scanning' ? 'Escaneando instancias' :
+                            activeUpdate.Stage === 'idling' ? 'Preparando instancias' :
+                                activeUpdate.Stage === 'waiting_idle' ? 'Esperando a que los bots estén inactivos' :
+                                    activeUpdate.Stage === 'updating' ? 'Actualizando instancias' :
+                                        activeUpdate.Stage === 'updating_master' ? 'Actualizando instancia principal' :
+                                            activeUpdate.Stage === 'complete' ? '¡Actualización completa!' : 'Procesando...',
+                    activeUpdate.Message,
+                    activeUpdate.Progress
+                );
+
+                // Add log entry about reconnection
+                addLogEntry('Reconectado al proceso de actualización en curso', 'info');
+
+                // Show idle status if in waiting phase
+                if (activeUpdate.Stage === 'waiting_idle') {
+                    document.getElementById('idle-status').style.display = 'block';
+                    document.getElementById('force-update-info').style.display = 'block';
+                }
+
+                // Start monitoring
+                updateState.interval = setInterval(() => {
+                    checkUpdateStatus();
+                }, 2000);
+
+                // Immediately check status
+                checkUpdateStatus();
+
+                // Pause auto-refresh while update is ongoing
+                refreshPaused = true;
+
+            } catch (error) {
+                console.error('Error checking for active updates:', error);
+            }
+        }
+
+        // Auto refresh
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                const hasOpenMenu = document.querySelector('.action-menu.show') !== null;
+                const timeSinceLastRefresh = Date.now() - lastRefreshTime;
+                const indicator = document.getElementById('refresh-indicator');
+
+                if (hasOpenMenu || isInteracting || refreshPaused) {
+                    indicator.classList.add('paused');
+                    indicator.title = 'Auto-refresh pausado';
+                } else {
+                    indicator.classList.remove('paused');
+                    indicator.title = 'Auto-refresh activo';
+                }
+
+                if (!hasOpenMenu && !isInteracting && !refreshPaused && timeSinceLastRefresh >= 5000) {
+                    refreshInstances();
+                }
+            }, 1000);
+        }
+
+        async function refreshInstances(isManual = false) {
+            try {
+                if (!isManual && document.querySelector('.action-menu.show')) {
+                    return;
+                }
+
+                lastRefreshTime = Date.now();
+                const response = await fetch(`${API_BASE}/instances`);
+                if (!response.ok) throw new Error('Error al obtener las instancias');
+
+                const data = await response.json();
+                instances = data.Instances;
+
+                if (!document.querySelector('.action-menu.show') || isManual) {
+                    renderInstances();
+                }
+            } catch (error) {
+                console.error('Error al obtener instancias:', error);
+                showError('No se pudieron cargar las instancias del bot. Asegúrate de que el bot esté en ejecución.');
+            }
+        }
+
+        function manualRefresh() {
+            document.querySelectorAll('.action-menu.show').forEach(menu => {
+                menu.classList.remove('show');
+            });
+            refreshInstances(true);
+            showToast('info', 'Actualizado', 'Instancias del bot actualizadas');
+        }
+
+        // Instance rendering
+        function renderInstances() {
+            const container = document.getElementById('instances-container');
+
+            if (instances.length === 0) {
+                container.innerHTML = '<div class="error-message">⚠️ No se encontraron instancias del bot. Asegúrate de que al menos un PokeBot esté en funcionamiento.</div>';
+                return;
+            }
+
+            container.innerHTML = instances.map(instance => {
+                const isOnline = instance.IsOnline || false;
+                const statusClass = isOnline ? 'online' : 'offline';
+                const statusIndicator = isOnline ?
+                    '<span class="online-indicator"></span>Conectado' :
+                    '<span class="offline-indicator"></span>Desconectado';
+
+                let instanceStatus = 'stopped';
+                let instanceStatusText = 'Detenido';
+                if (instance.BotStatuses && instance.BotStatuses.length > 0) {
+                    const runningCount = instance.BotStatuses.filter(b =>
+                        b.Status.toUpperCase().includes('EN EJECUCIÓN') ||
+                        b.Status.toUpperCase().includes('ACTIVO') ||
+                        (!b.Status.toUpperCase().includes('EN ESPERA') &&
+                            !b.Status.toUpperCase().includes('DETENIDO') &&
+                            !b.Status.toUpperCase().includes('ERROR'))
+                    ).length;
+                    const idleCount = instance.BotStatuses.filter(b =>
+                        b.Status.toUpperCase().includes('EN ESPERA')
+                    ).length;
+
+                    if (runningCount === instance.BotStatuses.length) {
+                        instanceStatus = 'running';
+                        instanceStatusText = 'Todos en ejecución';
+                    } else if (idleCount === instance.BotStatuses.length) {
+                        instanceStatus = 'idle';
+                        instanceStatusText = 'Todos inactivos';
+                    } else if (runningCount > 0) {
+                        instanceStatus = 'mixed';
+                        instanceStatusText = `${runningCount}/${instance.BotStatuses.length} en ejecución`;
+                    } else if (idleCount > 0) {
+                        instanceStatus = 'idle';
+                        instanceStatusText = 'Inactivo';
+                    }
+                }
+                return `
+                                <div class="instance-card ${statusClass}" data-port="${instance.Port}">
+                                    <div class="instance-header">
+                                        <h3 class="instance-title">
+                                            ${instance.Name}
+                                            <span class="instance-status-badge ${instanceStatus}">${instanceStatusText}</span>
+                                        </h3>
+                                        <span class="instance-badge">Port ${instance.Port}</span>
+                                    </div>
+                                    <div class="instance-body">
+                                        <div class="instance-info">
+                                            <div class="info-item">
+                                                <span class="info-label">Versión</span>
+                                                <span class="info-value">${instance.Version}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">Modo</span>
+                                                <span class="info-value">${instance.Mode}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">ID de proceso</span>
+                                                <span class="info-value">${instance.ProcessId}</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">Conexión</span>
+                                                <span class="info-value">${statusIndicator}</span>
+                                            </div>
+                                        </div>
+
+                    ${instance.BotStatuses && instance.BotStatuses.length > 0 ? `
+                                        <div class="bot-status">
+                                            <div class="info-label" style="margin-bottom: 0.5rem;">BOTS (${instance.BotStatuses.length})</div>
+                                            ${instance.BotStatuses.map((bot, index) => `
+                                                <div class="bot-status-item">
+                                                    <span class="bot-name">
+                                                        <span style="color: ${getStatusColor(bot.Status)};">●</span>
+                                                        <span>${bot.Name || `Bot ${index + 1}`}</span>
+                                                    </span>
+                                                    <span class="bot-state ${getStatusClass(bot.Status)}">${bot.Status}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                        ` : instance.BotCount > 0 ? `
+                                        <div class="bot-status">
+                                            <div class="info-label">BOTS</div>
+                                            <div class="bot-status-item">
+                                                <span class="bot-name">Cantidad de Bots: ${instance.BotCount}</span>
+                                                <span class="bot-state">Status Unknown</span>
+                                            </div>
+                                        </div>
+                                        ` : ''}
+
+                    <div class="instance-controls">
+                                            <button class="action-menu-button" onclick="toggleActionMenu(event, ${instance.Port})" ${!isOnline ? 'disabled' : ''}>
+                                                ⚡ Acciones <span style="font-size: 0.75rem;">▼</span>
+                                            </button>
+                                            <div class="action-menu" id="action-menu-${instance.Port}">
+                                                <button class="action-menu-item success" onclick="sendInstanceCommand(${instance.Port}, 'start')">
+                                                    ▶️ Iniciar
+                                                </button>
+                                                <button class="action-menu-item danger" onclick="sendInstanceCommand(${instance.Port}, 'stop')">
+                                                    ⏹️ Detener
+                                                </button>
+                                                <button class="action-menu-item warning" onclick="sendInstanceCommand(${instance.Port}, 'idle')">
+                                                    ⏸️ Inactivo
+                                                </button>
+                                                <button class="action-menu-item" onclick="sendInstanceCommand(${instance.Port}, 'resume')">
+                                                    ⏯️ Reanudar
+                                                </button>
+                                                <div class="action-menu-divider"></div>
+                                                <button class="action-menu-item" onclick="sendInstanceCommand(${instance.Port}, 'restart')">
+                                                    🔄 Reiniciar
+                                                </button>
+                                                <button class="action-menu-item danger" onclick="sendInstanceCommand(${instance.Port}, 'reboot')">
+                                                    🔌 Reinicio total
+                                                </button>
+                                                <div class="action-menu-divider"></div>
+                                                <button class="action-menu-item" onclick="sendInstanceCommand(${instance.Port}, 'screenon')">
+                                                    💡 Pantalla encendida
+                                                </button>
+                                                <button class="action-menu-item" onclick="sendInstanceCommand(${instance.Port}, 'screenoff')">
+                                                    🌙 Pantalla apagada
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+            }).join('');
+        }
+
+        function toggleActionMenu(event, port) {
+            event.stopPropagation();
+            const menu = document.getElementById(`action-menu-${port}`);
+            const allMenus = document.querySelectorAll('.action-menu');
+
+            allMenus.forEach(m => {
+                if (m.id !== `action-menu-${port}`) {
+                    m.classList.remove('show');
+                }
+            });
+
+            const wasOpen = menu.classList.contains('show');
+            menu.classList.toggle('show');
+
+            isInteracting = !wasOpen;
+
+            if (wasOpen && !document.querySelector('.action-menu.show')) {
+                isInteracting = false;
+            }
+        }
+
+        // Commands
+        async function sendGlobalCommand(command) {
+            showToast('info', 'Enviando comando', `Enviando ${command} a todas las instancias...`);
 
             try {
-                // Get current instances first to show version info
+                const response = await fetch(`${API_BASE}/command/all`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Command: command })
+                });
+
+                if (!response.ok) throw new Error('Fallo el comando');
+
+                const result = await response.json();
+                const successCount = result.SuccessfulCommands || 0;
+                const totalCount = result.TotalInstances || 0;
+
+                if (successCount === totalCount && totalCount > 0) {
+                    showToast('success', 'Comando enviado', `Comando ${command} enviado correctamente a las ${totalCount} instancias`);
+                } else if (successCount > 0) {
+                    showToast('warning', 'Éxito parcial', `Comando enviado a ${successCount} de ${totalCount} instancias`);
+                } else {
+                    showToast('error', 'Fallo en el comando', `No se pudo enviar el comando a ninguna instancia`);
+                }
+
+                setTimeout(() => refreshInstances(true), 1000);
+            } catch (error) {
+                console.error('Error al enviar comando global:', error);
+                showToast('error', 'Error', `No se pudo enviar el comando: ${command}`);
+            }
+        }
+
+        async function sendInstanceCommand(port, command) {
+            document.getElementById(`action-menu-${port}`).classList.remove('show');
+            isInteracting = false;
+
+            showToast('info', 'Enviando comando', `Enviando ${command} a la instancia en el puerto ${port}...`);
+
+            try {
+                const response = await fetch(`${API_BASE}/instances/${port}/command`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Command: command })
+                });
+
+                if (!response.ok) throw new Error('Fallo el comando');
+
+                const result = await response.json();
+                if (result.Success) {
+                    showToast('success', 'Comando enviado', `Comando ${command} enviado correctamente a la instancia en el puerto ${port}`);
+                } else {
+                    showToast('error', 'Fallo en el comando', result.Message || 'Error desconocido');
+                }
+
+                setTimeout(() => refreshInstances(true), 1000);
+            } catch (error) {
+                console.error(`Error al enviar comando al puerto ${port}:`, error);
+                showToast('error', 'Error', `No se pudo enviar el comando a la instancia en el puerto ${port}`);
+            }
+        }
+
+        // Update functions
+        async function updateAllInstances() {
+            showModal('update-modal');
+
+            try {
                 const instancesResponse = await fetch(`${API_BASE}/instances`);
                 const instancesData = await instancesResponse.json();
-                const currentVersion = instancesData.Instances?.[0]?.Version || 'Unknown';
+                const currentVersion = instancesData.Instances?.[0]?.Version || 'Desconocida';
 
                 document.getElementById('current-version').textContent = currentVersion;
-                document.getElementById('new-version').textContent = 'Verificando...';
+                document.getElementById('new-version').textContent = 'Comprobando...';
                 document.getElementById('changelog-content').innerHTML = '<div class="spinner"></div>';
 
-                // Check for updates
                 const checkResponse = await fetch(`${API_BASE}/update/check`);
                 let updateInfo = { version: 'Desconocida', changelog: 'No hay registro de cambios disponible' };
 
                 if (checkResponse.ok) {
                     updateInfo = await checkResponse.json();
-                    updateState.newVersion = updateInfo.version;
-                    updateState.changelog = updateInfo.changelog || 'No hay registro de cambios disponible';
                 } else {
-                    // If check endpoint doesn't exist, proceed with a generic update
-                    updateState.newVersion = 'Última';
-                    updateState.changelog = 'No se pudo obtener el registro de cambios. La actualización continuará a la última versión.';
+                    updateInfo.version = 'Última';
+                    updateInfo.changelog = 'No se pudo obtener el registro de cambios. La actualización procederá a la última versión.';
                 }
 
-                document.getElementById('new-version').textContent = updateState.newVersion;
-                document.getElementById('changelog-content').textContent = updateState.changelog;
+                document.getElementById('new-version').textContent = updateInfo.version;
+                document.getElementById('changelog-content').textContent = updateInfo.changelog;
 
             } catch (error) {
-                console.error('Error al verificar actualizaciones:', error);
+                console.error('Error checking updates:', error);
                 document.getElementById('new-version').textContent = 'Última';
                 document.getElementById('changelog-content').textContent = 'No se pudo obtener la información de la actualización. Haz clic en Actualizar para continuar.';
             }
         }
 
-        function showModal(modalId) {
-            document.getElementById(modalId).classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
-            document.body.style.overflow = '';
-        }
-
-        function closeUpdateModal() {
-            closeModal('update-modal');
-        }
-
         async function confirmUpdate() {
             closeModal('update-modal');
             showModal('progress-modal');
+            document.getElementById('progress-modal-title').textContent = 'Actualización en progreso';
+            document.getElementById('force-update-info').style.display = 'block';
 
+            updateState.type = 'update';
             updateState.startTime = Date.now();
-            updateProgress('Inicializando el proceso de actualización...', 'Verificando todas las instancias para actualizaciones', 10);
+            updateProgress('Inicializando proceso de actualización...', 'Iniciando proceso de actualización en segundo plano', 10);
 
             try {
-                // Start the idle process
                 const response = await fetch(`${API_BASE}/update/all`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stage: 'start' })
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
-                if (!response.ok) throw new Error('Falló la verificación de actualización');
+                if (!response.ok) throw new Error('No se pudo iniciar la actualización');
 
                 const result = await response.json();
+                updateState.id = result.Id;
 
-                if (result.UpdatesNeeded === 0) {
-                    updateProgress('Todas las instancias están actualizadas', 'No se necesitan actualizaciones', 100);
-                    addLogEntry('Todas las instancias ya están ejecutando la última versión', 'success');
-                    setTimeout(() => {
-                        closeModal('progress-modal');
-                        showToast('info', 'Sin actualizaciones', 'Todas las instancias ya están actualizadas');
-                    }, 2000);
-                    return;
+                if (result.Info) {
+                    updateProgress(
+                        'Actualización iniciada',
+                        result.Info,
+                        20
+                    );
+                    addLogEntry('Proceso de actualización iniciado en segundo plano', 'info');
                 }
 
-                // Store instances that need updates
-                updateState.instances = result.Results || [];
-                const totalInstances = result.TotalInstances || updateState.instances.length;
+                // Start monitoring update status
+                updateState.interval = setInterval(() => {
+                    checkUpdateStatus();
+                }, 2000);
 
-                updateProgress(
-                    'Preparando instancias para la actualización',
-                    `Se encontraron ${result.UpdatesNeeded} instancias que necesitan actualización`,
-                    20
-                );
-                addLogEntry(`Se identificaron ${result.UpdatesNeeded} instancias que requieren actualización`);
-                addLogEntry('Enviando comando de espera a todos los bots...', 'info');
-
-                // Show idle status immediately
-                document.getElementById('idle-status').style.display = 'block';
-                document.getElementById('force-update-btn').style.display = 'inline-flex';
-
-                // Start monitoring idle status
-                setTimeout(() => {
-                    startIdleMonitoring(totalInstances);
-                }, 500);
+                // Pause auto-refresh during update
+                refreshPaused = true;
 
             } catch (error) {
-                console.error('Error al actualizar las instancias:', error);
-                updateProgress('Error en la actualización', error.message, 0);
-                addLogEntry(`Error en la actualización: ${error.message}`, 'error');
+                console.error('Error al iniciar la actualización:', error);
+                updateProgress('Actualización fallida', error.message, 0);
+                addLogEntry(`No se pudo iniciar la actualización: ${error.message}`, 'error');
+                refreshPaused = false;
 
                 setTimeout(() => {
                     closeModal('progress-modal');
-                    showToast('error', 'Error', 'No se pudo verificar si hay actualizaciones');
+                    showToast('error', 'Error', 'No se pudo iniciar el proceso de actualización');
                 }, 2000);
             }
         }
 
-        function startIdleMonitoring(totalInstances) {
-            let lastIdleCount = 0;
-            let lastLogTime = 0;
+        async function checkUpdateStatus() {
+            if (!updateState.id) return;
 
+            try {
+                const response = await fetch(`${API_BASE}/update/all`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ updateId: updateState.id })
+                });
+
+                if (!response.ok) {
+                    // Update might be complete or not found
+                    clearInterval(updateState.interval);
+                    updateState.id = null;
+                    updateState.interval = null;
+                    refreshPaused = false;
+
+                    // Try to get final status from active updates endpoint
+                    const activeResponse = await fetch(`${API_BASE}/update/active`);
+                    if (activeResponse.ok) {
+                        const updates = await activeResponse.json();
+                        const ourUpdate = updates.find(u => u.Id === updateState.id);
+                        if (ourUpdate && ourUpdate.IsComplete) {
+                            if (ourUpdate.Success) {
+                                showToast('success', 'Actualización completa', 'La actualización se completó mientras estabas ausente');
+                            } else {
+                                showToast('error', 'Fallo en la actualización', 'La actualización falló mientras estabas ausente');
+                            }
+                        }
+                    }
+
+                    closeModal('progress-modal');
+                    refreshInstances(true);
+                    return;
+                }
+
+                const status = await response.json();
+
+                // Update UI with current status
+                updateProgress(
+                    status.Stage === 'checking' ? 'Buscando actualizaciones' :
+                        status.Stage === 'scanning' ? 'Escaneando instancias' :
+                            status.Stage === 'idling' ? 'Preparando instancias' :
+                                status.Stage === 'waiting_idle' ? (status.Message.includes('FORCING') ? 'Forzando actualización' : 'Esperando a que los bots estén inactivos') :
+                                    status.Stage === 'updating' ? 'Actualizando instancias' :
+                                        status.Stage === 'updating_master' ? 'Actualizando instancia principal' :
+                                            status.Stage === 'complete' ? (status.Success ? '¡Actualización completa!' : 'Fallo en la actualización') :
+                                                status.Stage === 'error' ? 'Error en la actualización' : 'Procesando...',
+                    status.Message,
+                    status.Progress
+                );
+
+                // Update idle status display
+                if (status.Stage === 'waiting_idle') {
+                    document.getElementById('idle-status').style.display = 'block';
+                    document.getElementById('force-update-info').style.display = 'block';
+
+                    // Calculate time remaining for timeout
+                    if (status.StartTime) {
+                        const startTime = new Date(status.StartTime);
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const remaining = Math.max(0, 300 - elapsed);  // 5 minutes = 300 seconds
+                        document.getElementById('timeout-countdown').textContent = remaining;
+
+                        if (remaining <= 30 && remaining > 0) {
+                            document.getElementById('timeout-countdown').style.color = 'var(--danger)';
+                        }
+                    }
+
+                    // Update the bot idle counts
+                    updateIdleStatus(status.Result?.TotalInstances || 0);
+                } else {
+                    document.getElementById('idle-status').style.display = 'none';
+                    document.getElementById('force-update-info').style.display = 'none';
+                }
+
+                // Handle completion
+                if (status.IsComplete) {
+                    clearInterval(updateState.interval);
+                    updateState.interval = null;
+                    updateState.id = null;
+                    refreshPaused = false;
+
+                    if (status.Success) {
+                        addLogEntry('Comandos de actualización enviados a todas las instancias', 'info');
+                        updateProgress(
+                            'Actualizaciones iniciadas',
+                            `${status.Result?.UpdatesStarted || 0} instancias están actualizando. Monitoreando progreso...`,
+                            100
+                        );
+
+                        setTimeout(() => {
+                            closeModal('progress-modal');
+                            showToast('info', 'Actualizaciones iniciadas', `Actualizaciones iniciadas para ${status.Result?.UpdatesStarted || 0} instancias. Monitoreando versiones...`);
+
+                            // Start monitoring for actual completion
+                            monitorUpdateCompletion(status.Result?.UpdatesStarted || 0);
+                        }, 3000);
+                    } else {
+                        addLogEntry(`Fallo en la actualización: ${status.Message}`, 'error');
+                        setTimeout(() => {
+                            closeModal('progress-modal');
+                            showToast('error', 'Fallo en la actualización', status.Message);
+                            refreshInstances(true);
+                        }, 2000);
+                    }
+                }
+            } catch (error) {
+                // Connection lost handling
+                console.log('Fallo en la comprobación de estado - verificando si el maestro está actualizando');
+
+                if (connectionLost || !response) {
+                    updateProgress(
+                        'Conexión perdida',
+                        'La instancia principal puede estar actualizándose. Se reconectará automáticamente...',
+                        -1
+                    );
+
+                    // Don't clear the update ID - we'll try to reconnect when connection is restored
+                }
+            }
+        }
+
+        function monitorUpdateCompletion(expectedUpdateCount) {
+            let checkCount = 0;
+            const maxChecks = 120; // Check for up to 10 minutes (120 * 5 seconds)
+            let initialVersions = {};
+            let targetVersion = null;
+
+            // Store initial versions
+            instances.forEach(instance => {
+                initialVersions[instance.Port] = instance.Version;
+            });
+
+            showToast('info', 'Monitoreando actualizaciones', 'Comprobando versiones de instancias...', 10000);
+
+            const checkInterval = setInterval(async () => {
+                checkCount++;
+
+                try {
+                    await refreshInstances(true);
+
+                    let updatedCount = 0;
+                    let allOnline = true;
+                    let allSameVersion = true;
+                    let currentVersions = new Set();
+
+                    instances.forEach(instance => {
+                        currentVersions.add(instance.Version);
+
+                        // Check if this instance has updated (version changed)
+                        if (initialVersions[instance.Port] &&
+                            instance.Version !== initialVersions[instance.Port]) {
+                            updatedCount++;
+                            if (!targetVersion) targetVersion = instance.Version;
+                        }
+
+                    // Check if online
+                        if (!instance.IsOnline) {
+                        allOnline = false;
+                    }
+                });
+
+            allSameVersion = currentVersions.size === 1;
+
+            // Success conditions:
+            // 1. All instances have the same version
+            // 2. At least expectedUpdateCount instances changed version
+            // 3. All instances are online
+            if (allSameVersion && updatedCount >= expectedUpdateCount && allOnline) {
+                clearInterval(checkInterval);
+                const finalVersion = Array.from(currentVersions)[0];
+
+                showToast('success', '¡Actualización completa!',
+                    `Las ${instances.length} instancias ahora están ejecutando la versión ${finalVersion} y están en línea.`, 8000);
+
+                // Log success
+                console.log(`Verificación de actualización completa: Todas las instancias en la versión ${finalVersion}`);
+                return;
+            }
+
+            // Show progress every 30 seconds
+            if (checkCount % 6 === 0) {
+                showToast('info', 'Update Progress',
+                    `${updatedCount} de ${expectedUpdateCount} instancias actualizadas. ${instances.filter(i => i.IsOnline).length} en línea.`, 5000);
+                    }
+
+            // Timeout reached
+            if (checkCount >= maxChecks) {
+                clearInterval(checkInterval);
+
+                if (updatedCount > 0) {
+                    showToast('warning', 'Tiempo de espera de actualización',
+                        `${updatedCount} de ${expectedUpdateCount} instancias actualizadas. Algunas pueden seguir actualizándose.`, 8000);
+                } else {
+                    showToast('error', 'Falló la verificación de actualización',
+                        'No se pudo verificar que la actualización haya finalizado. Por favor, revisa las instancias manualmente.', 8000);
+                }
+            }
+                } catch (error) {
+                    // Connection errors are expected during updates
+                    console.log('Monitor check failed (expected during updates):', error);
+                }
+             }, 5000); // Check every 5 seconds
+        }
+
+        function updateIdleStatus(totalInstances) {
+            // Check idle status
+            fetch(`${API_BASE}/update/idle-status`)
+                .then(response => response.json())
+                .then(data => {
+                    const totalBots = data.TotalBots || 0;
+                    const idledBots = data.TotalIdleBots || 0;
+
+                    document.getElementById('bots-idled').textContent = idledBots;
+                    document.getElementById('bots-remaining').textContent = totalBots - idledBots;
+
+                    // Update countdown
+                    const elapsed = Math.floor((Date.now() - updateState.startTime) / 1000);
+                    const remaining = Math.max(0, 300 - elapsed);  // 5 minutes
+                    document.getElementById('timeout-countdown').textContent = remaining;
+
+                    // Show warning when timeout is approaching
+                    if (remaining <= 30 && remaining > 0) {
+                        document.getElementById('timeout-countdown').style.color = 'var(--danger)';
+                        document.getElementById('timeout-countdown').style.fontWeight = 'bold';
+                    }
+
+                    // Auto-hide info message since backend will force automatically
+                    if (remaining === 0) {
+                        document.getElementById('force-update-info').textContent = '⚡ Forzando actualización en curso...';
+                        addLogEntry('Se alcanzó el tiempo límite - forzando actualización en todos los bots activos', 'warning');
+                    }
+                })
+                .catch(error => console.error('Error al verificar el estado inactivo:', error));
+        }
+
+        // Restart functions
+        async function restartAllInstances() {
+            // Check if this is the master instance
+            const response = await fetch(`${API_BASE}/instances`);
+            const data = await response.json();
+            const masterExists = data.Instances.some(i => i.IsMaster);
+
+            if (!masterExists) {
+                showToast('error', 'Error', 'No se encontró una instancia maestra. No se puede iniciar el reinicio.');
+                return;
+            }
+
+            showModal('progress-modal');
+            document.getElementById('progress-modal-title').textContent = 'Reinicio en progreso';
+            document.getElementById('force-update-info').style.display = 'none';
+
+            updateProgress('Preparando reinicio...', 'Poniendo todos los bots en espera antes del reinicio', 10);
+
+            try {
+                // This now waits for all bots to be idle before returning
+                const response = await fetch(`${API_BASE}/restart/all`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error('Fallo al iniciar el reinicio');
+
+                const result = await response.json();
+
+                if (result.Success) {
+                    updateProgress(
+                        'Todos los bots en reposo',
+                        result.Message || 'Continuando con la secuencia de reinicio',
+                        50
+                    );
+                    addLogEntry('Todos los bots están ahora en reposo', 'success');
+
+                    // Now proceed with the actual restarts
+                    proceedWithRestart();
+                } else {
+                    throw new Error(result.Error || result.Message || 'No se pudo iniciar el reinicio');
+                }
+            } catch (error) {
+                console.error('Error al reiniciar las instancias:', error);
+                updateProgress('Reinicio fallido', error.message, 0);
+                addLogEntry(`Reinicio fallido: ${error.message}`, 'error');
+
+                setTimeout(() => {
+                    closeModal('progress-modal');
+                    showToast('error', 'Error', 'No se pudo reiniciar las instancias');
+                }, 2000);
+            }
+        }
+
+        async function proceedWithRestart() {
             updateProgress(
-                'Esperando que TODOS los bots entren en espera',
-                'Todos los bots en todas las instancias deben finalizar sus operaciones actuales antes de actualizar',
+                'Iniciando reinicios',
+                'Comenzando el proceso de reinicio para todas las instancias...',
+                60
+            );
+
+            try {
+                const response = await fetch(`${API_BASE}/restart/proceed`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) throw new Error('No se pudo continuar con los reinicios');
+
+                const result = await response.json();
+
+                if (result.Success) {
+                    updateProgress(
+                        'Reinicios en progreso',
+                        'Las instancias se están reiniciando',
+                        90
+                    );
+
+                    if (result.MasterRestarting) {
+                        setTimeout(() => {
+                            updateProgress(
+                                'Instancia maestra reiniciándose',
+                                'Esta interfaz web se desconectará temporalmente...',
+                                95
+                            );
+                            addLogEntry('La instancia maestra se está reiniciando - espera una desconexión temporal', 'warning');
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            updateProgress(
+                                '¡Reinicios completos!',
+                                'Todas las instancias se han reiniciado correctamente',
+                                100
+                            );
+                            addLogEntry('¡Todos los reinicios se completaron con éxito!', 'success');
+
+                            setTimeout(() => {
+                                closeModal('progress-modal');
+                                showToast('success', 'Reinicio completado', 'Todas las instancias reiniciadas');
+                                refreshInstances(true);
+                            }, 3000);
+                        }, 5000);
+                    }
+                }
+            } catch (error) {
+                console.error('Error al continuar con los reinicios:', error);
+                updateProgress('Reinicio fallido', error.message, 0);
+                addLogEntry(`No se pudo continuar con los reinicios: ${error.message}`, 'error');
+            }
+        }
+
+        function startRestartIdleMonitoring(totalInstances) {
+            updateProgress(
+                'Esperando a que TODOS los bots estén inactivos',
+                'Todos los bots deben terminar sus operaciones actuales antes de reiniciar',
                 30
             );
 
-            // Update countdown
-            updateState.countdownInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - updateState.startTime) / 1000);
-                const remaining = Math.max(0, updateState.timeout - elapsed);
+            restartState.countdownInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - restartState.startTime) / 1000);
+                const remaining = Math.max(0, restartState.timeout - elapsed);
                 document.getElementById('timeout-countdown').textContent = remaining;
-
-                if (remaining === 0 && !updateState.forcedUpdate) {
-                    forceUpdate();
-                }
             }, 1000);
 
-            // Check idle status using dedicated endpoint
-            updateState.idleCheckInterval = setInterval(async () => {
+            restartState.idleCheckInterval = setInterval(async () => {
                 try {
                     const response = await fetch(`${API_BASE}/update/idle-status`);
                     const data = await response.json();
@@ -1490,234 +2317,79 @@
                     document.getElementById('bots-idled').textContent = idledBots;
                     document.getElementById('bots-remaining').textContent = totalBots - idledBots;
 
-                    // Build detailed status
-                    let detailsHtml = '<div style="margin-top: 10px; font-size: 0.8rem;">';
-                    let hasNonIdleBots = false;
-
-                    if (data.Instances) {
-                        data.Instances.forEach(instance => {
-                            if (instance.NonIdleBots && instance.NonIdleBots.length > 0) {
-                                hasNonIdleBots = true;
-                                detailsHtml += `<div style="margin-bottom: 5px;">Port ${instance.Port}: `;
-                                detailsHtml += instance.NonIdleBots.slice(0, 2).map(b =>
-                                    `${b.Name} (${b.Status})`
-                                ).join(', ');
-                                if (instance.NonIdleBots.length > 2) {
-                                    detailsHtml += ` +${instance.NonIdleBots.length - 2} more`;
-                                }
-                                detailsHtml += '</div>';
-                            }
-                        });
+                    if (allIdle) {
+                        clearInterval(restartState.idleCheckInterval);
+                        clearInterval(restartState.countdownInterval);
+                        addLogEntry('¡Todos los bots están ahora inactivos!', 'success');
+                        proceedWithRestart();
                     }
-
-                    if (!hasNonIdleBots) {
-                        detailsHtml = '<div style="color: var(--success); margin-top: 10px;">✅ Todos los bots en todas las instancias están en espera</div>';
-                    } else {
-                        detailsHtml += '</div>';
-                    }
-
-                    document.getElementById('bot-details').innerHTML = detailsHtml;
-
-                    // Log progress when bots idle (but not too frequently)
-                    const now = Date.now();
-                    if (idledBots > lastIdleCount && now - lastLogTime > 2000) {
-                        addLogEntry(`${idledBots}/${totalBots} bots están ahora en espera en todas las instancias`);
-                        lastIdleCount = idledBots;
-                        lastLogTime = now;
-
-                        // Log which instances still have active bots
-                        if (data.Instances) {
-                            const activeInstances = data.Instances.filter(i => !i.AllIdle);
-                            if (activeInstances.length > 0) {
-                                const ports = activeInstances.map(i => i.Port).join(', ');
-                                addLogEntry(`Esperando a los bots en los puertos: ${ports}`, 'warning');
-                            }
-                        }
-                    }
-
-                    // Update progress bar
-                    const idleProgress = 30 + (idledBots / totalBots) * 40;
-                    document.getElementById('progress-bar').style.width = `${idleProgress}%`;
-
-                    // Only proceed if ALL bots are idle
-                    if (allIdle && !updateState.forcedUpdate) {
-                        clearInterval(updateState.idleCheckInterval);
-                        clearInterval(updateState.countdownInterval);
-                        addLogEntry('¡Todos los bots en todas las instancias están ahora en espera!', 'success');
-                        proceedWithUpdate();
-                    }
-
                 } catch (error) {
-                    console.error('Error al verificar el estado de espera:', error);
-                    // Fall back to old method if new endpoint doesn't exist
-                    checkIdleStatusFallback();
+                    console.error('Error al verificar el estado inactivo:', error);
                 }
-            }, 2000);
+            }, 1000);
         }
 
-        // Fallback function for older versions
-        async function checkIdleStatusFallback() {
-            try {
-                const response = await fetch(`${API_BASE}/instances`);
-                const data = await response.json();
-
-                let totalBots = 0;
-                let idledBots = 0;
-
-                data.Instances.forEach(instance => {
-                    if (instance.BotStatuses) {
-                        instance.BotStatuses.forEach(bot => {
-                            totalBots++;
-                            const status = bot.Status.toUpperCase();
-                            if (status === 'EN ESPERA' || status === 'DETENIDO') {
-                                idledBots++;
-                            }
-                        });
-                    }
-                });
-
-                document.getElementById('bots-idled').textContent = idledBots;
-                document.getElementById('bots-remaining').textContent = totalBots - idledBots;
-
-                if (idledBots === totalBots && !updateState.forcedUpdate) {
-                    clearInterval(updateState.idleCheckInterval);
-                    clearInterval(updateState.countdownInterval);
-                    proceedWithUpdate();
-                }
-            } catch (error) {
-                console.error('La verificación de espera de respaldo falló:', error);
-            }
-        }
-
-        async function proceedWithUpdate() {
+        async function proceedWithRestart() {
             updateProgress(
-                'Iniciando actualizaciones',
-                'Todos los bots están en espera. Comenzando el proceso de actualización...',
+                'Iniciando reinicios',
+                'Todos los bots están inactivos. Comenzando proceso de reinicio...',
                 70
             );
-            addLogEntry('Todos los bots entraron en espera correctamente. Iniciando actualizaciones...', 'success');
 
             document.getElementById('idle-status').style.display = 'none';
-            document.getElementById('force-update-btn').style.display = 'none';
+            document.getElementById('force-update-info').style.display = 'none';
 
             try {
-                // Call the update endpoint with proceed stage
-                const response = await fetch(`${API_BASE}/update/all`, {
+                const response = await fetch(`${API_BASE}/restart/proceed`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ stage: 'proceed' })
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
-                if (!response.ok) throw new Error('No se pudo continuar con las actualizaciones');
+                if (!response.ok) throw new Error('No se pudo continuar con los reinicios');
 
                 const result = await response.json();
 
-                // The updates have been triggered, now just show progress
-                if (result.UpdatesStarted > 0) {
+                if (result.Success) {
                     updateProgress(
-                        'Actualizaciones en curso',
-                        `${result.UpdatesStarted} instancias están siendo actualizadas`,
+                        'Reinicios en progreso',
+                        'Las instancias se están reiniciando',
                         90
                     );
 
-                    // Log each update
-                    if (result.Results) {
-                        result.Results.forEach(r => {
-                            if (r.UpdateStarted) {
-                                addLogEntry(`Actualización iniciada en la instancia del puerto ${r.Port}`, 'success');
-                            }
-                        });
-                    }
-
-                    // Check for master updateAdd commentMore actions
                     const masterPort = parseInt(window.location.port || '8080');
-                    const masterUpdating = result.Results?.some(r =>
-                        r.UpdateStarted && r.Port === masterPort
-                    );
-
-                    if (masterUpdating) {
-                        masterUpdating = true;
+                    if (result.MasterRestarting) {
                         setTimeout(() => {
                             updateProgress(
-                                'Instancia maestra reiniciándose',
+                                'La instancia maestra se está reiniciando',
                                 'Esta interfaz web se desconectará temporalmente...',
                                 95
                             );
-                            addLogEntry('La instancia maestra se está actualizando - se espera una desconexión temporal', 'warning');
+                            addLogEntry('La instancia maestra se está reiniciando - espera una desconexión temporal', 'warning');
+                            addLogEntry('Los bots se iniciarán automáticamente una vez que termine el reinicio', 'info');
                         }, 1000);
                     } else {
                         setTimeout(() => {
                             updateProgress(
-                                '¡Actualizaciones completas!',
-                                'Todas las instancias se han actualizado correctamente',
+                                '¡Reinicios completos!',
+                                'Todas las instancias se han reiniciado correctamente',
                                 100
                             );
-                            addLogEntry('¡Todas las actualizaciones se completaron con éxito!', 'success');
+                            addLogEntry('¡Todos los reinicios se completaron con éxito!', 'success');
 
-                            setTimeout(() => {
+                            setTimeout(async () => {
+                                await sendGlobalCommand('start');
                                 closeModal('progress-modal');
-                                showToast('success', 'Actualización completa', 'Todas las instancias han sido actualizadas');
+                                showToast('success', 'Reinicio completado', 'Todas las instancias reiniciadas y arrancadas');
                                 refreshInstances(true);
-                            }, 2000);
-                        }, 3000);
+                            }, 3000);
+                        }, 5000);
                     }
                 }
             } catch (error) {
-                console.error('Error al continuar con las actualizaciones:', error);
-                updateProgress('La actualización falló', error.message, 0);
-                addLogEntry(`No se pudo continuar con las actualizaciones: ${error.message}`, 'error');
+                console.error('Error al continuar con los reinicios:', error);
+                updateProgress('Reinicio fallido', error.message, 0);
+                addLogEntry(`No se pudo continuar con los reinicios: ${error.message}`, 'error');
             }
-        }
-
-        function forceUpdate() {
-            if (updateState.forcedUpdate) return;
-
-            updateState.forcedUpdate = true;
-            clearInterval(updateState.idleCheckInterval);
-            clearInterval(updateState.countdownInterval);
-
-            addLogEntry('Se alcanzó el tiempo límite o se forzó la actualización', 'warning');
-            updateProgress(
-                'Forzando actualización',
-                'Continuando con la actualización a pesar de que hay bots activos',
-                70
-            );
-
-            proceedWithUpdate();
-        }
-
-        function updateProgress(status, details, percentage) {
-            document.getElementById('progress-status').textContent = status;
-            document.getElementById('progress-details').textContent = details;
-            document.getElementById('progress-bar').style.width = `${percentage}%`;
-
-            // Update icon based on status
-            const iconMap = {
-                'Inicializando': '🔍',
-                'Preparando': '📋',
-                'Esperando': '⏳',
-                'Iniciando': '🚀',
-                'Actualizando': '📦',
-                'Actualizaciones completas': '✅',
-                'Error en la actualización': '❌',
-                'Forzando': '⚡'
-            };
-
-            const icon = Object.entries(iconMap).find(([key]) =>
-                status.toLowerCase().includes(key.toLowerCase())
-            )?.[1] || '⏳';
-
-            document.querySelector('.step-icon').textContent = icon;
-        }
-
-        function addLogEntry(message, type = 'info') {
-            const log = document.getElementById('update-log');
-            const time = new Date().toLocaleTimeString();
-            const entry = document.createElement('div');
-            entry.className = `log-entry log-${type}`;
-            entry.innerHTML = `<span class="log-time">${time}</span>${message}`;
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
         }
 
         // Connection monitoring
@@ -1736,7 +2408,6 @@
                     if (!response.ok) throw new Error('Error del servidor');
 
                     if (connectionLost) {
-                        // Connection restored
                         connectionLost = false;
                         handleReconnection();
                     }
@@ -1750,26 +2421,26 @@
         }
 
         function handleConnectionLost() {
-            if (masterUpdating) return; // Already showing master update UI
+            if (masterUpdating) return;
+
+            const modalTitle = document.getElementById('progress-modal-title').textContent;
+            const processType = modalTitle.includes('Restart') ? 'restarting' : 'updating';
 
             updateProgress(
                 'Conexión perdida',
-                'Se perdió la conexión con el servidor. Esto puede deberse a que la instancia maestra se está actualizando...',
-                -1 // Special value to indicate unknown progress
+                `La conexión con el servidor se perdió. Esto puede deberse a que la instancia maestra ${processType}...`,
+                -1
             );
 
-            // Change progress bar to indeterminate
             document.getElementById('progress-bar').style.width = '100%';
             document.getElementById('progress-bar').style.opacity = '0.5';
             document.getElementById('progress-bar').classList.add('indeterminate');
 
-            addLogEntry('Se perdió la conexión con el servidor - es posible que la instancia maestra se esté actualizando', 'warning');
-
-            // Show reconnection UI
-            showReconnectionUI();
+            addLogEntry(`Conexión perdida con el servidor - la instancia maestra puede estar ${processType}`, 'warning');
+            showReconnectionUI(processType);
         }
 
-        function showReconnectionUI() {
+        function showReconnectionUI(processType = 'updating') {
             const modalBody = document.querySelector('#progress-modal .modal-body');
 
             // Add reconnection status if not already present
@@ -1778,11 +2449,10 @@
                 reconnectDiv.id = 'reconnect-status';
                 reconnectDiv.className = 'reconnect-status';
                 reconnectDiv.innerHTML = `
-                        <div class="reconnect-icon">🔄</div>
-                        <div class="reconnect-text">Intentando reconectar...</div>
-                        <div class="reconnect-hint">La instancia maestra se está actualizando. Esta página se reconectará automáticamente cuando la actualización haya finalizado.</div>
-
-                    `;
+                                <div class="reconnect-icon">🔄</div>
+                                <div class="reconnect-text">Intentando reconectar...</div>
+                                <div class="reconnect-hint">La instancia maestra está ${processType}. Esta página se reconectará automáticamente cuando la ${processType === 'restarting' ? 'reinicialización' : 'actualización'} haya finalizado.</div>
+                            `;
                 modalBody.appendChild(reconnectDiv);
             }
         }
@@ -1790,18 +2460,22 @@
         function handleReconnection() {
             addLogEntry('¡Conexión restaurada!', 'success');
 
-            // Remove reconnection UI
             const reconnectStatus = document.getElementById('reconnect-status');
             if (reconnectStatus) {
                 reconnectStatus.remove();
             }
 
-            // Reset progress bar
             document.getElementById('progress-bar').classList.remove('indeterminate');
             document.getElementById('progress-bar').style.opacity = '1';
 
-            // Check final update status
-            checkFinalUpdateStatus();
+            // If we have an update ID, try to reconnect to it
+            if (updateState.id) {
+                addLogEntry('Intentando reconectar con el proceso de actualización...', 'info');
+                checkUpdateStatus();
+            } else {
+                // No hay ID de actualización, verifica si hay actualizaciones activas
+                checkForOngoingOperations();
+            }
         }
 
         async function checkFinalUpdateStatus() {
@@ -1815,7 +2489,6 @@
                 const response = await fetch(`${API_BASE}/instances`);
                 const data = await response.json();
 
-                // Check versions
                 const versions = data.Instances.map(i => i.Version);
                 const allSameVersion = versions.every(v => v === versions[0]);
 
@@ -1849,316 +2522,293 @@
             }
         }
 
-        function startAutoRefresh() {
-            refreshInterval = setInterval(() => {
-                const hasOpenMenu = document.querySelector('.action-menu.show') !== null;
-                const timeSinceLastRefresh = Date.now() - lastRefreshTime;
-                const indicator = document.getElementById('refresh-indicator');
+        async function checkFinalRestartStatus() {
+            updateProgress(
+                'Verificando estado del reinicio',
+                'Comprobando si todas las instancias están en línea...',
+                90
+            );
 
-                // Update indicator
-                if (hasOpenMenu || isInteracting || refreshPaused) {
-                    indicator.classList.add('paused');
-                    indicator.title = 'Auto-refresh paused';
-                } else {
-                    indicator.classList.remove('paused');
-                    indicator.title = 'Auto-refresh active';
-                }
-
-                // Only refresh if no menus are open, not interacting, and not manually paused
-                if (!hasOpenMenu && !isInteracting && !refreshPaused && timeSinceLastRefresh >= 5000) {
-                    refreshInstances();
-                }
-            }, 1000); // Check every second but only refresh when conditions are met
-        }
-
-        async function refreshInstances(isManual = false) {
             try {
-                // Don't refresh if menu is open and it's not a manual refresh
-                if (!isManual && document.querySelector('.action-menu.show')) {
-                    return;
-                }
-
-                lastRefreshTime = Date.now();
                 const response = await fetch(`${API_BASE}/instances`);
-                if (!response.ok) throw new Error('No se pudo obtener las instancias');
-
                 const data = await response.json();
-                instances = data.Instances;
 
-                // Only render if no menus are open or it's a manual refresh
-                if (!document.querySelector('.action-menu.show') || isManual) {
-                    renderInstances();
+                const onlineCount = data.Instances.filter(i => i.IsOnline).length;
+                const totalCount = data.Instances.length;
+
+                if (onlineCount === totalCount) {
+                    updateProgress(
+                        '¡Reinicio completo!',
+                        `Las ${totalCount} instancias están nuevamente en línea`,
+                        100
+                    );
+                    addLogEntry('Todas las instancias se reiniciaron correctamente y están en línea', 'success');
+                    addLogEntry('Los bots se han iniciado automáticamente', 'success');
+
+                    setTimeout(() => {
+                        closeModal('progress-modal');
+                        showToast('success', 'Reinicio completado', 'Todas las instancias se han reiniciado y arrancado');
+                        refreshInstances(true);
+                    }, 3000);
+                } else {
+                    updateProgress(
+                        'Estado del reinicio',
+                        `${onlineCount} de ${totalCount} instancias en línea`,
+                        95
+                    );
+                    addLogEntry(`Esperando a que ${totalCount - onlineCount} instancias se conecten`, 'warning');
+
+                    setTimeout(() => checkFinalRestartStatus(), 5000);
                 }
             } catch (error) {
-                console.error('Error al obtener las instancias:', error);
-                showError('No se pudieron cargar las instancias del bot. Asegúrate de que el bot esté en ejecución.');
+                updateProgress(
+                    'No se pudo verificar',
+                    'No se pudo verificar el estado del reinicio. Por favor, revisa las instancias manualmente.',
+                    100
+                );
             }
         }
 
-        function renderInstances() {
-            const container = document.getElementById('instances-container');
+        // Scheduled restart functions
+        async function loadRestartSchedule() {
+            try {
+                const response = await fetch(`${API_BASE}/restart/schedule`);
+                if (response.ok) {
+                    const schedule = await response.json();
+                    document.getElementById('schedule-restart-toggle').checked = schedule.Enabled || false;
+                    document.getElementById('restart-time').value = schedule.Time || '00:00';
+                    document.getElementById('restart-time').disabled = !schedule.Enabled;
 
-            if (instances.length === 0) {
-                container.innerHTML = '<div class="error-message">⚠️ No se encontraron instancias del bot. Asegúrate de que al menos un DaiBot esté en ejecución.</div>';
-                return;
+                    if (schedule.Enabled) {
+                        document.getElementById('schedule-status').style.display = 'flex';
+                        updateNextRestartTime();
+                    }
+                }
+            } catch {
+                const enabled = localStorage.getItem('scheduleRestartEnabled') === 'true';
+                const time = localStorage.getItem('scheduleRestartTime') || '00:00';
+
+                document.getElementById('schedule-restart-toggle').checked = enabled;
+                document.getElementById('restart-time').value = time;
+                document.getElementById('restart-time').disabled = !enabled;
+
+                if (enabled) {
+                    document.getElementById('schedule-status').style.display = 'flex';
+                    updateNextRestartTime();
+                }
+            }
+        }
+
+        async function toggleScheduledRestart() {
+            const enabled = document.getElementById('schedule-restart-toggle').checked;
+            const time = document.getElementById('restart-time').value;
+
+            document.getElementById('restart-time').disabled = !enabled;
+
+            try {
+                await fetch(`${API_BASE}/restart/schedule`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Enabled: enabled, Time: time })
+                });
+            } catch {
+                localStorage.setItem('scheduleRestartEnabled', enabled);
+                localStorage.setItem('scheduleRestartTime', time);
             }
 
-            container.innerHTML = instances.map(instance => {
-                const isOnline = instance.IsOnline || false;
-                const statusClass = isOnline ? 'online' : 'offline';
-                const statusIndicator = isOnline ?
-                    '<span class="online-indicator"></span>Conectado' :
-                    '<span class="offline-indicator"></span>Desconectado';
+            if (enabled) {
+                document.getElementById('schedule-status').style.display = 'flex';
+                updateNextRestartTime();
+                startScheduleChecker();
+            } else {
+                document.getElementById('schedule-status').style.display = 'none';
+                if (restartScheduleInterval) {
+                    clearInterval(restartScheduleInterval);
+                    restartScheduleInterval = null;
+                }
+            }
+        }
 
-                let instanceStatus = 'stopped';
-                let instanceStatusText = 'Detenido';
-                if (instance.BotStatuses && instance.BotStatuses.length > 0) {
-                    const runningCount = instance.BotStatuses.filter(b =>
-                        b.Status.toUpperCase().includes('EN EJECUCIÓN') ||
-                        b.Status.toUpperCase().includes('ACTIVO') ||
-                        (!b.Status.toUpperCase().includes('EN ESPERA') &&
-                            !b.Status.toUpperCase().includes('DETENIDO') &&
-                            !b.Status.toUpperCase().includes('ERROR') &&
-                            !b.Status.toUpperCase().includes('DESCONOCIDO'))
-                    ).length;
+        async function updateRestartSchedule() {
+            const enabled = document.getElementById('schedule-restart-toggle').checked;
+            const time = document.getElementById('restart-time').value;
 
-                    const idleCount = instance.BotStatuses.filter(b =>
-                        b.Status.toUpperCase().includes('IDLE')
-                    ).length;
+            try {
+                await fetch(`${API_BASE}/restart/schedule`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Enabled: enabled, Time: time })
+                });
+            } catch {
+                localStorage.setItem('scheduleRestartTime', time);
+            }
 
-                    if (runningCount === instance.BotStatuses.length) {
-                        instanceStatus = 'running';
-                        instanceStatusText = 'Todos en ejecución';
-                    } else if (idleCount === instance.BotStatuses.length) {
-                        instanceStatus = 'idle';
-                        instanceStatusText = 'Todos en espera';
-                    } else if (runningCount > 0) {
-                        instanceStatus = 'mixed';
-                        instanceStatusText = `${runningCount}/${instance.BotStatuses.length} en ejecución`;
-                    } else if (idleCount > 0) {
-                        instanceStatus = 'idle';
-                        instanceStatusText = 'En espera';
+            updateNextRestartTime();
+        }
+
+        function updateNextRestartTime() {
+            const time = document.getElementById('restart-time').value;
+            const [hours, minutes] = time.split(':').map(n => parseInt(n));
+
+            const now = new Date();
+            const next = new Date();
+            next.setHours(hours, minutes, 0, 0);
+
+            if (next <= now) {
+                next.setDate(next.getDate() + 1);
+            }
+
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            document.getElementById('next-restart-time').textContent = formatter.format(next);
+        }
+
+        function startScheduleChecker() {
+            if (restartScheduleInterval) clearInterval(restartScheduleInterval);
+            restartScheduleInterval = setInterval(checkRestartSchedule, 30000);
+        }
+
+        async function checkRestartSchedule() {
+            try {
+                const response = await fetch(`${API_BASE}/restart/schedule`);
+                const schedule = await response.json();
+
+                if (!schedule.Enabled) return;
+
+                const time = schedule.Time || '00:00';
+                const [hours, minutes] = time.split(':').map(n => parseInt(n));
+
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+
+                if (currentHour === hours && currentMinute === minutes) {
+                    const lastRestart = localStorage.getItem('lastScheduledRestart');
+                    const todayStr = now.toDateString();
+
+                    if (lastRestart !== todayStr) {
+                        localStorage.setItem('lastScheduledRestart', todayStr);
+                        showToast('info', 'Reinicio programado', 'Iniciando reinicio programado...');
+                        restartAllInstances();
+                    }
+                }
+                if (schedule.Enabled && !restartScheduleInterval) {
+                    startScheduleChecker();
+                }
+            } catch {
+                const enabled = localStorage.getItem('scheduleRestartEnabled') === 'true';
+                if (!enabled) return;
+
+                const time = localStorage.getItem('scheduleRestartTime') || '00:00';
+                const [hours, minutes] = time.split(':').map(n => parseInt(n));
+
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+
+                if (currentHour === hours && currentMinute === minutes) {
+                    const lastRestart = localStorage.getItem('lastScheduledRestart');
+                    const todayStr = now.toDateString();
+
+                    if (lastRestart !== todayStr) {
+                        localStorage.setItem('lastScheduledRestart', todayStr);
+                        showToast('info', 'Reinicio programado', 'Iniciando reinicio programado...');
+                        restartAllInstances();
                     }
                 }
 
-                return `
-                    <div class="instance-card ${statusClass}" data-port="${instance.Port}">
-                                <div class="instance-header">
-                                    <h3 class="instance-title">
-                                        ${instance.Name}
-                                        <span class="instance-status-badge ${instanceStatus}">${instanceStatusText}</span>
-                                    </h3>
-                                    <span class="instance-badge">Port ${instance.Port}</span>
-                                </div>
-                                <div class="instance-body">
-                                    <div class="instance-info">
-                                        <div class="info-item">
-                                            <span class="info-label">Versión</span>
-                                            <span class="info-value">${instance.Version}</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-label">Modo</span>
-                                            <span class="info-value">${instance.Mode}</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-label">ID de proceso</span>
-                                            <span class="info-value">${instance.ProcessId}</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-label">Conexión</span>
-                                            <span class="info-value">${statusIndicator}</span>
-                                        </div>
-                                    </div>
-
-                                    ${instance.BotStatuses && instance.BotStatuses.length > 0 ? `
-                                    <div class="bot-status">
-                                        <div class="info-label" style="margin-bottom: 0.5rem;">BOTS (${instance.BotStatuses.length})</div>
-                                        ${instance.BotStatuses.map((bot, index) => `
-                                            <div class="bot-status-item">
-                                                <span class="bot-name">
-                                                    <span style="color: ${getStatusColor(bot.Status)};">●</span>
-                                                    <span>${bot.Name || `Bot ${index + 1}`}</span>
-                                                </span>
-                                                <span class="bot-state ${getStatusClass(bot.Status)}">${bot.Status}</span>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                    ` : instance.BotCount > 0 ? `
-                                    <div class="bot-status">
-                                        <div class="info-label">BOTS</div>
-                                        <div class="bot-status-item">
-                                            <span class="bot-name">Cantidad de bots: ${instance.BotCount}</span>
-                                            <span class="bot-state">Estado desconocido</span>
-                                        </div>
-                                    </div>
-                                    ` : ''}
-
-                                    <div class="instance-controls">
-                                        <button class="action-menu-button" onclick="toggleActionMenu(event, ${instance.Port})" ${!isOnline ? 'disabled' : ''}>
-                                            ⚡ Acciones <span style="font-size: 0.75rem;">▼</span>
-                                        </button>
-                                        <div class="action-menu" id="action-menu-${instance.Port}">
-                                            <button class="action-menu-item success" onclick="sendInstanceCommand(${instance.Port}, 'start')">
-                                                ▶️ Iniciar
-                                            </button>
-                                            <button class="action-menu-item danger" onclick="sendInstanceCommand(${instance.Port}, 'stop')">
-                                                ⏹️ Detener
-                                            </button>
-                                            <button class="action-menu-item warning" onclick="sendInstanceCommand(${instance.Port}, 'idle')">
-                                                ⏸️ Espera
-                                            </button>
-                                            <button class="action-menu-item" onclick="sendInstanceCommand(${instance.Port}, 'resume')">
-                                                ⏯️ Reanudar
-                                            </button>
-                                            <div class="action-menu-divider"></div>
-                                            <button class="action-menu-item" onclick="sendInstanceCommand(${instance.Port}, 'restart')">
-                                                🔄 Reiniciar
-                                            </button>
-                                            <button class="action-menu-item danger" onclick="sendInstanceCommand(${instance.Port}, 'reboot')">
-                                                🔌 Reiniciar y detener
-                                            </button>
-                                            <div class="action-menu-divider"></div>
-                                            <button class="action-menu-item" onclick="sendInstanceCommand(${instance.Port}, 'screenon')">
-                                                💡 Encender pantalla
-                                            </button>
-                                            <button class="action-menu-item" onclick="sendInstanceCommand(${instance.Port}, 'screenoff')">
-                                                🌙 Apagar pantalla
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-            }).join('');
-        }
-
-        function manualRefresh() {
-            // Close all menus
-            document.querySelectorAll('.action-menu.show').forEach(menu => {
-                menu.classList.remove('show');
-            });
-
-            // Force refresh
-            refreshInstances(true);
-            showToast('info', 'Actualizado', 'Instancias del bot actualizadas');
-        }
-
-        function toggleActionMenu(event, port) {
-            event.stopPropagation();
-            const menu = document.getElementById(`action-menu-${port}`);
-            const allMenus = document.querySelectorAll('.action-menu');
-
-            // Close all other menus
-            allMenus.forEach(m => {
-                if (m.id !== `action-menu-${port}`) {
-                    m.classList.remove('show');
+                if (enabled && !restartScheduleInterval) {
+                    startScheduleChecker();
                 }
-            });
-
-            // Toggle current menu
-            const wasOpen = menu.classList.contains('show');
-            menu.classList.toggle('show');
-
-            // Update interaction state
-            isInteracting = !wasOpen;
-
-            // If we just closed the last menu, allow refresh again
-            if (wasOpen && !document.querySelector('.action-menu.show')) {
-                isInteracting = false;
             }
         }
 
-        function getStatusColor(status) {
-            const upperStatus = status?.toUpperCase() || '';
-            if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('ACTIVO') ||
-                (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
-                return '#10b981'; // Verde - activo
-            } else if (upperStatus.includes('EN ESPERA') || upperStatus.includes('PAUSA')) {
-                return '#f59e0b'; // Amarillo - inactivo o pausado
-            } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('DESCONECTADO') || upperStatus.includes('REINICIANDO')) {
-                return '#ef4444'; // Rojo - detenido o error
-            } else if (upperStatus.includes('ERROR')) {
-                return '#ef4444'; // Rojo - error
-            } else {
-                return '#6b7280'; // Gris - desconocido
-            }
+        // UI utilities
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+            document.body.style.overflow = 'hidden';
         }
 
-        function getStatusClass(status) {
-            const upperStatus = status?.toUpperCase() || '';
-            if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('ACTIVO') ||
-                (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
-                return 'running';
-            } else if (upperStatus.includes('EN ESPERA') || upperStatus.includes('PAUSA')) {
-                return 'idle';
-            } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('REINICIANDO') || upperStatus.includes('DESCONECTADO') || upperStatus.includes('ERROR')) {
-                return 'stopped';
-            } else {
-                return 'error';
-            }
-        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            document.body.style.overflow = '';
 
-        async function sendGlobalCommand(command) {
-            showToast('info', 'Enviando Comando', `Enviando ${command} a todas las instancias...`);
-
-            try {
-                const response = await fetch(`${API_BASE}/command/all`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Command: command })
-                });
-
-                if (!response.ok) throw new Error('Fallo al enviar el comando');
-
-                const result = await response.json();
-                const successCount = result.SuccessfulCommands || 0;
-                const totalCount = result.TotalInstances || 0;
-
-                if (successCount === totalCount && totalCount > 0) {
-                    showToast('success', 'Comando Enviado', `Comando ${command} enviado correctamente a las ${totalCount} instancias`);
-                } else if (successCount > 0) {
-                    showToast('warning', 'Éxito Parcial', `Comando ${command} enviado a ${successCount} de ${totalCount} instancias`);
-                } else {
-                    showToast('error', 'Fallo', `No se pudo enviar el comando a ninguna instancia`);
+            if (modalId === 'progress-modal') {
+                if (updateState.interval) {
+                    clearInterval(updateState.interval);
+                    updateState.interval = null;
                 }
 
-                setTimeout(() => refreshInstances(true), 1000);
-            } catch (error) {
-                console.error('Error al enviar el comando global:', error);
-                showToast('error', 'Error', `No se pudo enviar el comando: ${command}`);
+                updateState.id = null;
+                refreshPaused = false;
+
+                if (restartState.idleCheckInterval) {
+                    clearInterval(restartState.idleCheckInterval);
+                    restartState.idleCheckInterval = null;
+                }
+                if (restartState.countdownInterval) {
+                    clearInterval(restartState.countdownInterval);
+                    restartState.countdownInterval = null;
+                }
+
+                // Reset the force update info text
+                document.getElementById('force-update-info').textContent = '⚡ La actualización se forzará automáticamente tras el tiempo de espera';
             }
         }
 
-        async function sendInstanceCommand(port, command) {
-            // Close action menu
-            document.getElementById(`action-menu-${port}`).classList.remove('show');
+        function closeUpdateModal() {
+            closeModal('update-modal');
+        }
 
-            // Clear interaction state
-            isInteracting = false;
+        function updateProgress(status, details, percentage) {
+            document.getElementById('progress-status').textContent = status;
+            document.getElementById('progress-details').textContent = details;
 
-            showToast('info', 'Enviando Comando', `Enviando ${command} a la instancia en el puerto ${port}...`);
-
-            try {
-                const response = await fetch(`${API_BASE}/instances/${port}/command`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ Command: command })
-                });
-
-                if (!response.ok) throw new Error('Command failed');
-
-                const result = await response.json();
-                if (result.Success) {
-                    showToast('success', 'Comando Enviado', `Comando ${command} enviado correctamente a la instancia en el puerto ${port}`);
-                } else {
-                    showToast('error', 'Fallo', result.Message || 'Error desconocido');
-                }
-
-                setTimeout(() => refreshInstances(true), 1000);
-            } catch (error) {
-                console.error(`Error al enviar el comando al puerto ${port}:`, error);
-                showToast('error', 'Error', `No se pudo enviar el comando a la instancia en el puerto ${port}`);
+            if (percentage >= 0) {
+                document.getElementById('progress-bar').style.width = `${percentage}%`;
             }
+
+            const iconMap = {
+                'Initializing': '🔍',
+                'Preparing': '📋',
+                'Waiting': '⏳',
+                'Starting': '🚀',
+                'Updating': '📦',
+                'Updates complete': '✅',
+                'Update failed': '❌',
+                'Forcing': '⚡',
+                'Force': '⚡',
+                'Restart': '🔄',
+                'Checking': '🔍',
+                'Scanning': '📊',
+                'Idling': '⏸️',
+                'Connection': '🔌',
+                'Master': '👑',
+                'Verifying': '🔍'
+            };
+
+            const icon = Object.entries(iconMap).find(([key]) =>
+                status.toLowerCase().includes(key.toLowerCase())
+            )?.[1] || '⏳';
+
+            document.querySelector('.step-icon').textContent = icon;
+        }
+
+        function addLogEntry(message, type = 'info') {
+            const log = document.getElementById('update-log');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.innerHTML = `<span class="log-time">${time}</span>${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
         }
 
         function showError(message) {
@@ -2166,7 +2816,7 @@
             showToast('error', 'Error', message);
         }
 
-        function showToast(type, title, message) {
+        function showToast(type, title, message, duration = 4000) {
             const toastId = Date.now();
             const toast = document.getElementById('toast').cloneNode(true);
             toast.id = `toast-${toastId}`;
@@ -2202,8 +2852,7 @@
             document.body.appendChild(toast);
             activeToasts.push(toastId);
 
-            // Adjust position for multiple toasts
-            const toastHeight = 80; // Approximate height including margin
+            const toastHeight = 80;
             const bottomOffset = activeToasts.indexOf(toastId) * toastHeight;
 
             if (window.innerWidth <= 768) {
@@ -2212,7 +2861,6 @@
                 toast.style.bottom = `${32 + bottomOffset}px`;
             }
 
-            // Force reflow before adding show class
             toast.offsetHeight;
 
             requestAnimationFrame(() => {
@@ -2225,7 +2873,6 @@
                     toast.remove();
                     activeToasts = activeToasts.filter(id => id !== toastId);
 
-                    // Reposition remaining toasts
                     activeToasts.forEach((id, index) => {
                         const remainingToast = document.getElementById(`toast-${id}`);
                         if (remainingToast) {
@@ -2237,7 +2884,37 @@
                         }
                     });
                 }, 300);
-            }, 4000);
+            }, duration);
+        }
+
+        function getStatusColor(status) {
+            const upperStatus = status?.toUpperCase() || '';
+            if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('ACTIVO') || upperStatus === 'ONLINE' ||
+                (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
+                return '#10b981';
+            } else if (upperStatus.includes('EN ESPERA') || upperStatus.includes('PAUSA')) {
+                return '#f59e0b';
+            } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('DESCONECTADO') || upperStatus.includes('REINICIANDO')) {
+                return '#ef4444';
+            } else if (upperStatus.includes('ERROR')) {
+                return '#ef4444';
+            } else {
+                return '#6b7280';
+            }
+        }
+
+        function getStatusClass(status) {
+            const upperStatus = status?.toUpperCase() || '';
+            if (upperStatus.includes('EN EJECUCIÓN') || upperStatus.includes('ACTIVO') ||
+                (!upperStatus.includes('EN ESPERA') && !upperStatus.includes('DETENIDO') && !upperStatus.includes('ERROR') && !upperStatus.includes('DESCONOCIDO'))) {
+                return 'running';
+            } else if (upperStatus.includes('EN ESPERA')) {
+                return 'idle';
+            } else if (upperStatus.includes('DETENIDO') || upperStatus.includes('ERROR')) {
+                return 'stopped';
+            } else {
+                return 'error';
+            }
         }
     </script>
 </body>
